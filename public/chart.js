@@ -244,7 +244,7 @@
       this.ind = { bb: false, ema: false, rsi: false, macd: false, vwap: false, fib: false, stoch: false, atr: false, obv: false };
       this.currency = "";
       this.hover = null;
-      this.viewLo = 0; this.viewHi = -1; this._dataId = null; this._prevN = 0;
+      this.viewSpan = 0; this.viewRight = 0; this._dataId = null; this._prevN = 0;
       this._dragging = false;
       this.dpr = window.devicePixelRatio || 1;
       this._bind();
@@ -262,45 +262,55 @@
         if (!this._dragging) { this._updateHover(); this.render(); }
       });
       c.addEventListener("mouseleave", () => { if (!this._dragging) { this.mouse = null; this.hover = null; this.render(); } });
-      // wheel = zoom around cursor
+      // wheel = zoom around cursor (continuous; viewSpan = visible width in candle-slots)
       c.addEventListener("wheel", (e) => {
         if (!this.candles.length) return;
         e.preventDefault();
-        const nFull = this.candles.length, L = this._layout();
-        let lo = this.viewLo, hi = this.viewHi; if (hi < lo) { lo = 0; hi = nFull - 1; }
-        const span = hi - lo + 1;
+        const L = this._layout();
         const r = c.getBoundingClientRect();
         const frac = Math.max(0, Math.min(1, ((e.clientX - r.left) - L.plotLeft) / Math.max(1, L.plotRight - L.plotLeft)));
-        const center = lo + frac * (span - 1);
-        const factor = e.deltaY > 0 ? 1.25 : 0.8;
-        let ns = Math.max(8, Math.min(nFull, Math.round(span * factor)));
-        let nlo = Math.round(center - frac * (ns - 1)), nhi = nlo + ns - 1;
-        if (nlo < 0) { nlo = 0; nhi = ns - 1; }
-        if (nhi > nFull - 1) { nhi = nFull - 1; nlo = nhi - ns + 1; }
-        this.viewLo = Math.max(0, nlo); this.viewHi = Math.min(nFull - 1, nhi);
-        this._updateHover(); this.render();
+        const leftPos = this.viewRight - this.viewSpan;
+        const posC = leftPos + frac * this.viewSpan;                 // index-position under cursor
+        const factor = e.deltaY > 0 ? 1.2 : 1 / 1.2;
+        this.viewSpan = this.viewSpan * factor;
+        this.viewRight = posC + (1 - frac) * this.viewSpan;          // keep cursor anchored
+        this._clampView(); this._updateHover(); this.render();
       }, { passive: false });
-      // drag = pan
+      // drag = pan (LEFT -> back in time; RIGHT -> forward / into the empty right margin)
       c.addEventListener("mousedown", (e) => {
         if (!this.candles.length) return;
-        this._dragging = true; this._dragX = e.clientX; this._dragLo = this.viewLo; this._dragHi = this.viewHi;
+        this._dragging = true; this._dragX = e.clientX; this._dragRight = this.viewRight;
         c.style.cursor = "grabbing";
       });
       window.addEventListener("mousemove", (e) => {
         if (!this._dragging) return;
-        const nFull = this.candles.length, L = this._layout();
-        const span = this._dragHi - this._dragLo + 1, plotW = Math.max(1, L.plotRight - L.plotLeft);
-        // drag LEFT -> go back in time (older); drag RIGHT -> forward (recent)
-        const dx = Math.round((e.clientX - this._dragX) / plotW * (span - 1));
-        let lo = this._dragLo + dx, hi = this._dragHi + dx;
-        if (lo < 0) { hi -= lo; lo = 0; }
-        if (hi > nFull - 1) { lo -= (hi - (nFull - 1)); hi = nFull - 1; }
-        this.viewLo = Math.max(0, lo); this.viewHi = Math.min(nFull - 1, hi);
-        this.render();
+        const L = this._layout(), plotW = Math.max(1, L.plotRight - L.plotLeft);
+        const dPos = (e.clientX - this._dragX) / plotW * this.viewSpan;
+        this.viewRight = this._dragRight + dPos;
+        this._clampView(); this.render();
       });
       window.addEventListener("mouseup", () => { if (this._dragging) { this._dragging = false; c.style.cursor = "crosshair"; } });
-      // double-click = reset zoom
-      c.addEventListener("dblclick", () => { this.viewLo = 0; this.viewHi = this.candles.length - 1; this.render(); });
+      // double-click = reset to a recent window with a right margin
+      c.addEventListener("dblclick", () => { this._resetView(this.candles.length); this.render(); });
+    }
+
+    _resetView(n) {
+      const visN = Math.min(n, Math.max(30, Math.round(n * 0.6)));   // recent ~60%
+      const margin = Math.max(3, Math.round(visN * 0.1));            // empty slots on the right
+      this.viewSpan = visN + margin;
+      this.viewRight = (n - 1) + margin;
+      this._clampView();
+    }
+
+    _clampView() {
+      const n = this.candles.length;
+      if (n === 0) { this.viewSpan = 0; this.viewRight = 0; return; }
+      this.viewSpan = Math.max(8, Math.min(this.viewSpan, n + Math.round(n * 0.3) + 30));
+      const maxRight = (n - 1) + this.viewSpan * 0.45;   // cap empty space on the right
+      if (this.viewRight > maxRight) this.viewRight = maxRight;
+      const minRight = Math.min(n - 1, this.viewSpan - 1) + 0.0001;   // keep candles in view (no big left gap)
+      if (this.viewSpan <= n && this.viewRight < minRight) this.viewRight = minRight;
+      if (this.viewRight < Math.min(n - 1, 4)) this.viewRight = Math.min(n - 1, 4);
     }
 
     setData(opts) {
@@ -314,16 +324,15 @@
       this._compute();
       const n = this.candles.length;
       const newId = opts.dataId != null ? opts.dataId : this._dataId;
-      if (newId !== this._dataId || this.viewHi < 0) {
-        // new symbol/range -> show the most RECENT ~60% so there's room to
-        // drag left (back in time). Double-click resets to fit-all.
+      if (newId !== this._dataId || this.viewSpan <= 0) {
         this._dataId = newId;
-        const vc = Math.min(n, Math.max(30, Math.round(n * 0.6)));
-        this.viewHi = n - 1; this.viewLo = Math.max(0, n - vc);
+        this._resetView(n);   // new symbol/range -> recent window + right margin
       } else {
-        const span = this.viewHi - this.viewLo + 1;
-        if (this.viewHi >= this._prevN - 1) { this.viewHi = n - 1; this.viewLo = Math.max(0, n - span); }  // was at the live edge -> follow
-        else { this.viewHi = Math.min(this.viewHi, n - 1); this.viewLo = Math.max(0, Math.min(this.viewLo, this.viewHi - 1)); }
+        // refresh of same data: if the right edge was at/after the latest
+        // candle, follow it forward by the count of new candles; else keep.
+        const grew = n - this._prevN;
+        if (this.viewRight >= this._prevN - 1 - 0.5 && grew !== 0) this.viewRight += grew;
+        this._clampView();
       }
       this._prevN = n;
       this.render();
@@ -388,12 +397,15 @@
     }
 
     _updateHover() {
-      if (!this.mouse || this.viewHi < this.viewLo) { this.hover = null; return; }
+      const N = this.candles.length;
+      if (!this.mouse || N === 0 || this.viewSpan <= 0) { this.hover = null; return; }
       const L = this._layout();
-      const n = this.viewHi - this.viewLo + 1;   // visible count
+      const leftPos = this.viewRight - this.viewSpan;
+      const iFrom = Math.max(0, Math.floor(leftPos));
       const x = Math.max(L.plotLeft, Math.min(L.plotRight, this.mouse.x));
       const frac = (x - L.plotLeft) / Math.max(1, L.plotRight - L.plotLeft);
-      this.hover = Math.max(0, Math.min(n - 1, Math.round(frac * (n - 1))));
+      const gIdx = Math.round(leftPos + frac * this.viewSpan);   // global candle index under cursor
+      this.hover = Math.max(0, Math.min(N - 1, gIdx)) - iFrom;    // -> local index into the rendered slice
     }
 
     render() {
@@ -407,10 +419,15 @@
         ctx.fillStyle = THEME.text; ctx.font = "12px ui-monospace, Menlo, monospace";
         ctx.textAlign = "center"; ctx.fillText("NO DATA", this.W / 2, this.H / 2); return;
       }
-      // ---- zoom/pan: render only the visible [viewLo..viewHi] window ----
+      // ---- zoom/pan: render the visible window (continuous viewSpan/viewRight; viewRight may exceed the last candle -> empty right margin) ----
       const _F = { c: this.candles, sma: this.smaSeries, ema: this.emaSeries, bb: this.bb, vwap: this.vwapData, fib: this.fib, rsi: this.rsiData, macd: this.macdData, stoch: this.stochData, atr: this.atrData, obv: this.obvData };
-      let _lo = this.viewLo, _hi = this.viewHi;
-      if (_hi < _lo || _hi > _F.c.length - 1 || _lo < 0) { _lo = 0; _hi = _F.c.length - 1; this.viewLo = _lo; this.viewHi = _hi; }
+      const _N = _F.c.length;
+      if (this.viewSpan <= 0) this._resetView(_N);
+      this._clampView();
+      const _span = this.viewSpan, _leftPos = this.viewRight - _span;
+      const _iFrom = Math.max(0, Math.floor(_leftPos));
+      const _iTo = Math.min(_N - 1, Math.ceil(this.viewRight));
+      const _lo = _iFrom, _hi = Math.max(_iFrom, _iTo);
       const _sl = (a) => a ? a.slice(_lo, _hi + 1) : a;
       try {
         this.candles = _F.c.slice(_lo, _hi + 1);
@@ -426,7 +443,9 @@
         this.obvData = _sl(_F.obv);
       const L = this._layout();
       const n = this.candles.length;
-      const xOf = (i) => L.plotLeft + (i / Math.max(1, n - 1)) * (L.plotRight - L.plotLeft);
+      const pitch = (L.plotRight - L.plotLeft) / _span;            // px per candle slot
+      this._pitch = pitch;
+      const xOf = (iLocal) => L.plotLeft + ((_iFrom + iLocal) - _leftPos) * pitch;
 
       // ---- price range (include overlays) ----
       let lo = Infinity, hi = -Infinity;
@@ -462,7 +481,7 @@
 
       // ---- price series ----
       if (this.type === "candle") {
-        const bw = Math.max(1, (L.plotRight - L.plotLeft) / n * 0.62);
+        const bw = Math.max(1, pitch * 0.62);
         for (let i = 0; i < n; i++) {
           const c = this.candles[i], x = xOf(i), up = c.c >= c.o, col = up ? THEME.up : THEME.down;
           ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 1;
@@ -545,7 +564,7 @@
 
     _drawVolume(ctx, L, p, xOf, n) {
       let vmax = 0; for (const c of this.candles) if (c.v > vmax) vmax = c.v; vmax = vmax || 1;
-      const bw = Math.max(1, (L.plotRight - L.plotLeft) / n * 0.7);
+      const bw = Math.max(1, (this._pitch || (L.plotRight - L.plotLeft) / n) * 0.7);
       for (let i = 0; i < n; i++) {
         const c = this.candles[i], h = (c.v / vmax) * (p.bottom - p.top), x = xOf(i);
         ctx.fillStyle = (c.c >= c.o) ? "rgba(38,194,129,0.45)" : "rgba(255,77,77,0.45)";
@@ -575,7 +594,7 @@
       const span = Math.max(Math.abs(lo), Math.abs(hi)) || 1; lo = -span; hi = span;
       const yOf = (v) => p.bottom - ((v - lo) / (hi - lo)) * (p.bottom - p.top);
       ctx.strokeStyle = THEME.grid; ctx.beginPath(); ctx.moveTo(L.plotLeft, yOf(0)); ctx.lineTo(L.plotRight, yOf(0)); ctx.stroke();
-      const bw = Math.max(1, (L.plotRight - L.plotLeft) / n * 0.6);
+      const bw = Math.max(1, (this._pitch || (L.plotRight - L.plotLeft) / n) * 0.6);
       for (let i = 0; i < n; i++) { const v = m.hist[i]; if (v == null) continue; const x = xOf(i), y0 = yOf(0), y1 = yOf(v); ctx.fillStyle = v >= 0 ? "rgba(38,194,129,0.55)" : "rgba(255,77,77,0.55)"; ctx.fillRect(x - bw / 2, Math.min(y0, y1), bw, Math.abs(y1 - y0)); }
       const line = (arr, col) => { ctx.strokeStyle = col; ctx.lineWidth = 1.2; ctx.beginPath(); let st = false; for (let i = 0; i < n; i++) { const v = arr[i]; if (v == null) { st = false; continue; } const x = xOf(i), y = yOf(v); if (!st) { ctx.moveTo(x, y); st = true; } else ctx.lineTo(x, y); } ctx.stroke(); ctx.lineWidth = 1; };
       line(m.line, THEME.macd); line(m.signal, THEME.signal);
