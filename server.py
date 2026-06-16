@@ -943,9 +943,41 @@ def fetch_quotes(symbols):
     return ordered
 
 
+def _td_spark(tsym):
+    data = _td_get(f"https://api.twelvedata.com/time_series?symbol={urllib.parse.quote(tsym)}"
+                   f"&interval=1h&outputsize=48&order=ASC&apikey={urllib.parse.quote(TD_KEY)}")
+    if not isinstance(data, dict) or "values" not in data:
+        return None
+    closes = []
+    for v in data["values"]:
+        try:
+            closes.append(float(v["close"]))
+        except (TypeError, ValueError, KeyError):
+            pass
+    return closes if len(closes) >= 2 else None
+
+
+def _yahoo_spark(stocks):
+    out = {}
+    try:
+        pathq = ("/v7/finance/spark?symbols=" + urllib.parse.quote(",".join(stocks)) + "&range=5d&interval=1h")
+        data = _yahoo_json(pathq)
+        for r in (data.get("spark", {}).get("result", []) or []):
+            sym = r.get("symbol")
+            resp = (r.get("response") or [{}])[0]
+            closes = (((resp.get("indicators") or {}).get("quote") or [{}])[0].get("close")) or []
+            closes = [c for c in closes if c is not None]
+            if sym and len(closes) >= 2:
+                out[sym] = _downsample(closes, 48)
+    except Exception:
+        pass
+    return out
+
+
 def fetch_spark(symbols):
-    """Real recent price series per symbol for the row sparklines: crypto from
-    CoinGecko's 7-day sparkline, stocks from Yahoo's batched spark endpoint."""
+    """Real recent price series per row sparkline: crypto from CoinGecko's
+    7-day sparkline; stocks from Twelve Data (1h bars) — falling back to Yahoo's
+    batched spark when no TD key. Cached 10 min per symbol (shape changes slowly)."""
     out = {}
     crypto = [s for s in symbols if _is_crypto(s)]
     if crypto:
@@ -957,29 +989,33 @@ def fetch_spark(symbols):
         except Exception:
             pass
     stocks = [s for s in symbols if not _is_crypto(s)]
-    if stocks:
-        ck = "spark:" + ",".join(sorted(stocks))
-        cached = CACHE.get(ck)
-        if cached is not None:
-            out.update(cached)
+    todo = []
+    for s in stocks:
+        c = CACHE.get("spark:" + s)
+        if c is not None:
+            if c:
+                out[s] = c
         else:
-            got = {}
-            try:
-                pathq = ("/v7/finance/spark?symbols=" + urllib.parse.quote(",".join(stocks))
-                         + "&range=5d&interval=1h")
-                data = _yahoo_json(pathq)
-                for r in (data.get("spark", {}).get("result", []) or []):
-                    sym = r.get("symbol")
-                    resp = (r.get("response") or [{}])[0]
-                    closes = (((resp.get("indicators") or {}).get("quote") or [{}])[0].get("close")) or []
-                    closes = [round(c, 4) for c in closes if c is not None]
-                    if sym and len(closes) >= 2:
-                        got[sym] = _downsample(closes, 48)
-            except Exception:
-                got = {}
-            if got:
-                CACHE.set(ck, got, 120)
-                out.update(got)
+            todo.append(s)
+    if todo:
+        if TD_KEY:
+            for s in todo:
+                series = None
+                tsym = _td_symbol(s)
+                if tsym:
+                    try:
+                        series = _td_spark(tsym)
+                    except Exception:
+                        series = None
+                ds = _downsample(series, 48) if series else []
+                CACHE.set("spark:" + s, ds, 600)
+                if ds:
+                    out[s] = ds
+        else:
+            got = _yahoo_spark(todo)
+            for s in todo:
+                CACHE.set("spark:" + s, got.get(s, []), 600)
+            out.update(got)
     return out
 
 
