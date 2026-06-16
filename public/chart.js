@@ -290,13 +290,16 @@
         this._clampView(); this.render();
       });
       window.addEventListener("mouseup", () => { if (this._dragging) { this._dragging = false; c.style.cursor = "crosshair"; } });
-      // double-click = reset to a recent window with a right margin
-      c.addEventListener("dblclick", () => { this._resetView(this.candles.length); this.render(); });
+      // double-click = reset to the range's default window with a right margin
+      c.addEventListener("dblclick", () => { this._resetView(this.candles.length, this._lastVB); this.render(); });
     }
 
-    _resetView(n) {
-      const visN = Math.min(n, Math.max(30, Math.round(n * 0.6)));   // recent ~60%
-      const margin = Math.max(3, Math.round(visN * 0.1));            // empty slots on the right
+    _resetView(n, vb) {
+      let visN;
+      if (vb === null) visN = n;                                  // show all loaded history
+      else if (vb === undefined) visN = Math.min(n, Math.max(30, Math.round(n * 0.6)));
+      else visN = Math.min(n, Math.max(8, vb));                   // the range's nominal window
+      const margin = Math.max(3, Math.round(visN * 0.1));         // empty slots on the right
       this.viewSpan = visN + margin;
       this.viewRight = (n - 1) + margin;
       this._clampView();
@@ -324,12 +327,15 @@
       this._compute();
       const n = this.candles.length;
       const newId = opts.dataId != null ? opts.dataId : this._dataId;
+      const vb = opts.viewBars;   // default visible candle count (number, null=all, or undefined=unchanged)
       if (newId !== this._dataId || this.viewSpan <= 0) {
-        this._dataId = newId;
-        this._resetView(n);   // new symbol/range -> recent window + right margin
+        this._dataId = newId; this._lastVB = vb;
+        this._resetView(n, vb);   // new symbol/granularity -> default window + right margin
+      } else if (vb !== undefined && vb !== this._lastVB) {
+        this._lastVB = vb;
+        this._resetView(n, vb);   // same data, different range button -> re-window
       } else {
-        // refresh of same data: if the right edge was at/after the latest
-        // candle, follow it forward by the count of new candles; else keep.
+        // refresh of same data: follow the live edge if we were at it, else keep
         const grew = n - this._prevN;
         if (this.viewRight >= this._prevN - 1 - 0.5 && grew !== 0) this.viewRight += grew;
         this._clampView();

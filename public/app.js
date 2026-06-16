@@ -147,15 +147,17 @@
     sim: false,
     reqId: 0,
   };
+  // Each button loads DEEP history at its granularity (full=1) and `viewBars`
+  // is just the default visible window — drag/scroll left to reach the start.
   const RANGES = [
-    { k: "1D", range: "1d", interval: "5m", intraday: true },
-    { k: "5D", range: "5d", interval: "30m", intraday: true },
-    { k: "1M", range: "1mo", interval: "1d", intraday: false },
-    { k: "6M", range: "6mo", interval: "1d", intraday: false },
-    { k: "YTD", range: "ytd", interval: "1d", intraday: false },
-    { k: "1Y", range: "1y", interval: "1d", intraday: false },
-    { k: "5Y", range: "5y", interval: "1d", intraday: false },
-    { k: "MAX", range: "max", interval: "1mo", intraday: false },
+    { k: "1D", range: "1d", interval: "5m", intraday: true, viewBars: 78 },
+    { k: "5D", range: "5d", interval: "30m", intraday: true, viewBars: 65 },
+    { k: "1M", range: "1mo", interval: "1d", intraday: false, viewBars: 22 },
+    { k: "6M", range: "6mo", interval: "1d", intraday: false, viewBars: 126 },
+    { k: "YTD", range: "ytd", interval: "1d", intraday: false, viewBars: "ytd" },
+    { k: "1Y", range: "1y", interval: "1d", intraday: false, viewBars: 252 },
+    { k: "5Y", range: "5y", interval: "1d", intraday: false, viewBars: 1260 },
+    { k: "MAX", range: "max", interval: "1mo", intraday: false, viewBars: null },
   ];
 
   // ---------------- status / clock ----------------
@@ -561,17 +563,21 @@
     syncControlButtons();
     const myReq = ++state.reqId;
     try {
-      const d = await api(`/api/chart?symbol=${encodeURIComponent(state.symbol)}&range=${state.range}&interval=${state.interval}&prov=1`);
+      const d = await api(`/api/chart?symbol=${encodeURIComponent(state.symbol)}&range=${state.range}&interval=${state.interval}&prov=1&full=1`);
       if (myReq !== state.reqId) return; // a newer request superseded this one
       if (d.error) { setStatus(false, "SYMBOL ERROR: " + d.error); return; }
       state.lastChart = d;
       setSource(d.source === "sim");
       renderHeader(d);
       if (!state.chart) state.chart = new TerminalChart($("#chart"));
+      // default visible window for the selected range (deep history is loaded; pan to reach it)
+      const rr = RANGES.find((r) => r.range === state.range) || {};
+      let viewBars = rr.viewBars;
+      if (viewBars === "ytd") { const y = new Date().getFullYear(); viewBars = (d.candles || []).filter((c) => new Date(c.t * 1000).getFullYear() === y).length || 126; }
       state.chart.setData({
         candles: d.candles, type: state.chartType, intraday: state.intraday,
         smaPeriods: state.intraday ? [] : activeSMAPeriods(), indicators: state.ind, showVolume: true, currency: d.currency,
-        dataId: state.symbol + ":" + state.range,
+        dataId: state.symbol + ":" + state.interval, viewBars: viewBars,
       });
       setStatus(true, "LOADED " + state.symbol);
     } catch (e) { setStatus(false, "CHART ERROR"); }
@@ -1133,11 +1139,8 @@
     else if (state.view === "screen") loadScreener();
     else if (state.view === "tech") loadTech();
     else if (state.view === "sec" && state.symbol) {
-      // light header refresh without disturbing chart interaction
-      const sym = state.symbol, rng = state.range;
-      api(`/api/chart?symbol=${encodeURIComponent(sym)}&range=${rng}&interval=${state.interval}&prov=1`)
-        .then((d) => { if (sym !== state.symbol || rng !== state.range) return; if (!d.error) { setSource(d.source === "sim"); renderHeader(d); if (state.chart) state.chart.setData({ candles: d.candles, type: state.chartType, intraday: state.intraday, smaPeriods: state.intraday ? [] : activeSMAPeriods(), indicators: state.ind, showVolume: true, currency: d.currency, dataId: sym + ":" + rng }); } })
-        .catch(() => {});
+      // refresh via loadChart (same full=1 / dataId / viewBars -> preserves your pan & zoom)
+      loadChart();
     }
   }, 6000);
 

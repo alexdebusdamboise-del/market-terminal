@@ -301,8 +301,11 @@ def _td_get(url):
     return data
 
 
-def _twelvedata_chart(symbol, tsym, rng, interval):
-    td_int, outsize, intraday = TD_MAP.get(rng, TD_MAP["6mo"])
+YINT_TO_TD = {"1m": "1min", "5m": "5min", "15m": "15min", "30m": "30min", "1h": "1h",
+              "1d": "1day", "1wk": "1week", "1mo": "1month"}
+
+
+def _twelvedata_chart(symbol, tsym, td_int, outsize):
     url = ("https://api.twelvedata.com/time_series?symbol=" + urllib.parse.quote(tsym)
            + f"&interval={td_int}&outputsize={outsize}&order=ASC&apikey={urllib.parse.quote(TD_KEY)}")
     data = _td_get(url)
@@ -403,14 +406,14 @@ def _synth_chart(symbol, rng="6mo", interval="1d"):
 # ---------------------------------------------------------------------------
 # Data fetchers
 # ---------------------------------------------------------------------------
-def fetch_chart(symbol, rng="6mo", interval="1d", use_provider=False):
-    key = f"chart:{symbol}:{rng}:{interval}"
+def fetch_chart(symbol, rng="6mo", interval="1d", use_provider=False, full=False):
+    key = f"chart:{symbol}:{'full-' + interval if full else rng + ':' + interval}"
     cached = CACHE.get(key)
     if cached:
         return cached
-    # 0) crypto -> CoinGecko OHLC (accurate, history to 5y/max)
+    # 0) crypto -> CoinGecko OHLC (accurate; full -> entire daily history)
     if _is_crypto(symbol):
-        cg = _coingecko_chart(symbol, rng)
+        cg = _coingecko_chart(symbol, rng, interval, full)
         if cg:
             CACHE.set(key, cg, 60 if rng in ("1d", "5d") else 180)
             return cg
@@ -419,13 +422,21 @@ def fetch_chart(symbol, rng="6mo", interval="1d", use_provider=False):
     if use_provider and TD_KEY:
         tsym = _td_symbol(symbol)
         if tsym:
-            td = _twelvedata_chart(symbol, tsym, rng, interval)
+            if full:  # load deep history at the chosen granularity (up to 5000 pts)
+                td_int, outsize = YINT_TO_TD.get(interval, "1day"), 5000
+            else:
+                td_int, outsize, _ = TD_MAP.get(rng, TD_MAP["6mo"])
+            td = _twelvedata_chart(symbol, tsym, td_int, outsize)
             if td:
                 CACHE.set(key, td, 20 if rng in ("1d", "5d") else 120)
                 return td
+    # Yahoo: full mode -> max history (daily) or 60d (intraday)
+    yrng = rng
+    if full:
+        yrng = "max" if interval in ("1d", "1wk", "1mo") else "60d"
     sym = urllib.parse.quote(symbol)
     pathq = (f"/v8/finance/chart/{sym}"
-             f"?range={rng}&interval={interval}&includePrePost=false&events=div,split")
+             f"?range={yrng}&interval={interval}&includePrePost=false&events=div,split")
     try:
         data = _yahoo_json(pathq)
         result = data["chart"]["result"][0]
@@ -768,9 +779,9 @@ def _coingecko_quotes(symbols):
     return out
 
 
-def _coingecko_chart(symbol, rng):
+def _coingecko_chart(symbol, rng, interval="1d", full=False):
     cid = CG_IDS[symbol]
-    days = CG_DAYS.get(rng, 365)
+    days = "max" if (full and interval in ("1d", "1wk", "1mo")) else CG_DAYS.get(rng, 365)
     try:
         ohlc = _cg_get(f"/coins/{cid}/ohlc?vs_currency=usd&days={days}")
     except Exception:
@@ -1158,9 +1169,10 @@ class Handler(BaseHTTPRequestHandler):
                 rng = qs.get("range", ["6mo"])[0]
                 interval = qs.get("interval", ["1d"])[0]
                 use_provider = qs.get("prov", ["0"])[0] == "1"
+                full = qs.get("full", ["0"])[0] == "1"
                 if not symbol:
                     return self._send_json({"error": "symbol required"}, 400)
-                return self._send_json(fetch_chart(symbol, rng, interval, use_provider=use_provider))
+                return self._send_json(fetch_chart(symbol, rng, interval, use_provider=use_provider, full=full))
 
             if path == "/api/quotes":
                 syms = (qs.get("symbols", [""])[0]).strip()
