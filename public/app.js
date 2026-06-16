@@ -190,7 +190,8 @@
 
   // ---------------- quote tables (monitor) ----------------
   const prevPx = {};
-  const sparkBuf = {};           // per-symbol rolling buffer of live ticks
+  const sparkBuf = {};           // per-symbol rolling buffer of live ticks (fallback)
+  const sparkData = {};          // per-symbol REAL recent series (crypto 7d / stock 5d)
   const SPARK_MAX = 40;
   function pushSpark(sym, px) {
     if (px == null) return;
@@ -199,7 +200,8 @@
     if (b.length > SPARK_MAX) b.shift();
   }
   function sparkSVG(sym) {
-    const b = sparkBuf[sym];
+    const real = sparkData[sym];
+    const b = (real && real.length >= 2) ? real : sparkBuf[sym];   // prefer real series
     if (!b || b.length < 2) return `<span class="spark-wait">·····</span>`;
     const w = 58, h = 18, pad = 2;
     const min = Math.min(...b), max = Math.max(...b), n = b.length;
@@ -247,7 +249,7 @@
       const ck = container.id || container.dataset.grid || "g";
       const prev = prevPx[ck] || (prevPx[ck] = {});
       const scroll = container.scrollTop;
-      quotes.forEach((q) => pushSpark(q.symbol, q.price)); // seed live sparkline buffers
+      quotes.forEach((q) => { if (q.spark && q.spark.length >= 2) sparkData[q.symbol] = q.spark; pushSpark(q.symbol, q.price); }); // real series (crypto) + tick fallback
       const rows = quotes.map((q) => quoteRow(q, opts, prev[q.symbol])).join("");
       container.innerHTML = tableHead(opts.spark) + rows;
       container.scrollTop = scroll;
@@ -261,9 +263,21 @@
     }
   }
 
+  let _lastSparkFetch = 0;
+  function maybeFetchStockSparks() {
+    const now = Date.now();
+    if (now - _lastSparkFetch < 25000) return;       // throttle (Yahoo spark)
+    const stocks = getWatchlist().filter((s) => !/-USD$/.test(s) && !/^\^/.test(s) && !/=[XF]$/.test(s));
+    if (!stocks.length) return;
+    _lastSparkFetch = now;
+    api("/api/spark?symbols=" + encodeURIComponent(stocks.join(","))).then((d) => {
+      if (d && d.spark) { Object.assign(sparkData, d.spark); if (state.view === "home") loadGrid($("#watchtable"), getWatchlist(), { del: true, spark: true }); }
+    }).catch(() => {});
+  }
   function refreshHome() {
     $$(".ptable[data-grid]").forEach((el) => loadGrid(el, GROUPS[el.dataset.grid], { spark: el.dataset.grid === "CRYPTO" }));
     loadGrid($("#watchtable"), getWatchlist(), { del: true, spark: true });
+    maybeFetchStockSparks();
   }
 
   // ---------------- heatmap ----------------

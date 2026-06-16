@@ -779,6 +779,58 @@ def _coingecko_quotes(symbols):
     return out
 
 
+_CG_LAST_GOOD = {}   # symbol -> last successful crypto quote (kept if CoinGecko 429s)
+
+
+def _downsample(arr, target=48):
+    if not arr:
+        return []
+    step = max(1, len(arr) // target)
+    return [round(float(arr[i]), 6) for i in range(0, len(arr), step) if arr[i] is not None][-72:]
+
+
+def _coingecko_markets(symbols):
+    """One batched call: price, 24h % change, market cap, volume AND a real
+    7-day sparkline per coin. Cached 45s so we stay well under CoinGecko's
+    free rate limit (avoids 429 -> wrong CNBC/sim fallback)."""
+    ids = [CG_IDS[s] for s in symbols if s in CG_IDS]
+    if not ids:
+        return {}
+    ck = "cgmarkets:" + ",".join(sorted(ids))
+    data = CACHE.get(ck)
+    if data is None:
+        try:
+            data = _cg_get("/coins/markets?vs_currency=usd&ids=" + ",".join(ids)
+                           + "&price_change_percentage=24h&sparkline=true&per_page=250&page=1")
+            if isinstance(data, list):
+                CACHE.set(ck, data, 45)
+        except Exception:
+            data = None
+    if not isinstance(data, list):
+        return {}
+    id2sym = {CG_IDS[s]: s for s in symbols if s in CG_IDS}
+    out = {}
+    for it in data:
+        sym = id2sym.get(it.get("id"))
+        if not sym:
+            continue
+        price = it.get("current_price")
+        chg = it.get("price_change_percentage_24h")
+        chgabs = it.get("price_change_24h")
+        prev = (price - chgabs) if (price is not None and chgabs is not None) else None
+        spark = _downsample(((it.get("sparkline_in_7d") or {}).get("price")) or [])
+        out[sym] = {
+            "symbol": sym, "shortName": sym.replace("-USD", ""), "price": price,
+            "previousClose": prev, "change": chgabs, "changePct": chg,
+            "currency": "USD", "exchange": "Crypto",
+            "marketCap": it.get("market_cap"), "volume": it.get("total_volume"),
+            "fiftyTwoWeekHigh": it.get("high_24h"), "fiftyTwoWeekLow": it.get("low_24h"),
+            "spark": spark, "source": "live",
+        }
+        _CG_LAST_GOOD[sym] = out[sym]
+    return out
+
+
 def _coingecko_chart(symbol, rng, interval="1d", full=False):
     cid = CG_IDS[symbol]
     days = "max" if (full and interval in ("1d", "1wk", "1mo")) else CG_DAYS.get(rng, 365)
@@ -855,15 +907,21 @@ def fetch_quotes(symbols):
     if cached:
         return cached
     out = {}
-    # 1) crypto -> CoinGecko (accurate price/24h change/market cap)
+    # 1) crypto -> CoinGecko markets (accurate 24h %, market cap, real sparkline)
     crypto = [s for s in symbols if _is_crypto(s)]
     if crypto:
+        cg = {}
         try:
-            out.update(_coingecko_quotes(crypto))
+            cg = _coingecko_markets(crypto)
         except Exception:
-            pass
-    # 2) everything else -> CNBC real-time batch
-    rest = [s for s in symbols if s not in out]
+            cg = {}
+        for s in crypto:
+            if s in cg:
+                out[s] = cg[s]
+            elif s in _CG_LAST_GOOD:
+                out[s] = dict(_CG_LAST_GOOD[s])   # CoinGecko busy -> last correct value (never wrong CNBC %)
+    # 2) everything else -> CNBC real-time batch (crypto stays on CoinGecko/sim, never CNBC)
+    rest = [s for s in symbols if s not in out and not _is_crypto(s)]
     if rest:
         try:
             out.update(_cnbc_quotes(rest))
@@ -883,6 +941,46 @@ def fetch_quotes(symbols):
     ordered = [out[s] for s in symbols if s in out]
     CACHE.set(key, ordered, 5)
     return ordered
+
+
+def fetch_spark(symbols):
+    """Real recent price series per symbol for the row sparklines: crypto from
+    CoinGecko's 7-day sparkline, stocks from Yahoo's batched spark endpoint."""
+    out = {}
+    crypto = [s for s in symbols if _is_crypto(s)]
+    if crypto:
+        try:
+            cg = _coingecko_markets(crypto)
+            for s, q in cg.items():
+                if q.get("spark"):
+                    out[s] = q["spark"]
+        except Exception:
+            pass
+    stocks = [s for s in symbols if not _is_crypto(s)]
+    if stocks:
+        ck = "spark:" + ",".join(sorted(stocks))
+        cached = CACHE.get(ck)
+        if cached is not None:
+            out.update(cached)
+        else:
+            got = {}
+            try:
+                pathq = ("/v7/finance/spark?symbols=" + urllib.parse.quote(",".join(stocks))
+                         + "&range=5d&interval=1h")
+                data = _yahoo_json(pathq)
+                for r in (data.get("spark", {}).get("result", []) or []):
+                    sym = r.get("symbol")
+                    resp = (r.get("response") or [{}])[0]
+                    closes = (((resp.get("indicators") or {}).get("quote") or [{}])[0].get("close")) or []
+                    closes = [round(c, 4) for c in closes if c is not None]
+                    if sym and len(closes) >= 2:
+                        got[sym] = _downsample(closes, 48)
+            except Exception:
+                got = {}
+            if got:
+                CACHE.set(ck, got, 120)
+                out.update(got)
+    return out
 
 
 SEARCH_DICT = [
@@ -1180,6 +1278,13 @@ class Handler(BaseHTTPRequestHandler):
                 if not symbols:
                     return self._send_json({"error": "symbols required"}, 400)
                 return self._send_json({"quotes": fetch_quotes(symbols)})
+
+            if path == "/api/spark":
+                syms = (qs.get("symbols", [""])[0]).strip()
+                symbols = [s.strip() for s in syms.split(",") if s.strip()]
+                if not symbols:
+                    return self._send_json({"spark": {}})
+                return self._send_json({"spark": fetch_spark(symbols)})
 
             if path == "/api/search":
                 q = (qs.get("q", [""])[0]).strip()
