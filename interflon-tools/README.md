@@ -37,7 +37,7 @@ Barre de commande en haut (touche `/`) :
 
 | Commande | Effet |
 |---|---|
-| `PROS 29 35 viande lait` | ajoute les départements 29 et 35 et les secteurs correspondants, lance la recherche |
+| `PROS 29 35 viande lait` | sélectionne les départements 29 et 35 et les secteurs correspondants (ils remplacent la sélection en cours), lance la recherche ; `agro` = tous les secteurs agroalimentaires |
 | `CARTE 56 bois` | idem, affiché sur la carte |
 | `PIPE` | mes prospects |
 | `SEL` | sélecteur produit |

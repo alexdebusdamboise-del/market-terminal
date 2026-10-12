@@ -138,9 +138,9 @@
     const counts = {};
     all.forEach((p) => (counts[p.status] = (counts[p.status] || 0) + 1));
     $("#pipe-stats").innerHTML =
-      `<div class="stat ${filterStatus === "" ? "on" : ""}" data-st=""><b>${all.length}</b>Tous</div>` +
+      `<button type="button" class="stat ${filterStatus === "" ? "on" : ""}" data-st=""><b>${all.length}</b>Tous</button>` +
       Object.entries(STATUSES)
-        .map(([k, v]) => `<div class="stat st-${k} ${filterStatus === k ? "on" : ""}" data-st="${k}"><b>${counts[k] || 0}</b>${esc(v)}</div>`)
+        .map(([k, v]) => `<button type="button" class="stat st-${k} ${filterStatus === k ? "on" : ""}" data-st="${k}"><b>${counts[k] || 0}</b>${esc(v)}</button>`)
         .join("");
 
     const words = IFX.norm($("#pipe-text").value).split(/\s+/).filter(Boolean);
@@ -156,7 +156,10 @@
       })
       .sort((a, b) => (a.next_date || "9999").localeCompare(b.next_date || "9999") || String(a.nom).localeCompare(String(b.nom)));
 
-    $("#clients-info").textContent = siretSet.size || sirenSet.size ? `Clients importés : ${siretSet.size} SIRET, ${sirenSet.size} SIREN` : "Aucun client importé";
+    $("#clients-info").innerHTML =
+      siretSet.size || sirenSet.size
+        ? `Clients importés : ${siretSet.size} SIRET, ${sirenSet.size} SIREN <button type="button" class="linkbtn" id="clients-clear">vider</button>`
+        : "Aucun client importé";
 
     if (!rows.length) {
       $("#pipe-list").innerHTML = `<div class="empty"><p>${all.length ? "Aucun prospect pour ce filtre." : "Aucun prospect enregistré."}</p>
@@ -164,15 +167,15 @@
       return;
     }
     $("#pipe-list").innerHTML = `<table class="grid"><thead><tr>
-      <th>Établissement</th><th class="hide-sm">Secteur</th><th>Commune</th><th>Statut</th><th>Prochaine action</th><th>Note</th><th></th></tr></thead><tbody>
+      <th>Établissement</th><th class="hide-sm">Secteur</th><th class="hide-sm">Commune</th><th>Statut</th><th>Prochaine action</th><th>Note</th><th></th></tr></thead><tbody>
       ${rows
         .map((p) => {
           const seg = segs.find((s) => s.key === p.segment);
           return `<tr data-siret="${esc(p.siret)}">
           <td><a href="#" class="name" data-open="${esc(p.siret)}">${esc(p.nom)}</a>${p.enseigne ? `<div class="sub">${esc(p.enseigne)}</div>` : ""}
-            <div class="sub">${esc(IFX.pros.trLabel(p.tranche))}</div></td>
+            <div class="sub">${esc(IFX.pros.trLabel(p.tranche))}<span class="show-sm"> · ${esc(p.commune)}</span></div></td>
           <td class="hide-sm">${seg ? esc(seg.label) : '<span class="muted">—</span>'}</td>
-          <td>${esc(p.commune)}<div class="sub">${esc(p.code_postal)}</div></td>
+          <td class="hide-sm">${esc(p.commune)}<div class="sub">${esc(p.code_postal)}</div></td>
           <td><select class="inline st-${esc(p.status)}" data-f="status">${PIPE.statusOptions(p.status)}</select></td>
           <td><input class="inline ${isDue(p) ? "overdue" : ""}" type="date" data-f="next_date" value="${esc(p.next_date || "")}"/></td>
           <td><input class="inline" type="text" data-f="note" value="${esc(p.note || "")}" placeholder="…"/></td>
@@ -189,6 +192,14 @@
       render();
     });
     $("#pipe-text").addEventListener("input", render);
+    $("#clients-info").addEventListener("click", (e) => {
+      if (e.target.id !== "clients-clear" || !confirm("Vider la liste de clients ? Ils réapparaîtront dans la prospection.")) return;
+      siretSet = new Set();
+      sirenSet = new Set();
+      saveClients();
+      changed();
+      IFX.toast("Liste de clients vidée");
+    });
     $("#pipe-due").addEventListener("change", render);
     $("#pipe-list").addEventListener("change", (e) => {
       const f = e.target.dataset.f;
@@ -256,7 +267,8 @@
       const { sirets, sirens } = PIPE.parseClients(await IFX.readFile(file));
       if (!sirets.length && !sirens.length) return IFX.toast("Aucun SIRET (14 chiffres) ni SIREN (9 chiffres) trouvé dans le fichier", true);
       reloadClients();
-      const replace = siretSet.size + sirenSet.size > 0 && confirm("Remplacer la liste de clients existante ?\n(OK = remplacer, Annuler = ajouter)");
+      if (!confirm(`Importer ${sirets.length} SIRET et ${sirens.length} SIREN comme clients ?\nIls seront masqués de la prospection.`)) return;
+      const replace = siretSet.size + sirenSet.size > 0 && confirm("Une liste de clients existe déjà.\nOK = la remplacer · Annuler = ajouter à la liste actuelle");
       if (replace) {
         siretSet = new Set();
         sirenSet = new Set();

@@ -57,7 +57,7 @@
       <h2>COMMANDES</h2>
       <p>Tape dans la barre du haut (touche <code>/</code> pour y aller), puis Entrée.</p>
       <table>
-        <tr><td><code>PROS 29 35 viande lait</code></td><td>Prospection : ajoute les départements 29 et 35 et les secteurs dont le nom contient « viande » et « lait », puis lance la recherche</td></tr>
+        <tr><td><code>PROS 29 35 viande lait</code></td><td>Prospection : sélectionne les départements 29 et 35 et les secteurs « viande » et « lait » (ils remplacent la sélection en cours), puis lance la recherche. <code>agro</code> sélectionne tous les secteurs agroalimentaires.</td></tr>
         <tr><td><code>CARTE 56 bois</code></td><td>Idem, résultats affichés sur la carte</td></tr>
         <tr><td><code>PIPE</code></td><td>Mes prospects : statut, relances, notes, exports</td></tr>
         <tr><td><code>SEL</code></td><td>Sélecteur produit (besoin client ou remplacement d'un produit existant)</td></tr>

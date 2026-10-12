@@ -15,7 +15,8 @@ const indusChain = P({ id: "tf", name: "Lube TF", nsf: "H2", temp_min_c: -40, te
 const ht = P({ id: "ht", name: "Lube HT", nsf: "H2", temp_min_c: 0, temp_max_c: 270, applications: ["chaines"], formats: ["5 L"] });
 const unknown = P({ id: "u", name: "Mystère", applications: [] });
 const grease = P({ id: "g", name: "Grease MP2", family: "graisse", nlgi: "2", temp_min_c: -30, temp_max_c: 140, applications: ["roulements"], formats: ["cartouche 400 g"] });
-const cleaner = P({ id: "c", name: "Metal Clean F", family: "degraissant", nsf: "K1", applications: ["nettoyage_degraissage"] });
+const cleaner = P({ id: "c", name: "Foam Clean", family: "nettoyant", nsf: "A1", applications: ["nettoyage_degraissage"] });
+const k1 = P({ id: "k", name: "Degreaser EM30+", family: "degraissant", nsf: "K1, K3", applications: ["nettoyage_degraissage"] });
 const release = P({ id: "r", name: "Food Lube 3H", family: "agent_demoulage", nsf: "3H", applications: ["demoulage"] });
 
 test("food contact = oui excludes products without NSF H1", () => {
@@ -28,17 +29,21 @@ test("food contact = oui excludes products without NSF H1", () => {
   assert.equal(r.find((x) => x.product.id === "u").eligible, false, "unknown NSF can never pass a food-contact requirement");
 });
 
-test("cleaners accept K/A/C categories and release agents accept 3H in food plants", () => {
-  assert.equal(C.evaluate(cleaner, { food: "oui", application: "nettoyage_degraissage" }).eligible, true);
+test("food plants: cleaners need A1/A7/H1, release agents 3H/H1; K1/K3 is not accepted", () => {
+  const ok = C.evaluate(cleaner, { food: "oui", application: "nettoyage_degraissage" });
+  assert.equal(ok.eligible, true);
+  assert.match(ok.reasons[0].t, /A1/);
+  assert.equal(C.evaluate(P({ nsf: "A7", applications: ["nettoyage_degraissage"] }), { food: "oui", application: "nettoyage_degraissage" }).eligible, true);
+  assert.equal(C.evaluate(k1, { food: "oui", application: "nettoyage_degraissage" }).eligible, false);
   assert.equal(C.evaluate(release, { food: "oui", application: "demoulage" }).eligible, true);
-  assert.equal(C.evaluate(cleaner, { food: "oui", application: "chaines" }).eligible, false);
+  assert.equal(C.evaluate(cleaner, { food: "oui", application: "chaines" }).eligible, false, "A1 is not a lubricant category");
 });
 
 test("'je ne sais pas' never excludes but favours H1", () => {
   const r = C.rank([indusChain, foodChain], { food: "nsp", application: "chaines" });
   assert.ok(r.every((x) => x.eligible));
   assert.equal(r[0].product.id, "fl");
-  assert.ok(r[1].reasons.some((x) => x.s === "u" && /H1/.test(x.t)));
+  assert.ok(r[1].reasons.some((x) => x.s === "u" && /contact alimentaire/.test(x.t)));
 });
 
 test("temperature: hard on known limits, flagged when unknown", () => {
@@ -114,6 +119,50 @@ test("rank puts eligible first then by score then by name", () => {
 test("combined NSF categories ('3H, H1', 'K1/K3') are understood", () => {
   assert.deepEqual(C.nsfList({ nsf: "3H, H1" }), ["3H", "H1"]);
   assert.equal(C.evaluate(P({ nsf: "3H, H1", applications: ["chaines"] }), { food: "oui", application: "chaines" }).eligible, true);
-  assert.equal(C.evaluate(P({ nsf: "K1/K3", applications: ["nettoyage_degraissage"] }), { food: "oui", application: "nettoyage_degraissage" }).eligible, true);
+  assert.equal(C.evaluate(P({ nsf: "K1/K3", applications: ["nettoyage_degraissage"] }), { food: "oui", application: "nettoyage_degraissage" }).eligible, false);
+  assert.equal(C.evaluate(P({ nsf: "NSF H1", applications: ["chaines"] }), { food: "oui", application: "chaines" }).eligible, true);
   assert.equal(C.evaluate(P({ nsf: "H2", applications: ["chaines"] }), { food: "oui", application: "chaines" }).eligible, false);
+});
+
+test("NSF mentions that are not plain categories fail closed", () => {
+  for (const nsf of ["Non H1", "H1 (en cours)", "pas H1", "H1 pending", "ex-H1"]) {
+    const r = C.evaluate(P({ nsf, applications: ["chaines"] }), { food: "oui", application: "chaines" });
+    assert.equal(r.eligible, false, nsf);
+    assert.match(r.blockers[0], /illisible|non adapté/, nsf);
+  }
+  assert.equal(C.nsfParse({ nsf: "Non H1" }), null);
+});
+
+test("unconfirmed NSF or temperature data is shown as '?' not as a green check", () => {
+  const p = P({ nsf: "H1", temp_min_c: -30, temp_max_c: 120, applications: ["chaines"], uncertain_fields: ["nsf (déduit de la gamme)", "temp_max_c (source unique)"] });
+  const r = C.evaluate(p, { food: "oui", application: "chaines", tmin: 0, tmax: 100 });
+  assert.equal(r.eligible, true);
+  assert.ok(r.reasons.some((x) => x.s === "u" && /NSF H1.*confirmer/.test(x.t)));
+  assert.ok(r.reasons.some((x) => x.s === "u" && /couvrirait/.test(x.t)));
+  assert.ok(!r.reasons.some((x) => x.s === "y" && /NSF|Plage/.test(x.t)));
+  // nsf_reg_no uncertainty alone does not downgrade the category
+  const q = C.evaluate(P({ nsf: "H1", applications: ["chaines"], uncertain_fields: ["nsf_reg_no"] }), { food: "oui", application: "chaines" });
+  assert.ok(q.reasons.some((x) => x.s === "y" && /NSF H1/.test(x.t)));
+});
+
+test("'exigé' requirements (sans PFAS, biodégradable) are hard constraints", () => {
+  const ptfe = P({ applications: ["chaines"], properties: ["contient_ptfe", "sans_pfas"] });
+  const free = P({ applications: ["chaines"], properties: ["sans_pfas"] });
+  const unknownProps = P({ applications: ["chaines"], properties: [] });
+  const c = { application: "chaines", env: ["sans_pfas"] };
+  assert.equal(C.evaluate(ptfe, c).eligible, false);
+  assert.equal(C.evaluate(free, c).eligible, true);
+  const u = C.evaluate(unknownProps, c);
+  assert.equal(u.eligible, true);
+  assert.ok(u.reasons.some((x) => x.s === "u"));
+  assert.equal(C.evaluate(P({ properties: ["resistant_eau"] }), { env: ["biodegradable"] }).eligible, false);
+});
+
+test("formatKinds handles French thousands separators and grease cartridges", () => {
+  const k = (f) => Array.from(C.formatKinds([f])).sort().join(",");
+  assert.equal(k("IBC 1 000 L"), "vrac");
+  assert.equal(k("Fût 1\u00a0000 litres"), "vrac");
+  assert.equal(k("Cartouche 400 g pour graisseur manuel"), "graisse");
+  assert.equal(k("Bidon 4 L"), "liquide");
+  assert.equal(k("Interflon Single Point Lubricator 125 ml"), "automatique");
 });

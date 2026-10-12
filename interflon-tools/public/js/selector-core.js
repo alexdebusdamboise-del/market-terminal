@@ -92,7 +92,7 @@
 
   const FORMATS = {
     aerosol: "Aérosol",
-    liquide: "Liquide (≤ 1 L)",
+    liquide: "Liquide (< 5 L)",
     vrac: "Bidon / fût (≥ 5 L)",
     graisse: "Cartouche / pot de graisse",
     automatique: "Graisseur automatique",
@@ -102,16 +102,17 @@
   function formatKinds(formats) {
     const kinds = new Set();
     (formats || []).forEach((f) => {
-      const s = String(f).toLowerCase();
+      // "1 000 L" -> "1000 L" (French thousands separators)
+      const s = String(f).toLowerCase().replace(/(\d)[\s\u00a0\u202f.](?=\d{3}\b)/g, "$1");
       if (/a[ée]rosol|spray|bombe/.test(s)) {
         kinds.add("aerosol");
         return;
       }
-      if (/lubrificateur|graisseur|automatique|dispenser|ampoule/.test(s)) {
+      if (/cartouche|tube|pot|\bkg\b|\d\s*g\b/.test(s)) kinds.add("graisse");
+      else if (/lubrificateur|automatique|single point|dispenser|ampoule/.test(s)) {
         kinds.add("automatique");
         return;
       }
-      if (/cartouche|tube|pot|\bkg\b|\d\s*g\b/.test(s)) kinds.add("graisse");
       const m = s.match(/(\d+(?:[.,]\d+)?)\s*(ml|l|litres?)\b/);
       if (m) {
         let litres = parseFloat(m[1].replace(",", "."));
@@ -122,21 +123,49 @@
     return kinds;
   }
 
-  // "H1", "3H, H1", "K1/K3"… -> ["H1"], ["3H","H1"], ["K1","K3"]
-  const nsfList = (p) =>
-    String((p && p.nsf) || "")
-      .toUpperCase()
-      .split(/[\s,;/+]+/)
-      .filter(Boolean);
-
-  // Release agents for food may be 3H; cleaners carry A/C/K categories.
-  function foodOk(product, application) {
-    const l = nsfList(product);
-    if (!l.length) return false;
-    if (application === "nettoyage_degraissage") return l.some((x) => /^(A\d|C\d|K\d|H1)$/.test(x));
-    if (application === "demoulage") return l.some((x) => x === "3H" || x === "H1");
-    return l.includes("H1");
+  // "H1", "NSF 3H, H1", "K1/K3"… -> ["H1"], ["3H","H1"], ["K1","K3"].
+  // Fails closed: any token that is not a known NSF category (e.g. "Non H1",
+  // "H1 (en cours)") makes the whole mention unreadable -> null.
+  const NSF_TOKEN = /^(H1|H2|H3|3H|HT1|A\d|C\d|K\d|P1|M1|R\d|N\d)$/;
+  function nsfParse(p) {
+    const raw = String((p && p.nsf) || "").toUpperCase().trim();
+    if (!raw) return [];
+    const toks = raw.split(/[\s,;/+]+/).filter(Boolean).filter((t, i) => !(i === 0 && t === "NSF"));
+    return toks.length && toks.every((t) => NSF_TOKEN.test(t)) ? toks : null;
   }
+  const nsfList = (p) => nsfParse(p) || [];
+
+  // Categories accepted per use when food contact is possible. Cleaners: A1
+  // (general cleaner in and around food processing areas) and A7 (listed for
+  // the food processing industry) only; K1/K3/C1 are not accepted without a
+  // check by the technical department. Release agents: 3H (direct contact) or H1.
+  const FOOD_OK = {
+    nettoyage_degraissage: ["H1", "A1", "A7"],
+    demoulage: ["3H", "H1"],
+  };
+  const FOOD_REASON = {
+    H1: "NSF H1 (contact alimentaire fortuit)",
+    "3H": "NSF 3H (agent de démoulage, contact direct)",
+    A1: "NSF A1 (nettoyant pour zones alimentaires, rinçage selon fiche)",
+    A7: "NSF A7 (nettoyant pour l'industrie alimentaire, selon fiche)",
+  };
+  function foodMatch(product, application) {
+    const l = nsfParse(product);
+    if (!l) return null;
+    return (FOOD_OK[application] || ["H1"]).find((x) => l.includes(x)) || null;
+  }
+  const foodOk = (product, application) => !!foodMatch(product, application);
+
+  // uncertain_fields entries look like "nsf", "temp_max_c (source unique)"…
+  const unsure = (p, re) => (p.uncertain_fields || []).some((f) => re.test(String(f)));
+  const NSF_UNSURE = /^nsf\b(?!_)/i;
+  const TEMP_UNSURE = /^temp_(min|max)/i;
+
+  // Requirements the customer states as mandatory ("exigé"): hard constraints
+  const REQUIRED_ENV = {
+    biodegradable: (props) => props.includes("biodegradable"),
+    sans_pfas: (props) => props.includes("sans_pfas") && !props.includes("contient_ptfe"),
+  };
 
   const num = (x) => (x === null || x === undefined || x === "" || isNaN(+x) ? null : +x);
   const fmtT = (x) => (x === null ? "?" : `${x > 0 ? "+" : ""}${x} °C`);
@@ -149,19 +178,19 @@
     const apps = p.applications || [];
     const props = p.properties || [];
 
-    // 1. Food contact — hard constraint when contact is possible
-    if (c.food === "oui") {
-      if (foodOk(p, c.application)) {
-        score += 30;
-        reasons.push({ s: "y", t: `NSF ${p.nsf} (contact alimentaire fortuit)` });
+    // 1. Food contact — hard constraint when contact is possible (fails closed)
+    if (c.food === "oui" || c.food === "nsp") {
+      const parsed = nsfParse(p);
+      const match = foodMatch(p, c.application);
+      const doubt = match && unsure(p, NSF_UNSURE);
+      if (match) {
+        score += doubt ? 10 : c.food === "oui" ? 30 : 15;
+        reasons.push(doubt ? { s: "u", t: `${FOOD_REASON[match]} : homologation à confirmer (NSF White Book)` } : { s: "y", t: FOOD_REASON[match] });
       } else {
-        blockers.push(p.nsf ? `NSF ${p.nsf} : pas adapté au contact alimentaire fortuit` : "Pas d'homologation NSF H1");
+        const why = parsed === null ? `Mention NSF illisible « ${p.nsf} » : à vérifier` : p.nsf ? `NSF ${p.nsf} : non adapté au contact alimentaire` : "Pas d'homologation NSF H1";
+        if (c.food === "oui") blockers.push(why);
+        else reasons.push({ s: "u", t: `${why} : vérifier l'absence de contact alimentaire` });
       }
-    } else if (c.food === "nsp") {
-      if (foodOk(p, c.application)) {
-        score += 15;
-        reasons.push({ s: "y", t: `NSF ${p.nsf} : sûr en cas de contact alimentaire` });
-      } else reasons.push({ s: "u", t: "Pas NSF H1 : vérifier l'absence de contact alimentaire" });
     }
 
     // 2. Application — hard when the product sheet lists its applications
@@ -207,17 +236,28 @@
       const failed = blockers.some((b) => b.startsWith("Mini produit") || b.startsWith("Maxi produit"));
       if (!failed) {
         if (unknown) reasons.push({ s: "u", t: `Plage de température à vérifier (besoin ${need})` });
-        else {
+        else if (unsure(p, TEMP_UNSURE)) {
+          score += 8;
+          reasons.push({ s: "u", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvrirait ${need} : donnée à confirmer` });
+        } else {
           score += 20;
           reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvre ${need}` });
         }
       }
     }
 
-    // 5. Environment — soft
+    // 5. Environment — soft, except explicit requirements (biodegradable, PFAS-free)
     (c.env || []).forEach((e) => {
-      const ok = (ENV_MATCH[e] || [e]).some((x) => props.includes(x));
       const label = PROPERTIES[e] || e;
+      if (REQUIRED_ENV[e]) {
+        if (REQUIRED_ENV[e](props)) {
+          score += 8;
+          reasons.push({ s: "y", t: label });
+        } else if (!props.length) reasons.push({ s: "u", t: `${label} : non renseigné, à vérifier` });
+        else blockers.push(`${label} : exigé, non revendiqué`);
+        return;
+      }
+      const ok = (ENV_MATCH[e] || [e]).some((x) => props.includes(x));
       if (ok) {
         score += 8;
         reasons.push({ s: "y", t: label });
@@ -230,9 +270,9 @@
       c.formats.forEach((f) => {
         if (kinds.has(f)) {
           score += 6;
-          reasons.push({ s: "y", t: `Existe en ${FORMATS[f].toLowerCase()}` });
+          reasons.push({ s: "y", t: `Existe en ${(FORMATS[f] || f).toLowerCase()}` });
         } else if (!(p.formats || []).length) reasons.push({ s: "u", t: "Conditionnements non renseignés" });
-        else reasons.push({ s: "n", t: `Pas de format ${FORMATS[f].toLowerCase()} référencé` });
+        else reasons.push({ s: "n", t: `Pas de format ${(FORMATS[f] || f).toLowerCase()} référencé` });
       });
     }
 
@@ -291,5 +331,5 @@
     demoulant: { label: "Agent de démoulage", application: "demoulage" },
   };
 
-  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, nsfList, formatKinds, foodOk, evaluate, rank, matchesQuery };
+  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, nsfList, nsfParse, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
 });

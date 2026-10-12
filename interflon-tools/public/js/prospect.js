@@ -50,6 +50,7 @@
   const division = (naf) => parseInt(String(naf || "").slice(0, 2), 10);
   const segOf = (naf) => (naf && NAF2SEG[naf] ? NAF2SEG[naf] : null);
   const trLabel = (t) => (t && TR_SHORT[t] ? TR_SHORT[t] + " sal." : "n.c.");
+  const narrow = () => window.matchMedia && window.matchMedia("(max-width: 980px)").matches;
   const daysSince = (iso) => (iso ? (Date.now() - new Date(iso).getTime()) / 86400000 : Infinity);
 
   function scoreRow(co, et, seg) {
@@ -260,7 +261,8 @@
       setMode("map");
       picking = true;
       document.body.classList.add("map-picking");
-      IFX.toast("Clique sur la carte pour choisir le centre de recherche");
+      if (narrow()) $("#res-map").scrollIntoView({ behavior: "smooth", block: "start" });
+      IFX.toast(narrow() ? "Touche la carte pour choisir le centre de recherche" : "Clique sur la carte pour choisir le centre de recherche");
     });
     $("#radius").value = String(st.radius);
     $("#radius").addEventListener("change", (e) => {
@@ -313,6 +315,7 @@
       if (!st.region) return { error: "Choisis une région." };
       return { endpoint: "/api/entreprises", params: { naf, region: st.region, tranche: companyTrancheFilter(st.minSize) } };
     }
+    if ($("#city-input").value.trim()) return { error: "Choisis la ville dans la liste proposée sous le champ (ou appuie sur Entrée)." };
     if (!st.center) return { error: "Choisis un centre : ville, ma position ou clic sur la carte." };
     return { endpoint: "/api/autour", params: { naf, lat: st.center.lat.toFixed(5), lon: st.center.lon.toFixed(5), radius: st.radius } };
   }
@@ -339,6 +342,7 @@
       st.renderLimit = 400;
     }
     $("#pros-msg").textContent = "";
+    if (narrow()) $("#res-title").scrollIntoView({ behavior: "smooth", block: "start" });
     return loadPage(1);
   }
 
@@ -505,7 +509,7 @@
         hidden > 0 ? `${hidden} site(s) masqué(s) par les filtres (taille, clients, catégorie…).` : "Élargis la zone, ajoute des secteurs ou baisse la taille minimale."
       }${st.page < st.totalPages ? " D'autres pages sont disponibles." : ""}</p></div>`;
     } else {
-      const th = (key, label, cls) => `<th data-sort="${key}" class="${cls || ""} ${st.sort.key === key ? "sorted" + (st.sort.dir > 0 ? " asc" : "") : ""}">${label}</th>`;
+      const th = (key, label, cls) => `<th data-sort="${key}" tabindex="0" class="${cls || ""} ${st.sort.key === key ? "sorted" + (st.sort.dir > 0 ? " asc" : "") : ""}">${label}</th>`;
       const shown = rows.slice(0, st.renderLimit);
       $("#res-list").innerHTML = `<table class="grid"><thead><tr>
         <th title="Suivre">★</th>${th("score", "Score")}${th("nom", "Établissement")}${th("secteur", "Secteur", "hide-sm")}${th("commune", "Commune")}
@@ -516,7 +520,7 @@
             return `<tr class="clickable" data-key="${esc(r.key)}">
             <td><button type="button" class="star ${IFX.pipe.has(r.et.siret) ? "on" : ""}" data-star="${esc(r.key)}" title="Ajouter à mes prospects">★</button></td>
             <td><span class="score" title="${esc(r.parts.map((p) => `${p[0]} : +${p[1]}`).join("\n"))}"><span class="bar"><i style="width:${r.score}%"></i></span>${r.score}</span></td>
-            <td><span class="name">${esc(name)}</span>${badges(r)}<div class="sub">${esc(r.et.naf || "")} ${esc(nafLabel(r.et.naf).slice(0, 60))}</div></td>
+            <td><a href="#" class="name" data-open-row="${esc(r.key)}">${esc(name)}</a>${badges(r)}<div class="sub">${esc(r.et.naf || "")} ${esc(nafLabel(r.et.naf).slice(0, 60))}</div></td>
             <td class="hide-sm">${r.seg ? esc(r.seg.label) : '<span class="muted">—</span>'}</td>
             <td>${esc(r.et.commune)}<div class="sub">${esc(r.et.code_postal)}</div></td>
             <td class="num">${esc(trLabel(r.et.tranche))}<div class="sub">ent. ${esc(trLabel(r.co.tranche))} ${esc(r.co.categorie || "")}</div></td>
@@ -530,6 +534,13 @@
   }
 
   function bindResults() {
+    // Enter / Space on a sortable header acts like a click
+    $("#res-list").addEventListener("keydown", (e) => {
+      if ((e.key === "Enter" || e.key === " ") && e.target.matches("th[data-sort]")) {
+        e.preventDefault();
+        e.target.click();
+      }
+    });
     $("#res-list").addEventListener("click", (e) => {
       const th = e.target.closest("th[data-sort]");
       if (th) {
@@ -554,6 +565,8 @@
         } else IFX.pipe.add(r);
         return renderResults();
       }
+      const link = e.target.closest("[data-open-row]");
+      if (link) e.preventDefault();
       const tr = e.target.closest("tr[data-key]");
       if (tr) openRow(tr.dataset.key);
     });
@@ -633,15 +646,33 @@
       </div>`;
 
     IFX.openDrawer(co.nom, html, (root) => {
+      const follow = () => ({ status: $("#sh-status", root).value, next_date: $("#sh-date", root).value, note: $("#sh-note", root).value });
       $("#sh-save", root).addEventListener("click", () => {
-        IFX.pipe.add(r, { status: $("#sh-status", root).value, next_date: $("#sh-date", root).value, note: $("#sh-note", root).value });
+        IFX.pipe.add(r, follow());
         IFX.toast("Prospect enregistré");
         IFX.closeDrawer();
         renderResults();
       });
+      // Any edit of the follow-up fields is saved at once, so closing the sheet never loses it
+      let timer = null;
+      const autosave = () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          const wasSaved = IFX.pipe.has(et.siret);
+          IFX.pipe.add(r, follow());
+          if (!wasSaved) {
+            IFX.toast("Ajouté à mes prospects");
+            $("#sh-save", root).textContent = "Mettre à jour";
+          }
+        }, 400);
+      };
+      ["#sh-status", "#sh-date"].forEach((s) => $(s, root).addEventListener("change", autosave));
+      $("#sh-note", root).addEventListener("input", autosave);
       const rm = $("#sh-remove", root);
       if (rm)
         rm.addEventListener("click", () => {
+          if (!confirm(`Retirer « ${co.nom} » de tes prospects ? Statut, relance et notes seront perdus.`)) return;
+          clearTimeout(timer);
           IFX.pipe.remove(et.siret);
           IFX.closeDrawer();
           renderResults();
@@ -771,32 +802,42 @@
   };
 
   // Command bar: PROS 29 35 viande lait
+  // PROS 29 35 viande lait: the departments and sectors given REPLACE the current ones
+  const FOOD_WORDS = ["agro", "agroalimentaire", "alimentaire", "iaa", "food"];
   P.command = (args) => {
-    let touched = false;
+    const deps = [];
     const segHits = [];
+    const unknown = [];
     args.forEach((a) => {
       const A = a.toUpperCase();
-      if (DEP_OK.test(A)) {
-        addDep(A);
-        touched = true;
-      } else if (/^\d$/.test(A) && REF.departements["0" + A]) {
-        addDep("0" + A);
-        touched = true;
-      } else if (a.length >= 3) {
+      if (DEP_OK.test(A)) deps.push(A);
+      else if (/^\d$/.test(A) && DEP_OK.test("0" + A)) deps.push("0" + A);
+      else {
         const n = norm(a);
         const words = (s) => norm(s.key + " " + s.label).split(/[^a-z0-9]+/);
-        let hits = SEGMENTS.filter((s) => words(s).includes(n));
-        if (!hits.length) hits = SEGMENTS.filter((s) => words(s).some((w) => w.startsWith(n)));
-        hits.forEach((s) => segHits.push(s.key));
+        let hits = FOOD_WORDS.includes(n) ? SEGMENTS.filter((s) => s.food) : n.length >= 3 ? SEGMENTS.filter((s) => words(s).includes(n)) : [];
+        if (!hits.length && n.length >= 3) hits = SEGMENTS.filter((s) => words(s).some((w) => w.startsWith(n)));
+        if (hits.length) hits.forEach((s) => segHits.push(s.key));
+        else unknown.push(a);
       }
     });
+    if (unknown.length) {
+      IFX.toast(`Non reconnu : « ${unknown.join(" ")} ». Tape un n° de département ou un mot d'un secteur (ex. viande, bois, papier), ou coche les secteurs dans la liste.`, true);
+      return;
+    }
+    if (deps.length) {
+      st.deps = Array.from(new Set(deps));
+      setZone("dep");
+      renderChips();
+    }
     if (segHits.length) {
-      segHits.forEach((k) => st.segs.add(k));
+      st.segs = new Set(segHits);
+      st.customNaf = [];
       renderSegments();
-      touched = true;
+      renderChips();
     }
     saveFilters();
-    if (touched && selectedNaf().length && (st.deps.length || st.zone !== "dep")) search(true);
+    if ((deps.length || segHits.length) && selectedNaf().length && (st.deps.length || st.zone !== "dep")) search(true);
   };
 
   P.onShow = () => {

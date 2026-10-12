@@ -73,7 +73,13 @@
       if (v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length)) return;
       qs.set(k, Array.isArray(v) ? v.join(",") : String(v));
     });
-    const res = await fetch(`${path}?${qs.toString()}`, { signal });
+    let res;
+    try {
+      res = await fetch(`${path}?${qs.toString()}`, { signal });
+    } catch (e) {
+      if (e.name === "AbortError") throw e;
+      throw new Error("Connexion impossible : vérifie ta connexion internet (ou que le serveur est lancé), puis relance.");
+    }
     let body = null;
     try {
       body = await res.json();
