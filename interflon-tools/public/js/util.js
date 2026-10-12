@@ -6,6 +6,9 @@
   const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   IFX.esc = (s) => (s === null || s === undefined ? "" : String(s).replace(/[&<>"']/g, (c) => ESC[c]));
 
+  // Only http(s) links from data files may become hrefs (no javascript: URLs)
+  IFX.safeUrl = (u) => (/^https?:\/\//i.test(String(u || "")) ? String(u) : "#");
+
   IFX.$ = (sel, root) => (root || document).querySelector(sel);
   IFX.$$ = (sel, root) => Array.from((root || document).querySelectorAll(sel));
 

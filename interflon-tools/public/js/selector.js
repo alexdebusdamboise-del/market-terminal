@@ -310,7 +310,11 @@
       <h3>PROPRIÉTÉS</h3>${list(p.properties, (a) => esc(C.PROPERTIES[a] || a))}
       ${(p.industries || []).length ? `<h3>SECTEURS</h3><div>${esc(p.industries.join(" · "))}</div>` : ""}
       ${(p.key_claims || []).length ? `<h3>ARGUMENTS (SOURCE INTERFLON)</h3>${list(p.key_claims)}` : ""}
-      <h3>SOURCES</h3>${list(p.source_urls, (u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 70))}</a>`)}
+      <h3>SOURCES</h3>${list(p.source_urls, (u) => `<a href="${esc(IFX.safeUrl(u))}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 70))}</a>`)}
+      ${(p.evidence || []).length ? `<details><summary class="muted" style="cursor:pointer;margin-top:10px">PREUVES (${p.evidence.length}) : citation exacte derrière chaque valeur</summary>${list(
+        p.evidence,
+        (e) => `<b>${esc(e.field)}</b> : « ${esc(e.quote)} » <a href="${esc(IFX.safeUrl(e.url))}" target="_blank" rel="noopener">source</a>`
+      )}</details>` : ""}
       ${(p.uncertain_fields || []).length ? `<h3>À CONFIRMER</h3><div class="muted">${esc(p.uncertain_fields.join(", "))}</div>` : ""}
       ${p.checked ? `<div class="muted small" style="margin-top:10px">Données vérifiées le ${esc(IFX.fmtDate(p.checked))}</div>` : ""}`;
     IFX.openDrawer(p.name, html);

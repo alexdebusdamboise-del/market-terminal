@@ -174,6 +174,14 @@ simulated data. Just leave it open — it retries every 15 s and flips back to
 plug an API key (Finnhub, Polygon, Alpha Vantage, Twelve Data, …) into the
 fetchers in `server.py`.
 
+## Terminal Interflon (interflon-tools/)
+
+A second, independent app lives in [`interflon-tools/`](interflon-tools/README.md): a
+French-language sales toolkit for Interflon field reps, with plant prospecting by NAF
+sector and territory (free *API Recherche d'entreprises*), a follow-up pipeline, and a
+lubricant product selector. Same zero-dependency approach (`python3 server.py`), and a
+second service in `render.yaml`.
+
 ## Disclaimer
 
 For educational/personal use. Market data is delayed and provided "as is" with

@@ -607,7 +607,7 @@
         ${seg.pitch_fr ? `<p>${esc(seg.pitch_fr)}</p>` : ""}
         ${seg.typical_applications && seg.typical_applications.length ? `<div class="muted">Points de lubrification typiques :</div><ul class="tight">${seg.typical_applications.map((a) => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}
         ${prods.length ? `<div class="muted">Produits souvent proposés :</div><div class="links">${prods.map((n) => `<a href="#" data-product="${esc(n)}">${esc(n)}</a>`).join("")}</div>` : ""}
-        ${seg.case_studies && seg.case_studies.length ? `<div class="muted" style="margin-top:6px">Cas clients :</div><ul class="tight">${seg.case_studies.map((c) => `<li><a href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.title)}</a>${c.result ? ` <span class="muted">— ${esc(c.result)}</span>` : ""}</li>`).join("")}</ul>` : ""}
+        ${seg.case_studies && seg.case_studies.length ? `<div class="muted" style="margin-top:6px">Cas clients :</div><ul class="tight">${seg.case_studies.map((c) => `<li><a href="${esc(IFX.safeUrl(c.url))}" target="_blank" rel="noopener">${esc(c.title)}</a>${c.result ? ` <span class="muted">— ${esc(c.result)}</span>` : ""}</li>`).join("")}</ul>` : ""}
         <div class="row"><button type="button" class="btn" id="sh-selector">Ouvrir le sélecteur pour ce secteur</button></div>` : ""}
 
       <h3>RECHERCHER</h3>

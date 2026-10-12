@@ -87,6 +87,9 @@ def main():
         for u in p.get("source_urls") or []:
             if not re.match(r"^https?://", u):
                 err(f"{where} : URL de source invalide '{u}'")
+        for e in p.get("evidence") or []:
+            if not re.match(r"^https?://", e.get("url", "")) or not e.get("quote"):
+                err(f"{where} : preuve sans citation ou URL valide")
         if not p.get("source_urls"):
             warn(f"{where} : aucune source")
         if p.get("family") in ("huile", "graisse", "aerosol") and not p.get("applications"):
