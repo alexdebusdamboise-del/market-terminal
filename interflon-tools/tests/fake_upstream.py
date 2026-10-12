@@ -122,7 +122,7 @@ ONLY_CLOSED = {   # a company whose only matching site is closed -> must disappe
 
 ND = "[NON-DIFFUSIBLE]"
 NON_DIFFUSIBLE = dict(company(1000, None), siren="888888888", nom_complet="SOCIETE DISCRETE",
-                      statut_diffusion="P")
+                      statut_diffusion="P", sigle=ND)
 NON_DIFFUSIBLE["matching_etablissements"] = [dict(etab("888888888", 1, "10.11Z", "21", CITIES[0]),
                                                   adresse=ND, code_postal=ND, latitude=ND, longitude=ND)]
 NON_DIFFUSIBLE["dirigeants"] = [{"nom": ND, "prenoms": ND, "qualite": "Gérant", "type_dirigeant": "personne physique"}]
@@ -184,6 +184,8 @@ class FakeHandler(BaseHTTPRequestHandler):
         per_page = int(qs.get("per_page", 10))
         if u.path in ("/search", "/near_point"):
             return self._json(search_payload(page, per_page))
+        if u.path.startswith("/limited"):
+            return self._json({"erreur": "Too many requests"}, 429, {"Retry-After": "30"})
         if u.path.endswith("/geocode"):
             return self._json({"type": "FeatureCollection", "features": [
                 {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-4.102, 47.996]},

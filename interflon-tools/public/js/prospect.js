@@ -121,6 +121,7 @@
 
   function setCenter(lat, lon, label) {
     stopPicking();
+    $("#city-input").value = "";
     st.center = { lat, lon, label };
     $("#center-label").textContent = `Centre : ${label} (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
     drawCenter();
@@ -646,8 +647,13 @@
       </div>`;
 
     IFX.openDrawer(co.nom, html, (root) => {
-      const follow = () => ({ status: $("#sh-status", root).value, next_date: $("#sh-date", root).value, note: $("#sh-note", root).value });
-      $("#sh-save", root).addEventListener("click", () => {
+      // capture this sheet's own fields: a pending autosave must not read the next sheet's ones
+      const fS = $("#sh-status", root);
+      const fD = $("#sh-date", root);
+      const fN = $("#sh-note", root);
+      const bSave = $("#sh-save", root);
+      const follow = () => ({ status: fS.value, next_date: fD.value, note: fN.value });
+      bSave.addEventListener("click", () => {
         IFX.pipe.add(r, follow());
         IFX.toast("Prospect enregistré");
         IFX.closeDrawer();
@@ -662,12 +668,13 @@
           IFX.pipe.add(r, follow());
           if (!wasSaved) {
             IFX.toast("Ajouté à mes prospects");
-            $("#sh-save", root).textContent = "Mettre à jour";
+            bSave.textContent = "Mettre à jour";
           }
         }, 400);
       };
-      ["#sh-status", "#sh-date"].forEach((s) => $(s, root).addEventListener("change", autosave));
-      $("#sh-note", root).addEventListener("input", autosave);
+      fS.addEventListener("change", autosave);
+      fD.addEventListener("change", autosave);
+      fN.addEventListener("input", autosave);
       const rm = $("#sh-remove", root);
       if (rm)
         rm.addEventListener("click", () => {
@@ -804,12 +811,14 @@
   // Command bar: PROS 29 35 viande lait
   // PROS 29 35 viande lait: the departments and sectors given REPLACE the current ones
   const FOOD_WORDS = ["agro", "agroalimentaire", "alimentaire", "iaa", "food"];
+  const STOP_WORDS = ["de", "du", "des", "d", "la", "le", "les", "l", "et", "en", "a", "au", "aux"];
   P.command = (args) => {
     const deps = [];
     const segHits = [];
     const unknown = [];
     args.forEach((a) => {
       const A = a.toUpperCase();
+      if (STOP_WORDS.includes(norm(a))) return;
       if (DEP_OK.test(A)) deps.push(A);
       else if (/^\d$/.test(A) && DEP_OK.test("0" + A)) deps.push("0" + A);
       else {

@@ -1,57 +1,164 @@
 {
- "_comment": "draft",
+ "_comment": "Secteurs de prospection : codes NAF (nomenclature Insee), priorité commerciale, argumentaire. Les secteurs 'recherche + vérification' s'appuient sur des cas clients publiés par Interflon (chiffres annoncés par Interflon). Modifiable : vérifier ensuite avec python3 tests/check_data.py.",
+ "genere": "2026-10-12",
  "secteurs": [
   {
-   "key": "viande_volaille",
-   "label": "Viande & volaille",
+   "key": "viande_charcuterie",
+   "label": "Viande & salaisons",
+   "label_long": "Abattage et transformation de viande de boucherie (porc, bœuf) et salaisons industrielles",
    "priority": "haute",
    "food": true,
    "naf_codes": [
     "10.11Z",
-    "10.12Z",
-    "10.13A",
-    "10.13B"
+    "10.13A"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements",
+    "nettoyage_degraissage"
+   ],
+   "typical_applications": [
+    "Chaînes de transport des pasteurisateurs et cuiseurs (jambon cuit, saucisses)",
+    "Chaînes d'étourdissement au gaz",
+    "Roulements des laveuses/échaudoirs à porcs exposés à la vapeur et à l'eau",
+    "Convoyeurs aériens et chaînes de convoyage"
+   ],
+   "recommended_products": [
+    "Interflon Food Lube G220",
+    "Interflon Food Lube HT",
+    "Interflon Grease LS2",
+    "Interflon Metal Clean F"
+   ],
+   "case_studies": [
+    {
+     "title": "Lubrication of the pasteurizer chains (cooked ham / sausage producer)",
+     "url": "https://interflon.com/cases/lubrication-of-the-pasteurizer-chains",
+     "result": "Chaînes de transport du pasteurisateur (jambons cuits) : durée de vie portée de 18 à 42 mois ; plus de 30 000 € économisés tous les 3 ans (Food Lube G220 + Food Lube HT)"
+    },
+    {
+     "title": "Pig washer – reducing downtime and extending lubrication intervals",
+     "url": "https://interflon.com/cases/reducing-downtime-and-extending-lubrication-intervals-2",
+     "result": "Abattoir de porcs passé à Grease LS2, Food Lube G220 et Metal Clean F : fin des casses de chaînes et des arrêts non planifiés sur l'étourdissement au gaz après l'introduction de Food Lube G220, bonne résistance au lavage ; aucun chiffre visible sur l'intervalle de graissage des roulements de la laveuse"
+    }
+   ],
+   "pitch_fr": "Chez un fabricant de jambons cuits et de saucisses, Food Lube G220 et Food Lube HT ont porté la durée de vie des chaînes du pasteurisateur de 18 à 42 mois, avec plus de 30 000 € d'économies tous les 3 ans.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "produits_mer",
-   "label": "Poisson & produits de la mer",
+   "key": "volaille",
+   "label": "Volaille",
+   "label_long": "Abattage et transformation de volailles",
    "priority": "haute",
    "food": true,
    "naf_codes": [
-    "10.20Z"
+    "10.12Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements",
+    "verins_pneumatique"
+   ],
+   "typical_applications": [
+    "Chaînes aériennes et manilles (crochets) d'accrochage",
+    "Convoyeurs d'étourdissement et de saignée (systèmes Stork/Marel)",
+    "Chaînes des basculeurs (dumpers)",
+    "Roulements des trieuses/calibreuses Marel",
+    "Équipements pneumatiques et doigts de plumaison"
+   ],
+   "recommended_products": [
+    "Interflon Food Lube G150",
+    "Interflon Food Lube G220",
+    "Interflon Food Lube",
+    "Interflon Food Grease HD2",
+    "Interflon Food Lube PN32",
+    "Interflon Grease LS2"
+   ],
+   "case_studies": [
+    {
+     "title": "Doubling chain life in stunning and bleeding conveyors",
+     "url": "https://interflon.com/cases/doubling-chain-life-in-stunning-bleeding-conveyors",
+     "result": "Durée de vie des chaînes doublée (1,5 → 3 ans) et relubrification hebdomadaire → mensuelle avec Food Lube G150 (G220 en alternative) ; Plukon cité pour les lignes de saignée (durée de vie doublée, plus d'égouttures d'huile)"
+    },
+    {
+     "title": "Lubricating almost 3 miles of chain",
+     "url": "https://interflon.com/us/cases/lubricating-almost-3-miles-of-chain",
+     "result": "4 500 m de chaînes de transport, Food Lube G150 en graissage automatique : environ 80 000 $/an d'économies (lubrifiant, chaînes, main-d'œuvre, arrêts) pour un coût de lubrification de près de 140 000 $/an ; durée de vie des chaînes presque doublée"
+    },
+    {
+     "title": "Interflon Food Lube increased chain life by 7-8 times",
+     "url": "https://interflon.com/us/cases/interflon-food-lube-increased-chain-life-by-7-8-times",
+     "result": "Chaînes de basculeur : remplacement toutes les 6-10 semaines → 78 semaines (estimation) après Metal Clean puis Food Lube MicPol ; allongement de 0,5 % seulement après 26 semaines ; lubrification une fois par mois"
+    },
+    {
+     "title": "Cutting grease use by 87% in Marel sorters",
+     "url": "https://interflon.com/cases/cutting-grease-use-by-87-in-marel-sorters",
+     "result": "Roulements de trieuses Marel : -87 % de graisse et main-d'œuvre de lubrification d'environ 1 000 h à environ 40 h par an, moins de casses de roulements (Food Grease HD2)"
+    }
+   ],
+   "pitch_fr": "Sur les convoyeurs d'étourdissement et de saignée, Food Lube G150 a doublé la durée de vie des chaînes (1,5 → 3 ans) et fait passer la relubrification d'hebdomadaire à mensuelle, Interflon citant notamment Plukon.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "fruits_legumes",
-   "label": "Fruits & légumes transformés",
+   "key": "boulangerie_biscuiterie_industrielle",
+   "label": "Boulangerie & biscuiterie industrielles",
+   "label_long": "Boulangerie-viennoiserie industrielle et biscuiterie",
    "priority": "haute",
    "food": true,
    "naf_codes": [
-    "10.31Z",
-    "10.32Z",
-    "10.39A",
-    "10.39B"
+    "10.71A",
+    "10.72Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements"
+   ],
+   "typical_applications": [
+    "Chaînes et roulements de fours (jusqu'à 220-240 °C)",
+    "Roulements de roues de chariots de four",
+    "Chaînes d'étuves de pousse (farine dans les axes)",
+    "Chaînes d'entraînement de convoyeurs lavés au jet",
+    "Équipements de surgélation"
+   ],
+   "recommended_products": [
+    "Interflon Food Lube AL",
+    "Interflon Food Lube",
+    "Interflon Food Lube HT",
+    "Interflon Grease HTG",
+    "Interflon Lube HT/SF",
+    "Interflon Food Lube LT"
+   ],
+   "case_studies": [
+    {
+     "title": "Oven rack wheel bearings",
+     "url": "https://interflon.com/us/cases/oven-rack-wheel-bearings",
+     "result": "Près de 5 000 $/an économisés, résistance à l'eau et au nettoyage haute pression, plus aucun changement de roues (Grease HTG)"
+    },
+    {
+     "title": "Bakery conveyor belt drive chains",
+     "url": "https://interflon.com/us/cases/bakery-conveyor-belt-drive-chains",
+     "result": "Durée de vie des chaînes allongée d'au moins 50 % et intervalles de lubrification plus longs, donc moins de lubrifiant (Food Lube AL)"
+    },
+    {
+     "title": "Conveyor chains in dough proofer",
+     "url": "https://interflon.com/us/cases/conveyor-chains-in-dough-proofer",
+     "result": "-50 % de consommation de lubrifiant et au moins -10 % de consommation électrique d'entraînement des chaînes (Food Lube AL)"
+    },
+    {
+     "title": "Bread oven bearings",
+     "url": "https://interflon.com/us/cases/bread-oven-bearings",
+     "result": "Lubrification des roulements de four hebdomadaire → mensuelle avec Grease HTG (S074 ; le résumé S028 ne donne pas de chiffre)"
+    }
+   ],
+   "pitch_fr": "Sur les chaînes d'une étuve de pousse, Food Lube AL a réduit de 50 % la consommation de lubrifiant et d'au moins 10 % l'énergie d'entraînement, tandis que Grease HTG (jusqu'à 240 °C) a fait passer la lubrification des roulements de four d'hebdomadaire à mensuelle.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "laitier",
-   "label": "Lait & fromages",
+   "key": "produits_laitiers",
+   "label": "Lait, fromages & glaces",
+   "label_long": "Industrie laitière, fromagerie et glaces",
    "priority": "haute",
    "food": true,
    "naf_codes": [
@@ -61,41 +168,177 @@
     "10.51D",
     "10.52Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements",
+    "mecanismes_articulations"
+   ],
+   "typical_applications": [
+    "Chaînes et convoyeurs de conditionnement",
+    "Mécanismes des remplisseuses et des machines d'emballage",
+    "Roulements en zones lavées (H1/3H)"
+   ],
+   "recommended_products": [
+    "Interflon Food Lube 3H"
+   ],
    "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "Interflon cite les sites de production laitière parmi les applications de Food Lube 3H, qui couvre à la fois les zones NSF H1 et 3H et dont la version aérosol est certifiée NSF 538 sans MOAH.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "boulangerie_cereales",
-   "label": "Meunerie, boulangerie industrielle, biscuiterie, pâtes",
+   "key": "fruits_legumes_snacks",
+   "label": "Fruits, légumes & snacks",
+   "label_long": "Transformation de fruits, légumes et pommes de terre (chips, jus, conserves)",
+   "priority": "haute",
+   "food": true,
+   "naf_codes": [
+    "10.31Z",
+    "10.32Z",
+    "10.39A",
+    "10.39B"
+   ],
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements"
+   ],
+   "typical_applications": [
+    "Chaînes de sécheurs et de friteuses (chips)",
+    "Chaînes de trieuses de fruits",
+    "Roulements de broyeurs de fruits (humidité, corrosion)",
+    "Bandes et convoyeurs"
+   ],
+   "recommended_products": [
+    "Interflon Food Lube AL",
+    "Interflon Food Grease EP",
+    "Interflon Food Lube G150",
+    "Interflon Food Lube G320"
+   ],
+   "case_studies": [
+    {
+     "title": "Reduced wear on the chain of a potato chip dryer",
+     "url": "https://interflon.com/cases/reduced-wear-on-the-chain-of-a-potato-chip-dryer-2",
+     "result": "Chaîne du sécheur (80 m à 227 €/m) : 2 ans sans remplacement au lieu de 2 remplacements par an, soit 36 320 € économisés ; lubrifiant 200 L → 15-20 L (Food Lube AL)"
+    },
+    {
+     "title": "Enhanced reliability in apple processing",
+     "url": "https://interflon.com/cases/enhanced-reliability-in-apple-processing",
+     "result": "Roulements et chaînes : 1 saison → 2 à 3 saisons ; chaînes de trieuse lubrifiées une fois par saison au lieu de chaque semaine ; moins d'arrêts non planifiés (Food Grease EP sur broyeur, Food Lube G150 sur trieuses, G320 sur convoyeurs)"
+    }
+   ],
+   "pitch_fr": "Sur un sécheur de chips, Food Lube AL a permis de tenir 2 ans sans remplacer la chaîne (36 320 € économisés) et de faire passer la consommation de lubrifiant de 200 L à 15-20 L.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "aliments_animaux_meunerie",
+   "label": "Aliments pour animaux & meunerie",
+   "label_long": "Aliments pour animaux (ferme et compagnie), meunerie et amidonnerie",
    "priority": "haute",
    "food": true,
    "naf_codes": [
     "10.61A",
     "10.61B",
     "10.62Z",
-    "10.71A",
-    "10.71B",
-    "10.72Z",
-    "10.73Z"
+    "10.91Z",
+    "10.92Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "roulements"
+   ],
+   "typical_applications": [
+    "Rouleaux, couronnes et roulements de presses à granulés",
+    "Roulements très chargés en ambiance poussiéreuse"
+   ],
+   "recommended_products": [
+    "Interflon Food Grease HD2"
+   ],
+   "case_studies": [
+    {
+     "title": "Extending bearing life and reducing lubrication costs (pellet machine roller bearings)",
+     "url": "https://interflon.com/cases/extending-bearing-life-and-reducing-lubrication-costs",
+     "result": "Usine d'aliments pour chiens/animaux : graisse 153 kg en 40 jours → 3,42 kg en 43 jours (ratio 1:44) ; coût de graisse par tonne 0,267 € → 0,081 € (environ -70 %) ; plus de 6 000 €/an attendus (Food Grease HD2)"
+    }
+   ],
+   "pitch_fr": "Sur les roulements d'une presse à granulés, Food Grease HD2 a fait passer la consommation de graisse de 153 kg en 40 jours à 3,42 kg en 43 jours (ratio 1:44), avec plus de 6 000 € d'économies attendues par an.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "autres_iaa",
-   "label": "Sucre, chocolat, plats préparés & autres IAA",
+   "key": "boissons",
+   "label": "Boissons & embouteillage",
+   "label_long": "Boissons : brasseries, eaux, sodas, spiritueux, cidre, vins effervescents",
    "priority": "haute",
    "food": true,
    "naf_codes": [
+    "11.01Z",
+    "11.02A",
+    "11.03Z",
+    "11.05Z",
+    "11.06Z",
+    "11.07A",
+    "11.07B"
+   ],
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements",
+    "engrenages_ouverts",
+    "glissieres_guides",
+    "mecanismes_articulations"
+   ],
+   "typical_applications": [
+    "Chaînes et convoyeurs à bouteilles/canettes",
+    "Remplisseuses : paliers centraux, joints, engrenages ouverts",
+    "Chaînes d'encaisseuses et encartonneuses",
+    "Roulements de palettiseurs et dépalettiseurs",
+    "Pinces d'étiqueteuses PET"
+   ],
+   "recommended_products": [
+    "Interflon Food Lube AL",
+    "Interflon Food Grease S1/2",
+    "Interflon Food Grease 1",
+    "Interflon Food Lube G100",
+    "Interflon Food Lube G220",
+    "Interflon Slide Wax Dry",
+    "Interflon Food Grease MP2"
+   ],
+   "case_studies": [
+    {
+     "title": "Beverage industry – conveyor belts / chains",
+     "url": "https://interflon.com/industries/beverage/conveyor-belts/chains",
+     "result": "Après dégraissage puis Food Lube AL : intervalle de lubrification 7 → 30 jours (+320 %), durée de vie des chaînes environ triplée, plus de pertes de lubrifiant ni de taches au sol"
+    },
+    {
+     "title": "Conveyor chain in bottling plant",
+     "url": "https://interflon.com/us/cases/conveyor-chain-in-bottling-plant",
+     "result": "Usine d'embouteillage en bocaux verre (lubrification à l'eau seule) : durée de vie des chaînes allongée d'au moins 6 mois, à 1,5 an ; fin des défaillances thermiques ; 114 000 $ d'économies totales (Food Lube AL)"
+    },
+    {
+     "title": "Lubrication of filling machines in the beverage industry",
+     "url": "https://interflon.com/industries/beverage/filling-machines",
+     "result": "Environ 23 000 $/an de disponibilité récupérée et -35 % de lubrifiant (Food Grease S1/2 sur paliers centraux et joints, Food Grease 1 sur engrenages ouverts)"
+    },
+    {
+     "title": "Beverage industry – case packers",
+     "url": "https://interflon.com/industries/beverage/case-packers",
+     "result": "Durée de vie de la chaîne principale ×3 et -65 % de lubrifiant (Food Lube G100) ; Food Lube G220 en graissage automatique chez un autre client"
+    }
+   ],
+   "pitch_fr": "Sur les convoyeurs de bouteilles, Food Lube AL a fait passer l'intervalle de lubrification de 7 à 30 jours et environ triplé la durée de vie des chaînes, et une usine d'embouteillage a déclaré 114 000 $ d'économies totales.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "autres_iaa",
+   "label": "Autres IAA (poisson, sucre, chocolat, plats…)",
+   "label_long": "Autres industries alimentaires (poisson, huiles, sucre, chocolat-confiserie, café, pâtes, plats préparés, condiments)",
+   "priority": "moyenne",
+   "food": true,
+   "naf_codes": [
+    "10.20Z",
     "10.41A",
     "10.41B",
     "10.42Z",
+    "10.73Z",
     "10.81Z",
     "10.82Z",
     "10.83Z",
@@ -104,72 +347,34 @@
     "10.86Z",
     "10.89Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "aliments_animaux",
-   "label": "Aliments pour animaux",
-   "priority": "haute",
-   "food": true,
-   "naf_codes": [
-    "10.91Z",
-    "10.92Z"
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements",
+    "glissieres_guides"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "boissons",
-   "label": "Boissons & embouteillage",
-   "priority": "haute",
-   "food": true,
-   "naf_codes": [
-    "11.01Z",
-    "11.02A",
-    "11.02B",
-    "11.03Z",
-    "11.04Z",
-    "11.05Z",
-    "11.06Z",
-    "11.07A",
-    "11.07B"
+   "typical_applications": [
+    "Chaînes de convoyeurs",
+    "Roulements et paliers de machines alimentaires",
+    "Glissières et convoyeurs",
+    "Machines de conditionnement et d'emballage"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "bois",
-   "label": "Bois, scieries & panneaux",
-   "priority": "haute",
-   "food": false,
-   "naf_codes": [
-    "16.10A",
-    "16.10B",
-    "16.21Z",
-    "16.22Z",
-    "16.23Z",
-    "16.24Z",
-    "16.29Z"
+   "recommended_products": [
+    "Interflon Food Lube",
+    "Interflon Food Lube 3H",
+    "Interflon Food Grease 2",
+    "Interflon Fin Grease",
+    "Interflon Slide Wax Dry",
+    "Interflon Food Grease HD2"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
    "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "Interflon indique que toute sa gamme Food Lube et Food Grease est enregistrée NSF H1 et sans PFAS, et cite la transformation du poisson parmi les applications de Food Lube 3H, qui couvre les zones NSF H1 et 3H.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
    "key": "papier_carton",
-   "label": "Papier, carton & emballages papier",
+   "label": "Papier & carton",
+   "label_long": "Pâte à papier, papeteries, carton ondulé et emballages papier",
    "priority": "haute",
    "food": false,
    "naf_codes": [
@@ -180,18 +385,46 @@
     "17.21C",
     "17.22Z",
     "17.23Z",
-    "17.24Z",
     "17.29Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "roulements",
+    "mecanismes_articulations"
+   ],
+   "typical_applications": [
+    "Chaînes en partie humide et sèche des machines à papier (tissue)",
+    "Roulements d'onduleuse en section vapeur chaude et humide",
+    "Roulements des margeurs (poussière de carton)",
+    "Porte-couteaux et chaînes de slotters et découpeuses",
+    "Chaînes des onduleuses"
+   ],
+   "recommended_products": [
+    "Interflon Lube TF",
+    "Interflon Lube HT",
+    "Interflon Grease HTG",
+    "Interflon Food Grease HD2",
+    "Interflon Grease MP2/3"
+   ],
+   "case_studies": [
+    {
+     "title": "From daily lubrication to once every two weeks (tissue/paper mill)",
+     "url": "https://interflon.com/us/cases/from-daily-lubrication-to-once-every-two-weeks",
+     "result": "Papeterie (tissue) humide et très poussiéreuse : lubrification des chaînes quotidienne → toutes les 2 semaines ; 2 cartons de Lube TF par an au lieu de 24 ; 2 667 $/an d'économies (titre de la page : coûts de lubrification -70 %)"
+    },
+    {
+     "title": "Lubrication solutions for the cardboard industry (FTSE 100 paper-based packaging group)",
+     "url": "https://interflon.com/industries/cardboard",
+     "result": "Groupe d'emballage papier du FTSE 100 présent dans plus de 30 pays : intervalles allongés, durée de vie des pièces accrue, températures de fonctionnement réduites (non chiffré ; la page ne nomme pas le client, un témoignage similaire est attribué à Smurfit Kappa sur une autre page)"
+    }
+   ],
+   "pitch_fr": "Dans une papeterie (tissue) humide et très poussiéreuse, le film sec Lube TF a espacé la lubrification des chaînes de quotidienne à toutes les deux semaines, avec 2 cartons de lubrifiant par an au lieu de 24.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "metallurgie",
+   "key": "siderurgie_metallurgie_fonderie",
    "label": "Sidérurgie, métallurgie & fonderie",
+   "label_long": "Sidérurgie, tubes et produits d'acier, métallurgie des non-ferreux et fonderies",
    "priority": "haute",
    "food": false,
    "naf_codes": [
@@ -201,26 +434,51 @@
     "24.32Z",
     "24.33Z",
     "24.34Z",
-    "24.41Z",
     "24.42Z",
     "24.43Z",
     "24.44Z",
     "24.45Z",
-    "24.46Z",
     "24.51Z",
     "24.52Z",
     "24.53Z",
     "24.54Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "roulements",
+    "engrenages_fermes",
+    "mecanismes_articulations",
+    "chaines"
+   ],
+   "typical_applications": [
+    "Roulements coniques de lignes de refroidissement (≈ 160 °C, eau)",
+    "Pivots et roulements de wagons skip",
+    "Réducteurs de ponts roulants",
+    "Chaînes et paliers en ambiance chaude, poussiéreuse et corrosive"
+   ],
+   "recommended_products": [
+    "Interflon Food Grease HD2",
+    "Interflon Grease LS2",
+    "Interflon Grease MP00"
+   ],
+   "case_studies": [
+    {
+     "title": "Lubrication of tapered roller bearings in a steel mill",
+     "url": "https://interflon.com/cases/lubrication-of-tapered-roller-bearings-in-a-steel-mill-2",
+     "result": "Roulements coniques d'une ligne de refroidissement de tubes (environ 160 °C, lavage à l'eau) : moins d'arrêts de production, de lubrifiant et de casses de roulements, moins de risques pour les opérateurs ; près de 4 823 €/an d'économies estimées (Food Grease HD2)"
+    },
+    {
+     "title": "Interflon lubricants for primary metal (application examples)",
+     "url": "https://interflon.com/industries/primary-metal",
+     "result": "Pivots et roulements de wagons skip : durée de vie de 2 à 10 ans et graisse divisée par 3 (Grease LS2) ; réducteurs de ponts roulants : fin des fuites et durée de vie ×4 à ×6 (Grease MP00)"
+    }
+   ],
+   "pitch_fr": "Dans une aciérie, Food Grease HD2 a tenu l'eau et environ 160 °C sur les roulements coniques d'une ligne de refroidissement de tubes (près de 4 823 €/an d'économies estimées), et Grease LS2 porte la durée de vie des pivots de wagons skip de 2 à 10 ans.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
    "key": "automobile",
    "label": "Automobile & équipementiers",
+   "label_long": "Construction automobile, carrosseries et équipementiers",
    "priority": "haute",
    "food": false,
    "naf_codes": [
@@ -229,31 +487,58 @@
     "29.31Z",
     "29.32Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "engrenages_fermes",
+    "moteurs_electriques"
+   ],
+   "typical_applications": [
+    "Chaînes Fly Roller des ateliers peinture carrosserie",
+    "Chaînes des lignes d'assemblage (sans coulure sur les véhicules)",
+    "Réducteurs de lignes de production qui fuient",
+    "Pompes et moteurs électriques de cataphorèse"
+   ],
+   "recommended_products": [
+    "Interflon Lube TF",
+    "Interflon Food Lube G150",
+    "Interflon Grease MP00",
+    "Interflon Grease MP2/3"
+   ],
+   "case_studies": [
+    {
+     "title": "Fly roller chain lubrication in a car body paint shop",
+     "url": "https://interflon.com/cases/fly-roller-chain-lubrication-in-a-car-body-paint-shop",
+     "result": "Entretien toutes les 4 → 12 semaines (40 → 30 min), plus de cycle de nettoyage des chaînes ; coûts de maintenance 27 160 € → 10 345 €/an, soit environ 16 800 €/an économisés (Lube TF)"
+    },
+    {
+     "title": "Lubrication of electric pumps (automotive cataphoresis plant)",
+     "url": "https://interflon.com/cases/lubrication-of-electric-pumps-2",
+     "result": "3 pompes en 24/7 : -28 % d'absorption électrique en 45 jours ; intervalle 3 → 6 mois ; plus de 8 000 €/an d'économies attendues (Grease MP2/3)"
+    },
+    {
+     "title": "PFAS-free lubricants in automotive production (Tier 1 example)",
+     "url": "https://interflon.com/us/proactively-moving-away-from-pfas-a-tier-1-automotive-example",
+     "result": "Équipementier de rang 1 passé aux graisses et huiles sans PFAS d'Interflon : consommation de graisse environ 5 fois plus faible et intervalles de lubrification allongés"
+    }
+   ],
+   "pitch_fr": "En atelier peinture carrosserie, Lube TF a espacé l'entretien des chaînes Fly Roller de 4 à 12 semaines (environ 16 800 €/an économisés), et Grease MP2/3 a réduit de 28 % en 45 jours l'absorption électrique de pompes de cataphorèse.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "materiaux",
-   "label": "Verre, céramique, ciment & béton",
-   "priority": "moyenne",
+   "key": "materiaux_construction_carrieres",
+   "label": "Ciment, béton, matériaux & carrières",
+   "label_long": "Matériaux de construction (ciment, chaux, plâtre, béton, terre cuite) et carrières",
+   "priority": "haute",
    "food": false,
    "naf_codes": [
-    "23.11Z",
-    "23.12Z",
-    "23.13Z",
-    "23.14Z",
-    "23.19Z",
+    "08.11Z",
+    "08.12Z",
+    "08.91Z",
+    "08.99Z",
     "23.20Z",
     "23.31Z",
     "23.32Z",
-    "23.41Z",
-    "23.42Z",
-    "23.43Z",
-    "23.44Z",
-    "23.49Z",
     "23.51Z",
     "23.52Z",
     "23.61Z",
@@ -262,53 +547,181 @@
     "23.64Z",
     "23.65Z",
     "23.69Z",
-    "23.70Z",
-    "23.91Z",
     "23.99Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "roulements",
+    "nettoyage_degraissage"
+   ],
+   "typical_applications": [
+    "Chaînes de convoyeurs d'alimentation des concasseurs",
+    "Roulements de traînards et arbres de convoyeurs",
+    "Palans et élévateurs à chaîne en ambiance poussiéreuse",
+    "Chaînes de gratteurs (scraper reclaimers) et plaques d'usure",
+    "Roulements de concasseurs"
+   ],
+   "recommended_products": [
+    "Interflon Lube EP",
+    "Interflon Lube EP+",
+    "Interflon Food Grease HD2",
+    "Interflon Degreaser EM30+",
+    "Interflon Lube TF",
+    "Interflon Lube PN32",
+    "Interflon Grease OG"
+   ],
+   "case_studies": [
+    {
+     "title": "Conveyor chain hoist for building materials",
+     "url": "https://interflon.com/cases/conveyor-chain-hoist-for-building-materials",
+     "result": "Palan à chaîne non lubrifié à cause de la poussière : -50 % de consommation d'énergie, environ 1 000 € par chaîne et par an ; nettoyage tous les 14 jours → tous les 3 mois ; au moins 10 h de disponibilité en plus (Lube TF)"
+    },
+    {
+     "title": "Conveyor chain in concrete plant",
+     "url": "https://interflon.com/us/cases/conveyor-chain-in-concrete-plant",
+     "result": "Chaîne d'alimentation de concasseur en ambiance sèche et sableuse : moins d'adhérence du sable, durée de vie allongée, plus de 2 500 $ d'économies (Lube PN 32 en graissage automatique)"
+    }
+   ],
+   "pitch_fr": "En ambiance poussiéreuse, Lube TF a réduit de 50 % la consommation d'énergie d'un palan à chaîne de matériaux de construction (environ 1 000 € par chaîne et par an) et espacé son nettoyage de 14 jours à 3 mois.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "travail_metaux",
-   "label": "Travail des métaux",
+   "key": "imprimerie",
+   "label": "Imprimerie",
+   "label_long": "Imprimerie de labeur et de journaux",
    "priority": "moyenne",
    "food": false,
    "naf_codes": [
+    "18.11Z",
+    "18.12Z"
+   ],
+   "applications": [
+    "chaines",
+    "roulements",
+    "engrenages_fermes",
+    "mecanismes_articulations"
+   ],
+   "typical_applications": [
+    "Chaînes de sortie et de transport des feuilles",
+    "Pinces (grippers) et roulements des presses offset",
+    "Réducteurs et engrenages des presses"
+   ],
+   "recommended_products": [
+    "Interflon Fin Super",
+    "Interflon Lube TF",
+    "Interflon Grease MP2/3",
+    "Interflon Finnoly Additive T251"
+   ],
+   "case_studies": [
+    {
+     "title": "High-tech lube has potential to reduce running costs (PrintWeek)",
+     "url": "https://www.printweek.com/content/product-news/high-tech-lube-has-potential-to-reduce-running-costs",
+     "result": "-12,7 % d'énergie sur une presse 8 couleurs et -8 % sur une presse 2 couleurs avec l'additif Finnoly T251 ; durée de vie annoncée d'environ 5 ans et retour sur investissement de 6 à 12 mois selon le fournisseur (imprimeur non nommé)"
+    }
+   ],
+   "pitch_fr": "L'additif Finnoly T251 a réduit de 12,7 % la consommation d'énergie d'une presse 8 couleurs selon PrintWeek, et les films secs Fin Super et Lube TF repoussent la poussière de papier et la poudre anti-maculage.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "bois_panneaux",
+   "label": "Bois, scieries & panneaux",
+   "label_long": "Scieries, panneaux et placages, menuiseries et emballages bois industriels",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "16.10A",
+    "16.10B",
+    "16.21Z",
+    "16.22Z",
+    "16.23Z",
+    "16.24Z"
+   ],
+   "applications": [
+    "chaines",
+    "convoyeurs"
+   ],
+   "typical_applications": [
+    "Chaînes des presses continues à panneaux (type Siempelkamp)",
+    "Convoyeurs à chaînes en ambiance poussiéreuse (sciure, copeaux)",
+    "Roulements et guidages exposés aux particules"
+   ],
+   "recommended_products": [
+    "Interflon Lube HT/SF"
+   ],
+   "case_studies": [
+    {
+     "title": "Conveyor chains of a Siempelkamp wood press",
+     "url": "https://interflon.com/cases/conveyor-chains-of-a-siempelkamp-wood-press",
+     "result": "Consommation de lubrifiant divisée par 10, soit 20 L/jour économisés ; même performance que le produit précédent avec moins de résidus et de contamination de la machine (Lube HT/SF)"
+    }
+   ],
+   "pitch_fr": "Sur une presse à bois Siempelkamp, Lube HT/SF a divisé par 10 la consommation de lubrifiant des chaînes de convoyage (20 L/jour économisés) tout en réduisant les résidus sur la machine.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "travail_metaux_traitement_surface",
+   "label": "Travail des métaux & peinture industrielle",
+   "label_long": "Forge, emboutissage, traitement de surface et peinture industrielle, mécanique et emballages métalliques",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "25.50A",
+    "25.50B",
+    "25.61Z",
+    "25.62A",
+    "25.62B",
+    "25.91Z",
+    "25.92Z",
+    "25.93Z",
+    "25.94Z",
+    "25.99B",
     "25.11Z",
     "25.12Z",
     "25.21Z",
     "25.29Z",
     "25.30Z",
     "25.40Z",
-    "25.50A",
-    "25.50B",
-    "25.61Z",
-    "25.62A",
-    "25.62B",
     "25.71Z",
     "25.72Z",
     "25.73A",
     "25.73B",
-    "25.91Z",
-    "25.92Z",
-    "25.93Z",
-    "25.94Z",
-    "25.99A",
-    "25.99B"
+    "25.99A"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "moteurs_electriques"
+   ],
+   "typical_applications": [
+    "Chaînes de fours de cuisson peinture (≈ 180 °C)",
+    "Convoyeurs aériens de lignes de peinture/thermolaquage",
+    "Pompes et moteurs électriques de bains (cataphorèse)"
+   ],
+   "recommended_products": [
+    "Interflon Lube HT/SF",
+    "Interflon Lube HT",
+    "Interflon Grease MP2/3"
+   ],
+   "case_studies": [
+    {
+     "title": "Oven chains lubrication on a steel capsule painting line",
+     "url": "https://interflon.com/cases/oven-chains-lubrication-on-a-steel-capsule-painting-line",
+     "result": "Chaînes de four à 180 °C d'une ligne de revêtement de capsules acier : environ 8 200 € économisés grâce aux remplacements de chaînes évités (9 493 $ sur la version US) avec Lube HT/SF"
+    },
+    {
+     "title": "Overhead conveyor chain lubrication (industrial painting line)",
+     "url": "https://interflon.com/cases/overhead-conveyor-chain-lubrication",
+     "result": "Après un essai d'un lubrifiant moins cher (consommation 10 → 25 L/an, égouttures sur pièces peintes), le retour à Lube HT a réduit la consommation de plus de 60 % et économisé plus de 2 000 €/an"
+    }
+   ],
+   "pitch_fr": "Sur les chaînes de four à 180 °C d'une ligne de peinture de capsules acier, Lube HT/SF a permis environ 8 200 € d'économies en remplacements de chaînes évités, et le retour à Lube HT a réduit de plus de 60 % la consommation d'un convoyeur aérien de peinture.",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
-   "key": "plasturgie",
+   "key": "plasturgie_caoutchouc",
    "label": "Plasturgie & caoutchouc",
+   "label_long": "Plasturgie (injection, extrusion, emballages plastiques) et caoutchouc",
    "priority": "moyenne",
    "food": false,
    "naf_codes": [
@@ -320,15 +733,298 @@
     "22.29A",
     "22.29B"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
+   "applications": [
+    "glissieres_guides",
+    "engrenages_fermes",
+    "degrippage",
+    "filetages_montage",
+    "nettoyage_degraissage",
+    "protection_anticorrosion",
+    "chaines"
+   ],
+   "typical_applications": [
+    "Éjecteurs, colonnes de guidage et canaux des moules",
+    "Colonnes (tie bars) des presses à injecter",
+    "Vis d'extrudeuses grippées (anti-grippage)",
+    "Réducteurs d'extrudeuses",
+    "Chaînes de palettiseurs"
+   ],
+   "recommended_products": [
+    "Interflon Degreaser EM30+",
+    "Interflon Fin Grease",
+    "Interflon Lube TF",
+    "Interflon Food Lube",
+    "Interflon Grease MP2/3",
+    "Interflon Paste HT1200",
+    "Interflon Food Lube G220"
+   ],
+   "case_studies": [
+    {
+     "title": "Logoplaste produces 24/7 thanks to chain treatment of Interflon",
+     "url": "https://interflon.com/us/news/logoplaste-produces-24-7-thanks-to-chain-treatment-of-interflon",
+     "result": "Usine de bouteilles plastique (Elst, Pays-Bas) : après nettoyage et prétraitement des chaînes neuves de 3 colonnes de palettisation, l'installation tourne sans problème ni panne en 24/7 (non chiffré, produit non précisé)"
+    }
+   ],
+   "pitch_fr": "Pour les moules d'injection, une seule graisse NSF H1 (Fin Grease) lubrifie éjecteurs, colonnes de guidage et canaux sans coulure, et Food Lube G220 est annoncé jusqu'à -8 % d'énergie sur les réducteurs d'extrudeuses.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "verre",
+   "label": "Verre",
+   "label_long": "Verre plat, verre creux et fibres de verre",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "23.11Z",
+    "23.12Z",
+    "23.13Z",
+    "23.14Z",
+    "23.19Z"
+   ],
+   "applications": [
+    "chaines",
+    "convoyeurs"
+   ],
+   "typical_applications": [
+    "Machines de lavage et de transfert",
+    "Convoyeurs et chaînes exposés à la poussière de verre",
+    "Chaînes d'encartonneuses"
+   ],
+   "recommended_products": [
+    "Interflon Lube TF",
+    "Interflon Food Lube AL"
+   ],
+   "case_studies": [
+    {
+     "title": "Food-grade chain lubrication for glass bottle cartoners",
+     "url": "https://interflon.com/cases/food-grade-chain-lubrication-for-glass-bottle-cartoners",
+     "result": "Fabricant d'emballages verre pour boissons : remplacement d'un lubrifiant étiqueté GHS09 par Food Lube AL ; chaînes restées propres, lubrifiées et opérationnelles nettement plus longtemps, moins de réapplications (non chiffré)"
+    }
+   ],
+   "pitch_fr": "Le film sec MicPol de Lube TF empêche la poussière de verre d'adhérer aux machines de lavage et de transfert, convoyeurs et chaînes, avec une relubrification annoncée 4 fois moins fréquente.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "textile",
+   "label": "Textile",
+   "label_long": "Industrie textile (filature, tissage, ennoblissement, non-tissés, textiles techniques, fibres synthétiques)",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "13.10Z",
+    "13.20Z",
+    "13.30Z",
+    "13.91Z",
+    "13.92Z",
+    "13.93Z",
+    "13.94Z",
+    "13.95Z",
+    "13.96Z",
+    "13.99Z",
+    "20.60Z"
+   ],
+   "applications": [
+    "chaines"
+   ],
+   "typical_applications": [
+    "Chaînes de rames (stenters/tenters) en zone chaude (≈ 180 °C)",
+    "Pièces de filature et de tissage exposées aux fibres abrasives",
+    "Pièces en contact avec les bains d'ennoblissement"
+   ],
+   "recommended_products": [
+    "Interflon Lube HT",
+    "Interflon Lube HT/SF"
+   ],
+   "case_studies": [
+    {
+     "title": "Lubrication of the chains of a stenter",
+     "url": "https://interflon.com/cases/lubrication-of-the-chains-of-a-stenter",
+     "result": "Chaînes de rame traitées au Lube HT/SF depuis 2003, quasi neuves après 18 ans selon le constructeur ; 300 000 € de remplacement évités"
+    },
+    {
+     "title": "High-temperature lubrication for tenter frame chains",
+     "url": "https://interflon.com/cases/high-temperature-lubrication-for-tenter-frame-chains",
+     "result": "Chaînes de rame à 180 °C : fin des fumées, de l'encrassement et de l'usure prématurée avec Lube HT (NSF H2), annoncé jusqu'à +270 °C"
+    }
+   ],
+   "pitch_fr": "Traitées au Lube HT/SF depuis 2003, les chaînes d'une rame étaient quasi neuves après 18 ans, ce qui a évité 300 000 € de remplacement.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "chimie_pharma",
+   "label": "Chimie, cosmétique & pharmacie",
+   "label_long": "Chimie, engrais, détergents, cosmétiques et pharmacie",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "20.11Z",
+    "20.12Z",
+    "20.13B",
+    "20.14Z",
+    "20.15Z",
+    "20.16Z",
+    "20.17Z",
+    "20.20Z",
+    "20.30Z",
+    "20.41Z",
+    "20.42Z",
+    "20.52Z",
+    "20.59Z",
+    "21.10Z",
+    "21.20Z"
+   ],
+   "applications": [
+    "chaines",
+    "convoyeurs",
+    "nettoyage_degraissage",
+    "autre"
+   ],
+   "typical_applications": [
+    "Chaînes d'ensachage et convoyeurs en ambiance poussiéreuse (ex. soude)",
+    "Poinçons et matrices de presses à comprimés",
+    "Roulements et mécanismes en zones soumises à audit (H1)"
+   ],
+   "recommended_products": [
+    "Interflon Lube TF",
+    "Interflon Degreaser EM30+",
+    "Interflon Food Lube AL"
+   ],
    "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "Sur les chaînes d'ensachage de soude, Interflon indique que Lube TF appliqué après nettoyage au Degreaser EM30+ allonge les intervalles de lubrification d'un facteur 4 à 8, et propose Food Lube AL (NSF H1) pour garder poinçons et matrices de comprimeuses lubrifiés sans compromettre les audits.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "eau_dechets_energie",
+   "label": "Eau, déchets & énergie",
+   "label_long": "Traitement de l'eau, assainissement, tri et recyclage des déchets, production d'énergie",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "36.00Z",
+    "37.00Z",
+    "38.21Z",
+    "38.22Z",
+    "38.32Z",
+    "35.11Z",
+    "35.30Z",
+    "38.31Z"
+   ],
+   "applications": [
+    "roulements",
+    "engrenages_ouverts",
+    "engrenages_fermes",
+    "hydraulique",
+    "chaines",
+    "convoyeurs",
+    "moteurs_electriques",
+    "nettoyage_degraissage"
+   ],
+   "typical_applications": [
+    "Roulements de racleurs de boues",
+    "Roulements de centrifugeuses",
+    "Réducteurs et couronnes de ponts roulants/racleurs dans les bassins",
+    "Presses à balles hydrauliques (huile chaude)",
+    "Chaînes de convoyeurs de tri (eau, poussière de carton)",
+    "Roulements de ventilateurs de chaudière et moteurs électriques"
+   ],
+   "recommended_products": [
+    "Interflon Grease MP2/3",
+    "Interflon Grease OG",
+    "Interflon Degreaser EM30+",
+    "Interflon Grease MP00",
+    "Interflon Finnoly Additive N251-H",
+    "Interflon Food Lube G150"
+   ],
+   "case_studies": [
+    {
+     "title": "Crane gearwheel in tank of a treatment plant",
+     "url": "https://interflon.com/cases/crane-gearwheel-in-tank-of-a-treatment-plant",
+     "result": "Réducteur de pont roulant en bassin : relubrification jusqu'à hebdomadaire → tous les 6 mois, nettoyage mensuel crémaillère/pignon supprimé ; 1 677,45 € économisés par semestre (Degreaser EM30+ puis Grease OG)"
+    },
+    {
+     "title": "Interflon lubricants for paper recycling (Balemaster baler)",
+     "url": "https://interflon.com/industries/paper-recycling",
+     "result": "Presse à balles Balemaster : huile hydraulique d'environ 71,1 °C à 47,9 °C et -18 à -20 % d'énergie avec l'additif Finnoly N-251H ; Food Lube G150 recommandé pour les chaînes de convoyeurs (eau, poussière de carton)"
+    },
+    {
+     "title": "Lubrication of a gear reducer in water treatment system (gas turbine plant)",
+     "url": "https://interflon.com/us/cases/lubrication-of-a-gear-reducer-in-water-treatment-system",
+     "result": "Intervalle de lubrification ×8, baisse du courant moteur, environ 2 104 $ d'énergie économisés sur 4 ans (Grease MP00)"
+    },
+    {
+     "title": "Reducing boiler fan bearing wear in a power plant",
+     "url": "https://interflon.com/cases/reducing-boiler-fan-bearing-wear-in-a-power-plant",
+     "result": "Moins d'énergie, de vibrations, de bruit et d'usure des roulements avec Grease MP2/3 ; non chiffré faute de mesure avant le changement"
+    }
+   ],
+   "pitch_fr": "En station de traitement d'eau, Grease OG a espacé la lubrification d'un réducteur de pont roulant d'une fréquence pouvant atteindre une fois par semaine à une fois tous les 6 mois, et l'additif Finnoly N251-H a réduit de 18 à 20 % l'énergie d'une presse à balles de recyclage.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "transports_infrastructures",
+   "label": "Ferroviaire, ports & aéroports",
+   "label_long": "Ferroviaire, transports urbains guidés, ports, aéroports et remontées mécaniques",
+   "priority": "moyenne",
+   "food": false,
+   "naf_codes": [
+    "52.21Z",
+    "49.10Z",
+    "49.20Z",
+    "49.31Z",
+    "30.20Z",
+    "33.17Z",
+    "52.22Z",
+    "52.23Z",
+    "52.24A",
+    "49.39C"
+   ],
+   "applications": [
+    "mecanismes_articulations",
+    "glissieres_guides",
+    "cables",
+    "chaines",
+    "engrenages_ouverts",
+    "roulements"
+   ],
+   "typical_applications": [
+    "Aiguillages : moteurs, plaques de glissement, verrous, éclisses",
+    "Pointes d'aiguilles (switch tips)",
+    "Câbles en milieu marin",
+    "Chaînes de levage de grues et couronnes de reach stackers",
+    "Chaînes des systèmes de tri bagages",
+    "Pinces de télécabines et ressorts de télésièges"
+   ],
+   "recommended_products": [
+    "Interflon Lube EPR",
+    "Interflon Grease OG",
+    "Interflon Grease LS2",
+    "Interflon Lube TF",
+    "Interflon Food Grease LT2"
+   ],
+   "case_studies": [
+    {
+     "title": "Optimal lubrication of cables in a marine environment",
+     "url": "https://interflon.com/cases/optimal-lubrication-of-cables-in-a-marine-environment-2",
+     "result": "Câbles remplacés tous les 2 ans malgré un graissage hebdomadaire : durée de vie portée à 6 ans, environ 29 640 €/an économisés (Grease LS2, résistante à l'eau salée)"
+    },
+    {
+     "title": "Interflon Lube EPR – rail switch point lubricant (Network Rail testimonial)",
+     "url": "https://interflon.com/products/interflon-lube-epr",
+     "result": "Témoignage d'un consultant Network Rail : nette amélioration du temps de manœuvre et de détection des aiguillages (non chiffré) ; Interflon annonce une forte baisse des défaillances d'aiguilles"
+    },
+    {
+     "title": "Why Hauser Kaibling Cableways relies on Interflon",
+     "url": "https://interflon.com/news/reliable-cable-car-lubrication-for-maximum-safety",
+     "result": "Lube TF et Food Grease LT2 utilisés sur les composants critiques des remontées mécaniques (qualitatif)"
+    }
+   ],
+   "pitch_fr": "Lube EPR est conçu pour les aiguillages (Interflon indique avoir travaillé avec la SNCF, Network Rail et la Deutsche Bahn), et Grease LS2 a triplé la durée de vie de câbles en milieu marin (2 → 6 ans, environ 29 640 €/an économisés).",
+   "source": "recherche + vérification sur sources Interflon"
   },
   {
    "key": "machines",
    "label": "Machines & équipements",
+   "label_long": "Machines & équipements",
    "priority": "moyenne",
    "food": false,
    "naf_codes": [
@@ -366,213 +1062,85 @@
     "28.99A",
     "28.99B"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "pharma_cosmetique",
-   "label": "Pharmacie & cosmétique",
-   "priority": "moyenne",
-   "food": true,
-   "naf_codes": [
-    "21.10Z",
-    "21.20Z",
-    "20.42Z"
+   "applications": [
+    "chaines",
+    "glissieres_guides",
+    "engrenages_fermes",
+    "roulements"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "chimie",
-   "label": "Chimie",
-   "priority": "basse",
-   "food": false,
-   "naf_codes": [
-    "20.11Z",
-    "20.12Z",
-    "20.13A",
-    "20.13B",
-    "20.14Z",
-    "20.15Z",
-    "20.16Z",
-    "20.17Z",
-    "20.20Z",
-    "20.30Z",
-    "20.41Z",
-    "20.51Z",
-    "20.52Z",
-    "20.53Z",
-    "20.59Z",
-    "20.60Z"
+   "typical_applications": [
+    "Chaînes et convoyeurs de lignes d'assemblage",
+    "Glissières, guidages et vis à billes",
+    "Réducteurs et engrenages",
+    "Roulements de broches et de moteurs"
    ],
-   "applications": [],
-   "typical_applications": [],
    "recommended_products": [],
    "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "",
+   "source": "secteur complémentaire (sans cas client Interflon référencé)"
   },
   {
-   "key": "imprimerie",
-   "label": "Imprimerie & façonnage",
+   "key": "logistique",
+   "label": "Logistique & entrepôts",
+   "label_long": "Logistique & entrepôts",
    "priority": "moyenne",
    "food": false,
    "naf_codes": [
-    "18.11Z",
-    "18.12Z",
-    "18.13Z",
-    "18.14Z"
+    "52.10A",
+    "52.10B",
+    "52.24B"
    ],
-   "applications": [],
-   "typical_applications": [],
+   "applications": [
+    "convoyeurs",
+    "chaines",
+    "roulements",
+    "mecanismes_articulations"
+   ],
+   "typical_applications": [
+    "Convoyeurs à rouleaux et à chaînes",
+    "Trieurs et transstockeurs",
+    "Chaînes et mâts de chariots élévateurs",
+    "Portes sectionnelles et quais de chargement"
+   ],
    "recommended_products": [],
    "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "",
+   "source": "secteur complémentaire (sans cas client Interflon référencé)"
   },
   {
-   "key": "textile",
-   "label": "Textile & cuir",
-   "priority": "basse",
-   "food": false,
-   "naf_codes": [
-    "13.10Z",
-    "13.20Z",
-    "13.30Z",
-    "13.91Z",
-    "13.92Z",
-    "13.93Z",
-    "13.94Z",
-    "13.95Z",
-    "13.96Z",
-    "13.99Z",
-    "15.11Z",
-    "15.12Z",
-    "15.20Z"
-   ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "transport_materiel",
-   "label": "Aéronautique, ferroviaire & naval",
+   "key": "aeronautique_naval",
+   "label": "Aéronautique, naval & autres matériels de transport",
+   "label_long": "Aéronautique, naval & autres matériels de transport",
    "priority": "moyenne",
    "food": false,
    "naf_codes": [
     "30.11Z",
     "30.12Z",
-    "30.20Z",
     "30.30Z",
     "30.40Z",
     "30.91Z",
     "30.92Z",
     "30.99Z"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "meubles",
-   "label": "Meubles",
-   "priority": "basse",
-   "food": false,
-   "naf_codes": [
-    "31.01Z",
-    "31.02Z",
-    "31.03Z",
-    "31.09A",
-    "31.09B"
+   "applications": [
+    "glissieres_guides",
+    "chaines",
+    "protection_anticorrosion"
    ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "carrieres",
-   "label": "Carrières & extraction",
-   "priority": "moyenne",
-   "food": false,
-   "naf_codes": [
-    "08.11Z",
-    "08.12Z",
-    "08.91Z",
-    "08.92Z",
-    "08.93Z",
-    "08.99Z"
+   "typical_applications": [
+    "Machines-outils et centres d'usinage",
+    "Convoyeurs et lignes d'assemblage",
+    "Protection anticorrosion des pièces"
    ],
-   "applications": [],
-   "typical_applications": [],
    "recommended_products": [],
    "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "recyclage",
-   "label": "Déchets & recyclage",
-   "priority": "moyenne",
-   "food": false,
-   "naf_codes": [
-    "38.11Z",
-    "38.12Z",
-    "38.21Z",
-    "38.22Z",
-    "38.31Z",
-    "38.32Z"
-   ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "eau",
-   "label": "Eau & assainissement",
-   "priority": "basse",
-   "food": false,
-   "naf_codes": [
-    "36.00Z",
-    "37.00Z"
-   ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
-  },
-  {
-   "key": "logistique",
-   "label": "Logistique, entrepôts & aéroports",
-   "priority": "moyenne",
-   "food": false,
-   "naf_codes": [
-    "52.10A",
-    "52.10B",
-    "52.24A",
-    "52.24B",
-    "52.23Z"
-   ],
-   "applications": [],
-   "typical_applications": [],
-   "recommended_products": [],
-   "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "",
+   "source": "secteur complémentaire (sans cas client Interflon référencé)"
   },
   {
    "key": "maintenance",
    "label": "Maintenance industrielle (prescripteurs)",
+   "label_long": "Maintenance industrielle (prescripteurs)",
    "priority": "moyenne",
    "food": false,
    "naf_codes": [
@@ -585,10 +1153,85 @@
     "33.20D"
    ],
    "applications": [],
-   "typical_applications": [],
+   "typical_applications": [
+    "Sous-traitants de maintenance qui choisissent et achètent les lubrifiants pour leurs clients"
+   ],
    "recommended_products": [],
    "case_studies": [],
-   "pitch_fr": ""
+   "pitch_fr": "",
+   "source": "secteur complémentaire (sans cas client Interflon référencé)"
+  },
+  {
+   "key": "agriculture",
+   "label": "Services agricoles",
+   "label_long": "Entreprises de travaux agricoles, traitement des récoltes et semences",
+   "priority": "basse",
+   "food": false,
+   "naf_codes": [
+    "01.61Z",
+    "01.63Z",
+    "01.64Z"
+   ],
+   "applications": [
+    "mecanismes_articulations",
+    "chaines",
+    "roulements",
+    "convoyeurs"
+   ],
+   "typical_applications": [
+    "Cardans de prise de force des tracteurs",
+    "Chaînes de moissonneuses-batteuses",
+    "Roulements à aiguilles des variateurs de batteur",
+    "Convoyeurs à rouleaux (big bags)"
+   ],
+   "recommended_products": [
+    "Interflon Food Grease HD2",
+    "Interflon Food Lube G",
+    "Interflon Grease MP2/3",
+    "Interflon Food Lube G150"
+   ],
+   "case_studies": [
+    {
+     "title": "Drum variator needle bearings of New Holland combine harvesters",
+     "url": "https://interflon.com/cases/drum-variator-needle-bearings-of-new-holland-combine-harvesters",
+     "result": "Aucune panne pendant la moisson, usure seulement après 1,5 à 2 ans, consommation de graisse divisée par 5, 11 500 € économisés sur 2 ans (Grease MP2/3)"
+    },
+    {
+     "title": "Chains on roller conveyor for 1-ton fertiliser bags",
+     "url": "https://interflon.com/cases/chains-on-roller-conveyor-for-1-ton-fertiliser-bags",
+     "result": "Après dégraissage puis Food Lube G150 : lubrification toutes les 2-4 semaines → tous les 6 mois ; nettoyage à l'air comprimé seulement"
+    }
+   ],
+   "pitch_fr": "Sur des moissonneuses-batteuses New Holland, Grease MP2/3 a supprimé les pannes des roulements de variateur pendant la moisson, divisé la consommation de graisse par 5 et fait économiser 11 500 € sur deux ans.",
+   "source": "recherche + vérification sur sources Interflon"
+  },
+  {
+   "key": "meubles",
+   "label": "Meubles",
+   "label_long": "Meubles",
+   "priority": "basse",
+   "food": false,
+   "naf_codes": [
+    "31.01Z",
+    "31.02Z",
+    "31.03Z",
+    "31.09A",
+    "31.09B"
+   ],
+   "applications": [
+    "chaines",
+    "glissieres_guides",
+    "roulements"
+   ],
+   "typical_applications": [
+    "Chaînes et convoyeurs de lignes de finition",
+    "Machines à bois (scies, plaqueuses, perceuses)",
+    "Guidages exposés à la poussière de bois"
+   ],
+   "recommended_products": [],
+   "case_studies": [],
+   "pitch_fr": "",
+   "source": "secteur complémentaire (sans cas client Interflon référencé)"
   }
  ]
 }

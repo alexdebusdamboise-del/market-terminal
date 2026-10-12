@@ -114,17 +114,17 @@ class RateLimiter:
     def __init__(self, rps):
         self.interval = 1.0 / rps
         self._next = 0.0
-        self._blocked_until = 0.0
+        self._blocked = {}  # host -> monotonic time until which it said 429
         self._lock = threading.Lock()
 
-    def block(self, seconds):
-        """Upstream said 429 + Retry-After: hold every caller for that long."""
+    def block(self, host, seconds):
+        """Upstream said 429 + Retry-After: hold every call to that host for that long."""
         with self._lock:
-            self._blocked_until = max(self._blocked_until, time.monotonic() + seconds)
+            self._blocked[host] = max(self._blocked.get(host, 0.0), time.monotonic() + seconds)
 
-    def blocked_for(self):
+    def blocked_for(self, host):
         with self._lock:
-            return max(0.0, self._blocked_until - time.monotonic())
+            return max(0.0, self._blocked.get(host, 0.0) - time.monotonic())
 
     def wait(self):
         with self._lock:
@@ -180,8 +180,9 @@ def fetch_json(url, timeout=20, transform=None):
         "Accept": "application/json",
         "Accept-Encoding": "gzip",
     })
+    host = urllib.parse.urlsplit(url).netloc
     for attempt in (1, 2):
-        blocked = LIMITER.blocked_for()
+        blocked = LIMITER.blocked_for(host)
         if blocked > 3:
             raise UpstreamError(429, RATE_MSG, blocked)
         if blocked:
@@ -193,7 +194,7 @@ def fetch_json(url, timeout=20, transform=None):
         except urllib.error.HTTPError as e:
             if e.code == 429:
                 retry_after = _retry_after(e.headers.get("Retry-After"))
-                LIMITER.block(retry_after)
+                LIMITER.block(host, retry_after)
                 if attempt == 1 and retry_after <= 3:
                     continue
                 raise UpstreamError(429, RATE_MSG, retry_after)
@@ -441,7 +442,7 @@ def normalize_results(payload):
         results.append({
             "siren": r.get("siren"),
             "nom": r.get("nom_complet") or r.get("nom_raison_sociale") or "",
-            "sigle": r.get("sigle"),
+            "sigle": _clean(r.get("sigle")),
             "naf": r.get("activite_principale"),
             "section": r.get("section_activite_principale"),
             "categorie": r.get("categorie_entreprise"),

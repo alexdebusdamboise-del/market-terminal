@@ -150,6 +150,17 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(len(fake_upstream.FakeHandler.calls), n, "upstream not called during the penalty")
         self.assertGreater(body["retry_after"], 25)
 
+    def test_geocoder_429_does_not_block_company_search(self):
+        server.GEOCODE_URLS = [f"http://localhost:{self.fake.server_address[1]}/limited/geocode", f"{self.fake_url}/geocode"]
+        try:
+            st, body, _ = self.get("/api/geocode?q=Quimper")
+            self.assertEqual(st, 200, "falls back to the second geocoder (another host)")
+            self.assertEqual(body["results"][0]["label"], "Quimper")
+            self.assertEqual(self.get("/api/entreprises?naf=10.11Z&departement=29")[0], 200,
+                             "a geocoder penalty does not block the company API")
+        finally:
+            server.GEOCODE_URLS = [f"{self.fake_url}/broken/geocode", f"{self.fake_url}/geocode"]
+
     def test_invalid_retry_after_and_non_json_body(self):
         st, body, headers = self.get("/api/entreprises?naf=10.11Z&q=negretry")
         self.assertEqual(st, 429)

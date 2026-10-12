@@ -405,7 +405,7 @@
       ? `<table class="grid"><thead><tr><th>Produit</th><th>Famille</th><th>NSF</th><th>Température</th><th class="hide-sm">Viscosité / NLGI</th><th class="hide-sm">Applications</th><th class="hide-sm">Conditionnements</th><th>Fiche</th></tr></thead><tbody>
       ${rows
         .map(
-          (p) => `<tr class="clickable" data-detail="${esc(p.id)}"><td class="name">${esc(p.name)}</td><td>${esc(famLabel(p.family))}</td>
+          (p) => `<tr class="clickable" data-detail="${esc(p.id)}"><td><a href="#" class="name" data-detail="${esc(p.id)}">${esc(p.name)}</a></td><td>${esc(famLabel(p.family))}</td>
         <td>${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">${esc(p.nsf)}</span>` : '<span class="muted">—</span>'}</td>
         <td class="num">${esc(tempTxt(p))}</td><td class="hide-sm">${esc([p.viscosity_iso_vg && "VG " + p.viscosity_iso_vg, p.nlgi && "NLGI " + p.nlgi].filter(Boolean).join(" · ") || "—")}</td>
         <td class="hide-sm">${esc((p.applications || []).map(appLabel).join(", "))}</td><td class="hide-sm">${esc((p.formats || []).join(", "))}</td>
@@ -449,6 +449,7 @@
     $("#cat-family").addEventListener("change", renderCatalog);
     $("#cat-h1").addEventListener("change", renderCatalog);
     $("#cat-list").addEventListener("click", (e) => {
+      if (e.target.closest("a[data-detail]")) e.preventDefault(); // keep the #cat hash
       const tr = e.target.closest("[data-detail]");
       if (tr) openProduct(tr.dataset.detail);
     });
