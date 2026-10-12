@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Terminal Interflon</title>
-  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
-  <link rel="stylesheet" href="/styles.css" />
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='black'/><text x='16' y='23' font-size='22' text-anchor='middle' fill='%23ff8800' font-family='monospace'>I</text></svg>" />
 </head>
 <body>
@@ -210,15 +210,22 @@
     </div>
   </div>
 
+  <div id="confirm" class="drawer confirm hidden" role="alertdialog" aria-modal="true" aria-labelledby="confirm-text">
+    <div class="confirm-box panel">
+      <p id="confirm-text"></p>
+      <div class="row"><button type="button" class="btn primary" id="confirm-ok">Confirmer</button><button type="button" class="btn" id="confirm-cancel">Annuler</button></div>
+    </div>
+  </div>
+
   <div id="toast" class="toast hidden"></div>
   <div id="print-area"></div>
 
-  <script src="/vendor/leaflet/leaflet.js"></script>
-  <script src="/js/util.js"></script>
-  <script src="/js/selector-core.js"></script>
-  <script src="/js/prospect.js"></script>
-  <script src="/js/pipeline.js"></script>
-  <script src="/js/selector.js"></script>
-  <script src="/js/app.js"></script>
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="js/util.js"></script>
+  <script src="js/selector-core.js"></script>
+  <script src="js/prospect.js"></script>
+  <script src="js/pipeline.js"></script>
+  <script src="js/selector.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>

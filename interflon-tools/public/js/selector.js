@@ -386,9 +386,37 @@
         )
         .join("")}
       <p class="muted" style="margin-top:18pt">Proposition indicative établie à partir des fiches produits publiques. À confirmer avec la fiche technique et la fiche de données de sécurité en vigueur.</p>`;
+    if (IFX.STATIC) return copyReco();
     // only this recommendation is printed; other prints (Ctrl+P elsewhere) are left alone
     document.body.classList.add("printing-reco");
     window.print();
+  }
+
+  // claude.ai pages cannot print: copy the same recommendation as plain text
+  function copyReco() {
+    const area = $("#print-area");
+    const lines = [];
+    area.querySelectorAll("h1,h2,p,li,div").forEach((el) => {
+      if (el.tagName === "DIV" && el.querySelector("h1,h2,p,li,div")) return;
+      const t = el.textContent.replace(/\s+/g, " ").trim();
+      if (!t) return;
+      lines.push(el.tagName === "LI" ? "  - " + t : el.tagName === "H2" ? "\n" + t.toUpperCase() : t);
+    });
+    const text = lines.join("\n");
+    area.innerHTML = "";
+    const fallback = () => {
+      IFX.openDrawer("Recommandation", `<p class="muted">Copie automatique refusée : sélectionne le texte ci-dessous.</p><textarea id="reco-text" rows="22" readonly></textarea>`, (root) => {
+        const ta = $("#reco-text", root);
+        ta.value = text;
+        ta.focus();
+        ta.select();
+      });
+    };
+    try {
+      navigator.clipboard.writeText(text).then(() => IFX.toast("Recommandation copiée : colle-la dans ton e-mail ou ton compte rendu"), fallback);
+    } catch (e) {
+      fallback();
+    }
   }
 
   // ------------------------------------------------------------------ catalogue
@@ -437,6 +465,7 @@
     META = (productsDoc && productsDoc._meta) || {};
     EQUIV = ((equivDoc && equivDoc.equivalences) || []).filter((x) => x && x.marque && x.interflon);
     crit = sanitizeCrit(IFX.store.get(LS_CRIT, null));
+    if (IFX.STATIC) $("#sel-print").textContent = "Copier la recommandation";
     window.addEventListener("afterprint", () => {
       document.body.classList.remove("printing-reco");
       $("#print-area").innerHTML = "";

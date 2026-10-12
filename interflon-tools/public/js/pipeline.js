@@ -192,8 +192,9 @@
       render();
     });
     $("#pipe-text").addEventListener("input", render);
-    $("#clients-info").addEventListener("click", (e) => {
-      if (e.target.id !== "clients-clear" || !confirm("Vider la liste de clients ? Ils réapparaîtront dans la prospection.")) return;
+    $("#clients-info").addEventListener("click", async (e) => {
+      if (e.target.id !== "clients-clear") return;
+      if (!(await IFX.confirm("Vider la liste de clients ? Ils réapparaîtront dans la prospection.", "Vider la liste"))) return;
       siretSet = new Set();
       sirenSet = new Set();
       saveClients();
@@ -209,11 +210,11 @@
       // never rebuild the table while a date is being typed (Chrome fires change at the 1st valid year digit)
       if (f === "next_date") e.target.classList.toggle("overdue", !!isDue(PIPE.get(tr.dataset.siret)));
     });
-    $("#pipe-list").addEventListener("click", (e) => {
+    $("#pipe-list").addEventListener("click", async (e) => {
       const del = e.target.closest("[data-del]");
       if (del) {
         const p = PIPE.get(del.dataset.del);
-        if (p && confirm(`Retirer « ${p.nom} » de tes prospects ?`)) {
+        if (p && (await IFX.confirm(`Retirer « ${p.nom} » de tes prospects ?`, "Retirer"))) {
           PIPE.remove(del.dataset.del);
           render();
         }
@@ -267,8 +268,10 @@
       const { sirets, sirens } = PIPE.parseClients(await IFX.readFile(file));
       if (!sirets.length && !sirens.length) return IFX.toast("Aucun SIRET (14 chiffres) ni SIREN (9 chiffres) trouvé dans le fichier", true);
       reloadClients();
-      if (!confirm(`Importer ${sirets.length} SIRET et ${sirens.length} SIREN comme clients ?\nIls seront masqués de la prospection.`)) return;
-      const replace = siretSet.size + sirenSet.size > 0 && confirm("Une liste de clients existe déjà.\nOK = la remplacer · Annuler = ajouter à la liste actuelle");
+      if (!(await IFX.confirm(`Importer ${sirets.length} SIRET et ${sirens.length} SIREN comme clients ? Ils seront masqués de la prospection.`, "Importer"))) return;
+      const replace =
+        siretSet.size + sirenSet.size > 0 &&
+        (await IFX.confirm("Une liste de clients existe déjà. Remplacer la liste, ou ajouter ces clients à la liste actuelle ?", "Remplacer la liste", "Ajouter à la liste"));
       if (replace) {
         siretSet = new Set();
         sirenSet = new Set();

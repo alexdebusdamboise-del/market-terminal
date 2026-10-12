@@ -54,6 +54,7 @@
   // ------------------------------------------------------------------ help
   function renderHelp(meta, segments) {
     $("#aide").innerHTML = `<div class="phead"><span>AIDE</span><span class="phead-r">AIDE / HELP</span></div><div class="fbody">
+      ${IFX.STATIC ? `<h2>VERSION EN LIGNE</h2><p>Cette page en ligne contient le sélecteur, le catalogue et le suivi des prospects. La recherche d'usines (PROS) interroge l'API Recherche d'entreprises : elle fonctionne dans la version installée (<code>python3 server.py</code>, voir le README), car une page claude.ai ne peut pas appeler de service externe.</p>` : ""}
       <h2>COMMANDES</h2>
       <p>Tape dans la barre du haut (touche <code>/</code> pour y aller), puis Entrée.</p>
       <table>
@@ -109,10 +110,10 @@
     let ref, segs, prods, equiv;
     try {
       [ref, segs, prods, equiv] = await Promise.all([
-        loadJson("/data/referentiels.json"),
-        loadJson("/data/secteurs.json"),
-        loadJson("/data/produits.json", { products: [] }),
-        loadJson("/data/equivalences.json", { equivalences: [] }),
+        loadJson("data/referentiels.json"),
+        loadJson("data/secteurs.json"),
+        loadJson("data/produits.json", { products: [] }),
+        loadJson("data/equivalences.json", { equivalences: [] }),
       ]);
     } catch (e) {
       document.body.insertAdjacentHTML("afterbegin", `<div class="warnbar">${esc(e.message)}</div>`);
@@ -159,7 +160,8 @@
     tick();
     setInterval(tick, 15000);
 
-    IFX.go(location.hash.slice(1) || "pros");
+    // the claude.ai page has no server for company searches: open on the selector
+    IFX.go(location.hash.slice(1) || (IFX.STATIC ? "sel" : "pros"));
   }
 
   boot();

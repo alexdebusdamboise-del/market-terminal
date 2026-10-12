@@ -2,6 +2,8 @@
 (function () {
   "use strict";
   const IFX = (window.IFX = window.IFX || {});
+  // Set by the claude.ai build: no Python server behind the page
+  IFX.STATIC = !!window.IFX_STATIC;
 
   const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   IFX.esc = (s) => (s === null || s === undefined ? "" : String(s).replace(/[&<>"']/g, (c) => ESC[c]));
@@ -113,7 +115,25 @@
       )
       .join("\r\n");
 
-  IFX.download = (filename, content, type) => {
+  // In a claude.ai page, files are offered through the platform's download
+  // capability (direct downloads are blocked there); elsewhere, a plain link.
+  let downloadsNs;
+  const downloadsCap = () => {
+    if (downloadsNs === undefined) {
+      downloadsNs = window.claude && typeof window.claude.use === "function" ? window.claude.use("downloads").catch(() => null) : Promise.resolve(null);
+    }
+    return downloadsNs;
+  };
+  IFX.download = async (filename, content, type) => {
+    const cap = await downloadsCap();
+    if (cap) {
+      try {
+        await cap.save({ filename, data: content });
+      } catch (e) {
+        if (e && e.code !== "declined") IFX.toast("Téléchargement impossible ici (" + ((e && e.code) || "erreur") + ")", true);
+      }
+      return;
+    }
     const blob = new Blob([content], { type: type || "text/plain;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -187,6 +207,32 @@
     });
     input.addEventListener("blur", () => setTimeout(close, 150));
   };
+
+  // In-page confirmation (native confirm() is blocked in claude.ai pages)
+  IFX.confirm = (text, okLabel, cancelLabel) =>
+    new Promise((resolve) => {
+      const box = IFX.$("#confirm");
+      IFX.$("#confirm-text").textContent = text;
+      const ok = IFX.$("#confirm-ok");
+      const cancel = IFX.$("#confirm-cancel");
+      ok.textContent = okLabel || "Confirmer";
+      cancel.textContent = cancelLabel || "Annuler";
+      const done = (v) => {
+        box.classList.add("hidden");
+        ok.onclick = cancel.onclick = box.onkeydown = null;
+        resolve(v);
+      };
+      ok.onclick = () => done(true);
+      cancel.onclick = () => done(false);
+      box.onkeydown = (e) => {
+        if (e.key === "Escape") {
+          e.stopPropagation();
+          done(false);
+        }
+      };
+      box.classList.remove("hidden");
+      ok.focus();
+    });
 
   // Tiny drawer used by prospects and products
   IFX.openDrawer = (title, html, onMount) => {

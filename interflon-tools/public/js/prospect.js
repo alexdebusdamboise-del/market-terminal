@@ -322,6 +322,7 @@
   }
 
   function search(reset) {
+    if (IFX.STATIC) return showStaticNotice();
     const q = buildQuery();
     if (q.error) {
       $("#pros-msg").textContent = q.error;
@@ -542,7 +543,7 @@
         e.target.click();
       }
     });
-    $("#res-list").addEventListener("click", (e) => {
+    $("#res-list").addEventListener("click", async (e) => {
       const th = e.target.closest("th[data-sort]");
       if (th) {
         const k = th.dataset.sort;
@@ -561,7 +562,7 @@
         const saved = IFX.pipe.get(r.key);
         if (saved) {
           const hasFollowUp = saved.note || saved.next_date || saved.status !== "a_contacter";
-          if (hasFollowUp && !confirm(`Retirer « ${saved.nom} » de tes prospects ? Statut, relance et notes seront perdus.`)) return;
+          if (hasFollowUp && !(await IFX.confirm(`Retirer « ${saved.nom} » de tes prospects ? Statut, relance et notes seront perdus.`, "Retirer"))) return;
           IFX.pipe.remove(r.key);
         } else IFX.pipe.add(r);
         return renderResults();
@@ -677,8 +678,8 @@
       fN.addEventListener("input", autosave);
       const rm = $("#sh-remove", root);
       if (rm)
-        rm.addEventListener("click", () => {
-          if (!confirm(`Retirer « ${co.nom} » de tes prospects ? Statut, relance et notes seront perdus.`)) return;
+        rm.addEventListener("click", async () => {
+          if (!(await IFX.confirm(`Retirer « ${co.nom} » de tes prospects ? Statut, relance et notes seront perdus.`, "Retirer"))) return;
           clearTimeout(timer);
           IFX.pipe.remove(et.siret);
           IFX.closeDrawer();
@@ -793,6 +794,17 @@
     IFX.download(`prospection-${IFX.today()}.csv`, IFX.csv([head].concat(data)), "text/csv;charset=utf-8");
   }
 
+  function showStaticNotice() {
+    $("#pros-msg").textContent = "Recherche disponible dans la version installée.";
+    $("#res-list").innerHTML = `<div class="empty static-note">
+      <p><b>La recherche d'usines n'est pas disponible dans cette page en ligne.</b></p>
+      <p>Elle interroge l'API Recherche d'entreprises (base Sirene de l'Insee), et une page claude.ai ne peut pas appeler de service externe.</p>
+      <p>Pour prospecter : lance la version installée sur ton ordinateur (<code>python3 server.py</code> dans le dossier <code>interflon-tools</code>), puis ouvre <code>http://127.0.0.1:8766</code>. Tes prospects s'exportent en JSON et se restaurent ici dans PIPE.</p>
+      <p>Le sélecteur produit (SEL), le catalogue (CAT) et le suivi des prospects (PIPE) fonctionnent ici normalement.</p>
+      <p><a href="https://annuaire-entreprises.data.gouv.fr" target="_blank" rel="noopener">Ouvrir l'Annuaire des entreprises</a></p>
+    </div>`;
+  }
+
   // ------------------------------------------------------------------ public API
   P.init = (ref, segments) => {
     REF = ref;
@@ -806,6 +818,10 @@
     if (st.center) $("#center-label").textContent = `Centre : ${st.center.label} (${st.center.lat.toFixed(4)}, ${st.center.lon.toFixed(4)})`;
     bindFilters();
     bindResults();
+    if (IFX.STATIC) {
+      showStaticNotice();
+      $("#pros-search").textContent = "▶ VERSION INSTALLÉE REQUISE";
+    }
   };
 
   // Command bar: PROS 29 35 viande lait
