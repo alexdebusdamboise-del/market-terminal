@@ -112,6 +112,14 @@ apparaît avec le badge « GROUPE CLIENT ».
 - un badge « fiche vérifiée » ou « à valider ».
 
 Une valeur n'est renseignée que si une source citée l'affirme ; sinon le champ reste vide.
+
+État au 12/10/2026 :
+- 78 produits : 51 avec une catégorie NSF sourcée, 37 avec une plage de température, 20 fiches « vérifiées » ;
+- 27 secteurs, dont 22 appuyés par des cas clients publiés par Interflon (chiffres annoncés par Interflon).
+
+Chaque valeur critique (NSF, températures, viscosité, NLGI, conditionnements, applications) est
+accompagnée de la citation exacte de sa source : bouton « Détails » d'un produit, section PREUVES.
+Les fiches les moins complètes (« à valider ») sont la priorité de relecture.
 Après modification d'un fichier, `python3 tests/check_data.py` vérifie sa cohérence (champs,
 codes NAF valides, produits référencés existants).
 
