@@ -20,11 +20,15 @@ import argparse
 import base64
 import gzip
 import hmac
+import http.client
 import json
+import math
 import os
 import re
+import sys
 import threading
 import time
+import traceback
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -43,6 +47,8 @@ GEOCODE_URLS = [u for u in os.environ.get(
 
 # Optional shared password (HTTP Basic auth, any user name) for public hosting.
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "")
+AUTH_MAX_FAILURES = 10        # per client, within AUTH_WINDOW seconds
+AUTH_WINDOW = 600
 
 # The API docs ask for an explicit, descriptive User-Agent.
 UA = "TerminalInterflon/1.0 (outil interne de prospection; python-urllib)"
@@ -58,14 +64,15 @@ UPSTREAM_RPS = 5.0          # stay under the documented 7 req/s per IP
 with open(os.path.join(PUBLIC, "data", "referentiels.json"), encoding="utf-8") as _f:
     REF = json.load(_f)
 
+NAF_CODES = set(REF["naf"])
 TRANCHES = set(REF["tranches"])
 REGIONS = set(REF["regions"])
 SECTIONS = set(REF["sections"])
 CATEGORIES = {"PME", "ETI", "GE"}
-NAF_RE = re.compile(r"^\d{2}\.\d{2}[A-Z]$")
 # Departements accepted by the upstream API (metropole, Corse, DROM except 975)
-DEP_RE = re.compile(r"^(0[1-9]|1\d|2[1-9]|[3-8]\d|9[0-5]|2A|2B|97[12346])$")
-CP_RE = re.compile(r"^\d{5}$")
+DEP_RE = re.compile(r"^(0[1-9]|1\d|2[1-9]|[3-8]\d|9[0-5]|2A|2B|97[12346])$", re.ASCII)
+CP_RE = re.compile(r"^\d{5}$", re.ASCII)
+ND = "[NON-DIFFUSIBLE]"  # upstream mask for companies that opted out of publication
 
 
 # ---------------------------------------------------------------------------
@@ -107,7 +114,17 @@ class RateLimiter:
     def __init__(self, rps):
         self.interval = 1.0 / rps
         self._next = 0.0
+        self._blocked_until = 0.0
         self._lock = threading.Lock()
+
+    def block(self, seconds):
+        """Upstream said 429 + Retry-After: hold every caller for that long."""
+        with self._lock:
+            self._blocked_until = max(self._blocked_until, time.monotonic() + seconds)
+
+    def blocked_for(self):
+        with self._lock:
+            return max(0.0, self._blocked_until - time.monotonic())
 
     def wait(self):
         with self._lock:
@@ -120,6 +137,8 @@ class RateLimiter:
 
 
 CACHE = TTLCache()
+AUTH_FAILURES = {}
+AUTH_LOCK = threading.Lock()
 LIMITER = RateLimiter(UPSTREAM_RPS)
 
 
@@ -138,9 +157,21 @@ def _read_body(resp):
     return raw.decode("utf-8", "replace")
 
 
-def fetch_json(url, timeout=20):
-    """GET JSON from an upstream, cached, rate-limited, with one polite retry
-    on short 429s and transient 5xx/network errors."""
+def _retry_after(value):
+    try:
+        ra = float(value or 2)
+    except ValueError:
+        return 2.0
+    return 2.0 if not math.isfinite(ra) or ra < 0 else min(ra, 3600.0)
+
+
+RATE_MSG = "Limite de requêtes de l'API atteinte, réessayez dans quelques secondes."
+
+
+def fetch_json(url, timeout=20, transform=None):
+    """GET JSON from an upstream, rate-limited, with one polite retry on short
+    429s and transient 5xx/network/truncated-body errors. The cache stores
+    transform(data) (the normalised, much smaller result) when given."""
     cached = CACHE.get(url)
     if cached is not None:
         return cached
@@ -150,23 +181,22 @@ def fetch_json(url, timeout=20):
         "Accept-Encoding": "gzip",
     })
     for attempt in (1, 2):
+        blocked = LIMITER.blocked_for()
+        if blocked > 3:
+            raise UpstreamError(429, RATE_MSG, blocked)
+        if blocked:
+            time.sleep(blocked)
         LIMITER.wait()
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 data = json.loads(_read_body(resp))
-            CACHE.set(url, data, CACHE_TTL)
-            return data
         except urllib.error.HTTPError as e:
             if e.code == 429:
-                try:
-                    retry_after = float(e.headers.get("Retry-After") or 2)
-                except ValueError:
-                    retry_after = 2.0
+                retry_after = _retry_after(e.headers.get("Retry-After"))
+                LIMITER.block(retry_after)
                 if attempt == 1 and retry_after <= 3:
-                    time.sleep(retry_after)
                     continue
-                raise UpstreamError(429, "Limite de requêtes de l'API atteinte, "
-                                         "réessayez dans quelques secondes.", retry_after)
+                raise UpstreamError(429, RATE_MSG, retry_after)
             if e.code == 400:
                 try:
                     msg = json.loads(_read_body(e)).get("erreur") or "requête refusée"
@@ -182,6 +212,15 @@ def fetch_json(url, timeout=20):
                 time.sleep(0.5)
                 continue
             raise UpstreamError(502, f"API injoignable ({getattr(e, 'reason', e)})")
+        except (http.client.HTTPException, ValueError, EOFError):
+            # truncated body, HTML maintenance page served as 200, broken gzip
+            if attempt == 1:
+                time.sleep(0.5)
+                continue
+            raise UpstreamError(502, "API : réponse invalide")
+        result = transform(data) if transform else data
+        CACHE.set(url, result, CACHE_TTL)
+        return result
     raise UpstreamError(502, "API indisponible")
 
 
@@ -251,7 +290,7 @@ def _paging(qs):
 
 def build_search_params(qs):
     """Query string of /api/entreprises -> upstream /search parameters."""
-    naf = _list(qs, "naf", NAF_RE.match, "Code NAF")
+    naf = _list(qs, "naf", NAF_CODES, "Code NAF")
     section = _list(qs, "section", SECTIONS, "Section NAF", 21)
     dep = _list(qs, "departement", DEP_RE.match, "Département", 30)
     region = _list(qs, "region", REGIONS, "Région", 18)
@@ -292,7 +331,7 @@ def build_near_params(qs):
     lat = _float(qs, "lat", -90, 90, "lat")
     lon = _float(qs, "lon", -180, 180, "lon")
     radius = _float(qs, "radius", 0.5, 50, "rayon (km)", default=20)
-    naf = _list(qs, "naf", NAF_RE.match, "Code NAF")
+    naf = _list(qs, "naf", NAF_CODES, "Code NAF")
     section = _list(qs, "section", SECTIONS, "Section NAF", 21)
     page, per_page = _paging(qs)
     params = {
@@ -313,6 +352,10 @@ def build_near_params(qs):
 # ---------------------------------------------------------------------------
 # Normalisation of upstream payloads (keeps only what the UI needs)
 # ---------------------------------------------------------------------------
+def _clean(x):
+    return None if x == ND else x
+
+
 def _num(x):
     try:
         return float(x) if x not in (None, "") else None
@@ -343,18 +386,18 @@ def _norm_etab(e):
     return {
         "siret": e.get("siret"),
         "est_siege": bool(e.get("est_siege")),
-        "adresse": e.get("adresse") or "",
-        "code_postal": e.get("code_postal") or "",
-        "commune": e.get("libelle_commune") or "",
-        "departement": _dep_from(e.get("commune"), e.get("code_postal")),
+        "adresse": _clean(e.get("adresse")) or "",
+        "code_postal": _clean(e.get("code_postal")) or "",
+        "commune": _clean(e.get("libelle_commune")) or "",
+        "departement": _dep_from(_clean(e.get("commune")), _clean(e.get("code_postal"))),
         "lat": lat,
         "lon": lon,
         "naf": e.get("activite_principale"),
         "tranche": e.get("tranche_effectif_salarie"),
         "annee_tranche": e.get("annee_tranche_effectif_salarie"),
         "date_creation": e.get("date_creation"),
-        "enseignes": [x for x in (e.get("liste_enseignes") or []) if x],
-        "nom_commercial": e.get("nom_commercial"),
+        "enseignes": [x for x in (e.get("liste_enseignes") or []) if x and x != ND],
+        "nom_commercial": _clean(e.get("nom_commercial")),
     }
 
 
@@ -376,7 +419,7 @@ def _norm_dirigeants(lst):
             nom = d.get("denomination") or ""
             kind = "pm"
         else:
-            nom = " ".join(x for x in (d.get("prenoms"), d.get("nom")) if x)
+            nom = " ".join(x for x in (d.get("prenoms"), d.get("nom")) if x and x != ND)
             kind = "pp"
         if nom:
             out.append({"nom": nom, "qualite": d.get("qualite") or "", "type": kind})
@@ -407,11 +450,12 @@ def normalize_results(payload):
             "date_creation": r.get("date_creation"),
             "nb_etab_ouverts": r.get("nombre_etablissements_ouverts"),
             "nature_juridique": r.get("nature_juridique"),
+            "diffusion_partielle": r.get("statut_diffusion") == "P",
             "ca": ca,
             "ca_annee": ca_annee,
             "resultat_net": rn,
             "dirigeants": _norm_dirigeants(r.get("dirigeants")),
-            "siege_commune": siege.get("libelle_commune") or "",
+            "siege_commune": _clean(siege.get("libelle_commune")) or "",
             "siege_siret": siege.get("siret"),
             "etablissements": active,
         })
@@ -427,13 +471,13 @@ def normalize_results(payload):
 def search_entreprises(qs):
     params = build_search_params(qs)
     url = f"{API_BASE}/search?{urllib.parse.urlencode(params)}"
-    return normalize_results(fetch_json(url))
+    return fetch_json(url, transform=normalize_results)
 
 
 def search_autour(qs):
     params = build_near_params(qs)
     url = f"{API_BASE}/near_point?{urllib.parse.urlencode(params)}"
-    return normalize_results(fetch_json(url))
+    return fetch_json(url, transform=normalize_results)
 
 
 def geocode(qs):
@@ -509,7 +553,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             with open(path, "rb") as f:
                 body = f.read()
-        except (FileNotFoundError, IsADirectoryError):
+        except OSError:  # missing, directory, "index.html/x", permissions…
             self.send_error(404, "Not Found")
             return
         self.send_response(200)
@@ -520,34 +564,61 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _authorized(self, path):
-        if not APP_PASSWORD or path == "/api/health":
-            return True
+    def _client_key(self):
+        # behind Render's proxy the last X-Forwarded-For hop is the one it added
+        xff = self.headers.get("X-Forwarded-For", "")
+        return f"{self.client_address[0]}|{xff.split(',')[-1].strip()}"
+
+    def _check_password(self):
+        """None if allowed, else the HTTP status to answer (401, or 429 when throttled)."""
+        key = self._client_key()
+        now = time.monotonic()
+        with AUTH_LOCK:
+            recent = [t for t in AUTH_FAILURES.get(key, []) if now - t < AUTH_WINDOW]
+            AUTH_FAILURES[key] = recent
+            if len(recent) >= AUTH_MAX_FAILURES:
+                return 429
         h = self.headers.get("Authorization", "")
-        if not h.startswith("Basic "):
-            return False
-        try:
-            _, _, pw = base64.b64decode(h[6:]).decode("utf-8").partition(":")
-        except Exception:
-            return False
-        return hmac.compare_digest(pw.encode("utf-8"), APP_PASSWORD.encode("utf-8"))
+        ok = False
+        if h.startswith("Basic "):
+            try:
+                _, _, pw = base64.b64decode(h[6:]).decode("utf-8").partition(":")
+                ok = hmac.compare_digest(pw.encode("utf-8"), APP_PASSWORD.encode("utf-8"))
+            except Exception:
+                ok = False
+        if ok:
+            return None
+        if h:  # a wrong password, not just the browser's first anonymous request
+            with AUTH_LOCK:
+                AUTH_FAILURES.setdefault(key, []).append(now)
+        return 401
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
-        if not self._authorized(path):
-            self.send_response(401)
-            self.send_header("WWW-Authenticate", 'Basic realm="Terminal Interflon", charset="UTF-8"')
-            self.send_header("Content-Length", "0")
-            self.end_headers()
-            return
+        if APP_PASSWORD and path != "/api/health":
+            denied = self._check_password()
+            if denied:
+                self.send_response(denied)
+                if denied == 401:
+                    self.send_header("WWW-Authenticate", 'Basic realm="Terminal Interflon", charset="UTF-8"')
+                else:
+                    self.send_header("Retry-After", str(AUTH_WINDOW))
+                self.send_header("Content-Length", "0")
+                self.end_headers()
+                return
         if path.startswith("/api/"):
             return self._handle_api(path, urllib.parse.parse_qs(parsed.query))
 
         if path in ("", "/"):
             path = "/index.html"
-        full = os.path.realpath(os.path.join(PUBLIC, urllib.parse.unquote(path).lstrip("/")))
-        if os.path.commonpath([full, os.path.realpath(PUBLIC)]) != os.path.realpath(PUBLIC):
+        try:
+            full = os.path.realpath(os.path.join(PUBLIC, urllib.parse.unquote(path).lstrip("/")))
+            inside = os.path.commonpath([full, os.path.realpath(PUBLIC)]) == os.path.realpath(PUBLIC)
+        except ValueError:  # NUL byte, mixed drives…
+            self.send_error(400, "Bad Request")
+            return
+        if not inside:
             self.send_error(403, "Forbidden")
             return
         if os.path.isdir(full):
@@ -568,7 +639,9 @@ class Handler(BaseHTTPRequestHandler):
             headers = {"Retry-After": str(int(e.retry_after + 0.999))} if e.retry_after else None
             return self._send_json({"error": e.message, "retry_after": e.retry_after},
                                    e.status, headers)
-        except Exception as e:  # never leak a stack trace to the browser
+        except Exception as e:  # never leak a stack trace to the browser, but log it
+            print(f"ERROR {self.path}", file=sys.stderr)
+            traceback.print_exc()
             return self._send_json({"error": f"erreur interne : {e.__class__.__name__}"}, 500)
 
 
@@ -586,6 +659,8 @@ def main():
     print(f"TERMINAL INTERFLON running at http://{args.host}:{args.port}")
     if APP_PASSWORD:
         print("Access protected by APP_PASSWORD (HTTP Basic auth).")
+        if len(APP_PASSWORD) < 12:
+            print("WARNING: APP_PASSWORD is short; use at least 12 characters on a public URL.")
     print("Press Ctrl+C to stop.")
     try:
         httpd.serve_forever()

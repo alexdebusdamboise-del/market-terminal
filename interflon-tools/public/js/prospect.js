@@ -42,6 +42,7 @@
     sort: { key: "score", dir: -1 },
     mode: "list",
     renderLimit: 400,
+    needFit: true, // fit the map to the markers once per new result set
   };
 
   // ------------------------------------------------------------------ helpers
@@ -105,13 +106,20 @@
       .join("");
   }
 
+  function stopPicking() {
+    picking = false;
+    document.body.classList.remove("map-picking");
+  }
+
   function setZone(mode) {
+    if (mode !== "autour") stopPicking();
     st.zone = mode;
     $$("#zone-mode button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
     $$(".zone-pane").forEach((p) => p.classList.toggle("hidden", p.dataset.pane !== mode));
   }
 
   function setCenter(lat, lon, label) {
+    stopPicking();
     st.center = { lat, lon, label };
     $("#center-label").textContent = `Centre : ${label} (${lat.toFixed(4)}, ${lon.toFixed(4)})`;
     drawCenter();
@@ -321,6 +329,7 @@
     st.loading = false;
     st.query = q;
     st.queryMin = q.endpoint === "/api/entreprises" ? st.minSize : 0;
+    st.needFit = true;
     if (reset) {
       st.companies.clear();
       st.rows = [];
@@ -537,8 +546,12 @@
         e.stopPropagation();
         const r = st.rows.find((x) => x.key === star.dataset.star);
         if (!r) return;
-        if (IFX.pipe.has(r.key)) IFX.pipe.remove(r.key);
-        else IFX.pipe.add(r);
+        const saved = IFX.pipe.get(r.key);
+        if (saved) {
+          const hasFollowUp = saved.note || saved.next_date || saved.status !== "a_contacter";
+          if (hasFollowUp && !confirm(`Retirer « ${saved.nom} » de tes prospects ? Statut, relance et notes seront perdus.`)) return;
+          IFX.pipe.remove(r.key);
+        } else IFX.pipe.add(r);
         return renderResults();
       }
       const tr = e.target.closest("tr[data-key]");
@@ -640,12 +653,12 @@
           IFX.sel.fromSegment(seg);
           IFX.go("sel");
         });
-      root.addEventListener("click", (e) => {
+      root.onclick = (e) => {
         const a = e.target.closest("[data-product]");
         if (!a) return;
         e.preventDefault();
         IFX.sel.openProductByName(a.dataset.product);
-      });
+      };
     });
   }
 
@@ -666,8 +679,6 @@
     centerLayer = L.layerGroup().addTo(map);
     map.on("click", (e) => {
       if (!picking) return;
-      picking = false;
-      document.body.classList.remove("map-picking");
       setZone("autour");
       setCenter(e.latlng.lat, e.latlng.lng, "point choisi sur la carte");
     });
@@ -708,11 +719,14 @@
       m.addTo(layer);
       pts.push([r.et.lat, r.et.lon]);
     });
-    if (pts.length) map.fitBounds(pts, { padding: [30, 30], maxZoom: 12 });
-    else if (st.center) map.setView([st.center.lat, st.center.lon], 10);
+    if (st.needFit && pts.length) {
+      map.fitBounds(pts, { padding: [30, 30], maxZoom: 12 });
+      st.needFit = false;
+    } else if (st.needFit && st.center) map.setView([st.center.lat, st.center.lon], 10);
   }
 
   function setMode(mode) {
+    if (mode !== "map") stopPicking();
     st.mode = mode;
     $$("#res-mode button").forEach((b) => b.classList.toggle("on", b.dataset.mode === mode));
     $("#res-list").classList.toggle("hidden", mode !== "list");
@@ -770,7 +784,10 @@
         touched = true;
       } else if (a.length >= 3) {
         const n = norm(a);
-        SEGMENTS.filter((s) => norm(s.key).includes(n) || norm(s.label).includes(n)).forEach((s) => segHits.push(s.key));
+        const words = (s) => norm(s.key + " " + s.label).split(/[^a-z0-9]+/);
+        let hits = SEGMENTS.filter((s) => words(s).includes(n));
+        if (!hits.length) hits = SEGMENTS.filter((s) => words(s).some((w) => w.startsWith(n)));
+        hits.forEach((s) => segHits.push(s.key));
       }
     });
     if (segHits.length) {

@@ -26,9 +26,29 @@
   let groupSet = new Set(clients.sirets.map((s) => s.slice(0, 9)));
   let filterStatus = "";
 
+  // Another tab may have written since we loaded: always merge into the latest copy
+  const reload = () => {
+    prospects = IFX.store.get(LS_PROSPECTS, {}) || {};
+  };
+  const reloadClients = () => {
+    clients = IFX.store.get(LS_CLIENTS, { sirets: [], sirens: [] }) || { sirets: [], sirens: [] };
+    siretSet = new Set(clients.sirets || []);
+    sirenSet = new Set(clients.sirens || []);
+    groupSet = new Set((clients.sirets || []).map((s) => s.slice(0, 9)));
+  };
+  const viewVisible = () => {
+    const v = document.getElementById("view-pipe");
+    return v && !v.classList.contains("hidden");
+  };
+  // keep both PIPE and PROS in sync after any change, whoever made it
+  const changed = () => {
+    updateCount();
+    if (viewVisible()) render();
+    if (IFX.pros && IFX.pros.refresh) IFX.pros.refresh();
+  };
   const save = () => {
     IFX.store.set(LS_PROSPECTS, prospects);
-    updateCount();
+    changed();
   };
   const saveClients = () => {
     clients = { sirets: Array.from(siretSet), sirens: Array.from(sirenSet) };
@@ -50,6 +70,7 @@
   };
 
   PIPE.add = (row, patch) => {
+    reload();
     const { co, et, seg } = row;
     const prev = prospects[et.siret] || {};
     const now = new Date().toISOString();
@@ -86,13 +107,18 @@
     return prospects[et.siret];
   };
 
-  PIPE.update = (siret, patch) => {
+  PIPE.update = (siret, patch, rerender) => {
+    reload();
     if (!prospects[siret]) return;
     Object.assign(prospects[siret], patch, { updated: new Date().toISOString() });
-    save();
+    IFX.store.set(LS_PROSPECTS, prospects);
+    updateCount();
+    if (rerender && viewVisible()) render();
+    if (IFX.pros && IFX.pros.refresh) IFX.pros.refresh();
   };
 
   PIPE.remove = (siret) => {
+    reload();
     delete prospects[siret];
     save();
   };
@@ -168,8 +194,9 @@
       const f = e.target.dataset.f;
       const tr = e.target.closest("tr[data-siret]");
       if (!f || !tr) return;
-      PIPE.update(tr.dataset.siret, { [f]: e.target.value });
-      if (f !== "note") render();
+      PIPE.update(tr.dataset.siret, { [f]: e.target.value }, f === "status");
+      // never rebuild the table while a date is being typed (Chrome fires change at the 1st valid year digit)
+      if (f === "next_date") e.target.classList.toggle("overdue", !!isDue(PIPE.get(tr.dataset.siret)));
     });
     $("#pipe-list").addEventListener("click", (e) => {
       const del = e.target.closest("[data-del]");
@@ -198,17 +225,19 @@
       if (!file) return;
       try {
         const data = JSON.parse(await IFX.readFile(file));
-        const incoming = data.prospects || {};
+        const incoming = Object.values(data.prospects || {}).map(sanitize).filter(Boolean);
+        if (!incoming.length && !data.clients) throw new Error("aucun prospect reconnu");
+        reload();
         let n = 0;
-        Object.values(incoming).forEach((p) => {
-          if (!p || !/^\d{14}$/.test(p.siret || "")) return;
+        incoming.forEach((p) => {
           const cur = prospects[p.siret];
-          if (!cur || (p.updated || "") > (cur.updated || "")) {
+          if (!cur || p.updated > (cur.updated || "")) {
             prospects[p.siret] = p;
             n++;
           }
         });
         if (data.clients) {
+          reloadClients();
           (data.clients.sirets || []).forEach((s) => /^\d{14}$/.test(s) && siretSet.add(s));
           (data.clients.sirens || []).forEach((s) => /^\d{9}$/.test(s) && sirenSet.add(s));
           saveClients();
@@ -226,6 +255,7 @@
       if (!file) return;
       const { sirets, sirens } = PIPE.parseClients(await IFX.readFile(file));
       if (!sirets.length && !sirens.length) return IFX.toast("Aucun SIRET (14 chiffres) ni SIREN (9 chiffres) trouvé dans le fichier", true);
+      reloadClients();
       const replace = siretSet.size + sirenSet.size > 0 && confirm("Remplacer la liste de clients existante ?\n(OK = remplacer, Annuler = ajouter)");
       if (replace) {
         siretSet = new Set();
@@ -240,6 +270,19 @@
     });
   }
 
+  // Coerce a restored record to the shape the app relies on (hand-edited backups…)
+  const STR_FIELDS = ["siren", "nom", "enseigne", "adresse", "code_postal", "commune", "departement", "naf", "naf_entreprise", "segment", "tranche", "tranche_entreprise", "categorie", "ca_annee", "date_creation", "note", "added", "updated"];
+  function sanitize(p) {
+    if (!p || typeof p !== "object" || !/^\d{14}$/.test(String(p.siret || ""))) return null;
+    const out = Object.assign({}, p, { siret: String(p.siret) });
+    STR_FIELDS.forEach((k) => (out[k] = p[k] === null || p[k] === undefined ? "" : String(p[k])));
+    out.status = STATUSES[p.status] ? p.status : "a_contacter";
+    out.next_date = /^\d{4}-\d{2}-\d{2}$/.test(String(p.next_date || "")) ? p.next_date : "";
+    out.dirigeants = Array.isArray(p.dirigeants) ? p.dirigeants.filter((d) => d && typeof d.nom === "string") : [];
+    ["lat", "lon", "ca"].forEach((k) => (out[k] = typeof p[k] === "number" && isFinite(p[k]) ? p[k] : null));
+    return out;
+  }
+
   // Accepts any CSV/TXT export: picks 14-digit SIRETs and 9-digit SIRENs,
   // tolerating "123 456 789 00012"-style spacing.
   PIPE.parseClients = (text) => {
@@ -249,8 +292,10 @@
       .split(/\r?\n/)
       .forEach((line) => {
         const compact = line.replace(/(\d)[ . ](?=\d)/g, "$1");
-        (compact.match(/(?<!\d)\d{14}(?!\d)/g) || []).forEach((s) => sirets.add(s));
-        (compact.match(/(?<!\d)\d{9}(?!\d)/g) || []).forEach((s) => sirens.add(s));
+        const lineSirets = compact.match(/(?<!\d)\d{14}(?!\d)/g) || [];
+        lineSirets.forEach((s) => sirets.add(s));
+        // "SIREN;SIRET" exports: the SIREN only identifies the company of that site
+        (compact.match(/(?<!\d)\d{9}(?!\d)/g) || []).filter((s) => !lineSirets.some((t) => t.startsWith(s))).forEach((s) => sirens.add(s));
       });
     return { sirets: Array.from(sirets), sirens: Array.from(sirens) };
   };
@@ -268,6 +313,12 @@
   PIPE.init = () => {
     bind();
     updateCount();
+    window.addEventListener("storage", (e) => {
+      if (e.key === LS_PROSPECTS) reload();
+      else if (e.key === LS_CLIENTS) reloadClients();
+      else return;
+      changed();
+    });
   };
   PIPE.onShow = render;
 })();

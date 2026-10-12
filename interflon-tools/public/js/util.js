@@ -96,7 +96,11 @@
       .map((r) =>
         r
           .map((v) => {
-            const s = v === null || v === undefined ? "" : String(v);
+            let s = v === null || v === undefined ? "" : String(v);
+            // Excel would turn "01000" into 1000 and a SIRET into 1,23E+13
+            if (/^\d+$/.test(s) && (s.length >= 9 || (s.length > 1 && s[0] === "0"))) return `="${s}"`;
+            // never let a cell start like a formula (CSV injection)
+            if (/^[=+\-@\t\r]/.test(s) && !/^-?\d+(\.\d+)?$/.test(s)) s = "'" + s;
             return /[;"\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
           })
           .join(";")
@@ -128,7 +132,9 @@
   IFX.autocomplete = (input, box, source, onPick) => {
     let items = [];
     let idx = -1;
+    let seq = 0;
     const close = () => {
+      seq++; // drop any response still in flight
       box.classList.add("hidden");
       idx = -1;
     };
@@ -137,12 +143,11 @@
       box.innerHTML = items.map((it, i) => `<div data-i="${i}" class="${i === idx ? "on" : ""}">${it.html}</div>`).join("");
       box.classList.remove("hidden");
     };
-    let seq = 0;
     input.addEventListener("input", async () => {
       const q = input.value.trim();
       const my = ++seq;
       const res = q ? await source(q) : [];
-      if (my !== seq) return; // a newer keystroke won
+      if (my !== seq || input.value.trim() !== q) return; // a newer keystroke or a pick won
       items = res || [];
       idx = items.length ? 0 : -1;
       render();
@@ -181,6 +186,7 @@
   IFX.openDrawer = (title, html, onMount) => {
     IFX.$("#drawer-title").textContent = title;
     IFX.$("#drawer-body").innerHTML = html;
+    IFX.$("#drawer-body").onclick = null;
     IFX.$("#drawer").classList.remove("hidden");
     if (onMount) onMount(IFX.$("#drawer-body"));
   };

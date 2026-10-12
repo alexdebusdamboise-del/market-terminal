@@ -40,6 +40,8 @@ class ServerTest(unittest.TestCase):
 
     def setUp(self):
         server.CACHE.clear()
+        server.LIMITER = server.RateLimiter(1000)   # also clears any Retry-After block
+        server.AUTH_FAILURES.clear()
         fake_upstream.FakeHandler.calls.clear()
 
     def get(self, path):
@@ -104,6 +106,7 @@ class ServerTest(unittest.TestCase):
         bad = [
             "/api/entreprises?departement=29",                       # no sector
             "/api/entreprises?naf=10.11&departement=29",             # malformed NAF
+            "/api/entreprises?naf=99.99Z&departement=29",            # well-formed but not in the nomenclature
             "/api/entreprises?naf=10.11Z&departement=20",            # not a departement
             "/api/entreprises?naf=10.11Z&departement=975",           # not accepted upstream
             "/api/entreprises?naf=10.11Z&region=99",
@@ -130,6 +133,7 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(st, 429)
         self.assertEqual(body["retry_after"], 30.0)
         self.assertEqual(headers.get("Retry-After"), "30")
+        server.LIMITER = server.RateLimiter(1000)  # lift the 30 s penalty for the next cases
         st, body, _ = self.get("/api/entreprises?naf=10.11Z&q=bad")
         self.assertEqual(st, 400)
         self.assertIn("au moins un paramètre", body["error"])
@@ -137,6 +141,38 @@ class ServerTest(unittest.TestCase):
         self.assertEqual(st, 502)
         self.assertEqual(sum(1 for c in fake_upstream.FakeHandler.calls if c[1].get("q") == "boom"), 2,
                          "a 5xx is retried exactly once")
+
+    def test_retry_after_is_honoured_for_following_requests(self):
+        self.assertEqual(self.get("/api/entreprises?naf=10.11Z&q=ratelimit")[0], 429)
+        n = len(fake_upstream.FakeHandler.calls)
+        st, body, _ = self.get("/api/entreprises?naf=16.10A&departement=29")
+        self.assertEqual(st, 429, "the 30 s penalty applies to every request")
+        self.assertEqual(len(fake_upstream.FakeHandler.calls), n, "upstream not called during the penalty")
+        self.assertGreater(body["retry_after"], 25)
+
+    def test_invalid_retry_after_and_non_json_body(self):
+        st, body, headers = self.get("/api/entreprises?naf=10.11Z&q=negretry")
+        self.assertEqual(st, 429)
+        self.assertEqual(body["retry_after"], 2.0, "negative Retry-After replaced by a sane default")
+        server.LIMITER = server.RateLimiter(1000)
+        st, body, _ = self.get("/api/entreprises?naf=10.11Z&q=html")
+        self.assertEqual(st, 502)
+        self.assertIn("réponse invalide", body["error"])
+        self.assertEqual(sum(1 for c in fake_upstream.FakeHandler.calls if c[1].get("q") == "html"), 2)
+
+    def test_non_diffusible_masks_are_dropped(self):
+        st, body, _ = self.get("/api/entreprises?naf=10.11Z&departement=29")
+        co = next(r for r in body["results"] if r["siren"] == "888888888")
+        et = co["etablissements"][0]
+        self.assertEqual((et["adresse"], et["code_postal"], et["lat"], et["lon"]), ("", "", None, None))
+        self.assertEqual(co["dirigeants"], [])
+        self.assertTrue(co["diffusion_partielle"])
+        self.assertNotIn("NON-DIFFUSIBLE", json.dumps(body))
+
+    def test_cache_stores_normalised_result(self):
+        self.get("/api/entreprises?naf=10.11Z&departement=29")
+        cached = list(server.CACHE._d.values())[0][1]
+        self.assertIn("etablissements", cached["results"][0])
 
     def test_cache(self):
         self.get("/api/entreprises?naf=10.11Z&departement=29")
@@ -207,6 +243,33 @@ class ServerTest(unittest.TestCase):
                 self.assertEqual(code, expected, pw)
         finally:
             server.APP_PASSWORD = ""
+
+    def test_password_throttling(self):
+        import base64
+        server.APP_PASSWORD = "a-long-team-password"
+        try:
+            def call(pw):
+                req = urllib.request.Request(self.base + "/", headers={
+                    "Authorization": "Basic " + base64.b64encode(f"x:{pw}".encode()).decode()})
+                try:
+                    with urllib.request.urlopen(req, timeout=10) as r:
+                        return r.status
+                except urllib.error.HTTPError as e:
+                    return e.code
+            self.assertEqual([call("wrong") for _ in range(10)], [401] * 10)
+            self.assertEqual(call("wrong"), 429)
+            self.assertEqual(call("a-long-team-password"), 429, "blocked even with the right password")
+        finally:
+            server.APP_PASSWORD = ""
+
+    def test_odd_static_paths(self):
+        for path, code in (("/%00", 400), ("/index.html/x", 404), ("/nope.js", 404)):
+            with self.subTest(path=path):
+                try:
+                    urllib.request.urlopen(self.base + path, timeout=10)
+                    self.fail("should not succeed")
+                except urllib.error.HTTPError as e:
+                    self.assertEqual(e.code, code)
 
     def test_unknown_api(self):
         self.assertEqual(self.get("/api/nope")[0], 404)

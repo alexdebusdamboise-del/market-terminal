@@ -120,6 +120,13 @@ ONLY_CLOSED = {   # a company whose only matching site is closed -> must disappe
     "finances": None, "dirigeants": [],
 }
 
+ND = "[NON-DIFFUSIBLE]"
+NON_DIFFUSIBLE = dict(company(1000, None), siren="888888888", nom_complet="SOCIETE DISCRETE",
+                      statut_diffusion="P")
+NON_DIFFUSIBLE["matching_etablissements"] = [dict(etab("888888888", 1, "10.11Z", "21", CITIES[0]),
+                                                  adresse=ND, code_postal=ND, latitude=ND, longitude=ND)]
+NON_DIFFUSIBLE["dirigeants"] = [{"nom": ND, "prenoms": ND, "qualite": "Gérant", "type_dirigeant": "personne physique"}]
+
 TOTAL = 60
 
 
@@ -129,7 +136,7 @@ def search_payload(page, per_page):
     start = (page - 1) * per_page
     results = all_cos[start:start + per_page]
     if page == 1:
-        results = [ONLY_CLOSED] + results[:-1]
+        results = [ONLY_CLOSED, NON_DIFFUSIBLE] + results[:-2]
     total_pages = (TOTAL + per_page - 1) // per_page
     return {"results": results, "total_results": TOTAL, "page": page, "per_page": per_page, "total_pages": total_pages}
 
@@ -159,6 +166,16 @@ class FakeHandler(BaseHTTPRequestHandler):
         q = qs.get("q", "")
         if q == "ratelimit":
             return self._json({"erreur": "Too many requests"}, 429, {"Retry-After": "30"})
+        if q == "negretry":
+            return self._json({"erreur": "Too many requests"}, 429, {"Retry-After": "-1"})
+        if q == "html":
+            body = b"<html>maintenance</html>"
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if q == "bad":
             return self._json({"erreur": "Veuillez indiquer au moins un paramètre de recherche."}, 400)
         if q == "boom" or u.path.startswith("/broken"):
