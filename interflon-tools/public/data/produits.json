@@ -1,0 +1,823 @@
+{
+ "_meta": {
+  "avertissement": "BROUILLON de test"
+ },
+ "products": [
+  {
+   "id": "food-lube-h68",
+   "name": "Interflon Food Lube H68",
+   "family": "huile",
+   "range": "food",
+   "description_fr": "Huile hydraulique de qualité alimentaire ISO VG 68 à faible usure, enregistrée NSF H1. Elle fait partie de la série Food Lube H, également disponible en ISO VG 32 et 46.",
+   "nsf": "H1",
+   "nsf_reg_no": "128806",
+   "temp_min_c": -34,
+   "temp_max_c": 90,
+   "temp_note": "Plage d'application tirée de la fiche technique Interflon en espagnol (CL), seule source chiffrée trouvée ; la page US cite aussi -34 °C pour la tenue à basse température. Éviter le stockage sous 0 °C.",
+   "viscosity_iso_vg": "68",
+   "nlgi": null,
+   "base": null,
+   "formats": [],
+   "applications": [
+    "hydraulique"
+   ],
+   "properties": [
+    "sans_pfas"
+   ],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Huile hydraulique ISO VG 68 enregistrée NSF H1 (n° 128806) pour applications avec contact alimentaire fortuit",
+    "Série disponible en ISO VG 32, 46 et 68",
+    "Biodégradable à 65 % selon la fiche technique espagnole (norme OECD 301B indiquée sur la page US)",
+    "Décrite comme sans PFAS par Interflon",
+    "Certification NSF 537 mentionnée sur la page produit Interflon finlandaise (non vérifiée auprès de NSF)"
+   ],
+   "source_urls": [
+    "https://us.interflon.com/food-lube-h68/8762",
+    "https://interflon.com/products/interflon-food-lube-h68",
+    "https://interflon.com/fi/products/interflon-food-lube-h68",
+    "https://static.interflon.com/assets/TDS2/8768_TDS_CL_es_Interflon_Food_Lube_H68.pdf",
+    "https://nextsds.com/sds/nl/281331501263686/interflon-food-lube-h-68",
+    "https://nextsds.com/sds/nl/281331501263682/interflon-food-lube-h-68"
+   ],
+   "confidence": "high",
+   "uncertain_fields": [
+    "base",
+    "formats",
+    "nsf_537",
+    "temp_max_c (source unique en espagnol)"
+   ]
+  },
+  {
+   "id": "food-lube-pn32",
+   "name": "Interflon Food Lube PN32",
+   "family": "huile",
+   "range": "food",
+   "description_fr": "Huile pneumatique ISO VG 32 de qualité alimentaire avec technologie MicPol®, pour outils à air comprimé, vannes, vérins et guidages linéaires. Enregistrée NSF H1 ; une FDS la désigne sous l'ancien nom « Interflon Fin Food Lube PN 32 ».",
+   "nsf": "H1",
+   "nsf_reg_no": "119639",
+   "temp_min_c": null,
+   "temp_max_c": 80,
+   "temp_note": "Maximum de 80 °C confirmé par deux fiches. Le minimum varie selon la source : -25 °C selon la fiche technique GB (8446), -10 °C selon la fiche allemande de 2020 hébergée par perma-tec, qui indique un point d'écoulement de -18 °C.",
+   "viscosity_iso_vg": "32",
+   "nlgi": null,
+   "base": null,
+   "formats": [],
+   "applications": [
+    "verins_pneumatique",
+    "glissieres_guides"
+   ],
+   "properties": [
+    "resistant_eau",
+    "sans_pfas"
+   ],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Huile pneumatique ISO VG 32 avec technologie MicPol® pour outils à air comprimé, vannes et vérins",
+    "Enregistrée NSF H1 (n° 119639) et certifiée ISO 21469 selon le certificat NSF du 26/11/2025",
+    "Réduction annoncée de la consommation d'huile jusqu'à 90 % selon la fiche technique (les pages produit parlent de jusqu'à 9 fois moins d'huile)",
+    "Bonne séparation de l'eau, anti-usure",
+    "Sans PFAS selon la page produit"
+   ],
+   "source_urls": [
+    "https://interflon.com/gb/products/interflon-food-lube-pn32",
+    "https://interflon.com/us/products/interflon-food-lube-pn32",
+    "https://interflon.com/in/products/interflon-food-lube-pn32",
+    "https://interflon.com/de/produkte/interflon-food-lube-pn32",
+    "https://static.interflon.com/assets/TDS2/8446_TDS_GB_en_Interflon_Food_Lube_PN32.pdf",
+    "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Lube_PN32_TDS_de.pdf",
+    "https://info.nsf.org/USDA/letters/119639.pdf",
+    "https://nextsds.com/sds/nl/281331501263691/interflon-fin-food-lube-pn-32",
+    "https://interflon.com/us/lubricating-oil-for-pneumatic-equipment",
+    "https://interflon.com/cases/lubrication-of-pneumatic-equipment",
+    "https://lubricanthub.com/interflon-food-lube-pn32/"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "temp_min_c",
+    "base",
+    "formats",
+    "densite (0,85 ou 0,87 g/cm3 selon la source)"
+   ]
+  },
+  {
+   "id": "food-lube-gsc46",
+   "name": "Interflon Food Lube GSC46",
+   "family": "huile",
+   "range": "food",
+   "description_fr": "Huile pour compresseurs ISO VG 46 de qualité alimentaire, destinée aux compresseurs d'air à vis rotatifs à injection d'huile en environnement alimentaire. Selon sa fiche technique, elle est formulée à partir d'huiles minérales de qualité alimentaire et d'additifs.",
+   "nsf": "H1",
+   "nsf_reg_no": "128804",
+   "temp_min_c": -10,
+   "temp_max_c": 120,
+   "temp_note": "Plage tirée d'une fiche technique Interflon hébergée par un tiers (insist2.com). Point d'écoulement : -18 °C.",
+   "viscosity_iso_vg": "46",
+   "nlgi": null,
+   "base": "minerale",
+   "formats": [],
+   "applications": [
+    "compresseurs"
+   ],
+   "properties": [],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Lubrifiant longue durée pour compresseurs d'air à vis rotatifs à injection d'huile en environnement alimentaire",
+    "Enregistré NSF H1 (n° 128804) selon la fiche technique",
+    "Tous les composants répondent aux exigences FDA pour le contact alimentaire fortuit",
+    "Large retour d'expérience terrain revendiqué, notamment sur compresseurs Atlas Copco"
+   ],
+   "source_urls": [
+    "https://insist2.com/admin/upl/interflon-food-lube-gsc-46.pdf"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf (non vérifié dans le NSF White Book)",
+    "formats",
+    "statut_commercial (aucune page produit interflon.com vue)",
+    "temp_min_c",
+    "temp_max_c"
+   ]
+  },
+  {
+   "id": "food-lube-3h",
+   "name": "Interflon Food Lube 3H",
+   "family": "agent_demoulage",
+   "range": "food",
+   "description_fr": "Lubrifiant et agent de démoulage synthétique à base d'esters d'origine végétale, renforcé par la technologie MicPol®, pour contact alimentaire direct. Enregistré NSF 3H et H1, il s'utilise comme lubrifiant H1 à vitesses moyennes et charges modérées.",
+   "nsf": "3H, H1",
+   "nsf_reg_no": "173074",
+   "temp_min_c": -5,
+   "temp_max_c": 160,
+   "temp_note": "Plage de -5 à 160 °C confirmée par les fiches techniques de la version aérosol (DE, SI, PT) ; le chiffre pour la version vrac n'a pas été vu séparément. Le point d'éclair de -10 °C (fiche aérosol) correspond au gaz propulseur.",
+   "viscosity_iso_vg": "32",
+   "nlgi": null,
+   "base": "ester",
+   "formats": [
+    "aérosol"
+   ],
+   "applications": [
+    "demoulage"
+   ],
+   "properties": [
+    "synthetique"
+   ],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Lubrifiant et agent de démoulage synthétique à base d'esters d'origine végétale, renforcé par la technologie MicPol®",
+    "Enregistré NSF 3H et H1 (n° 173074) pour le contact alimentaire autorisé selon FDA 21 CFR 178.3570 et 178.3620",
+    "Certifié Halal, Kosher et Vegan selon les fiches techniques",
+    "Formation de dépôts nulle à faible à température élevée, intervalles de relubrification plus longs",
+    "Viscosité de l'huile de base : 33 cSt à 40 °C (ISO VG 32), densité 0,94 g/cm3 à 20 °C"
+   ],
+   "source_urls": [
+    "https://us.interflon.com/food-lube-3h/84520",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_GB_en_Interflon_Food_Lube_3_H.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_BR_pt_Interflon_Food_Lube_3_H_Aerosol.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_CH_de_Interflon_Food_Lube_3_H_Aerosol.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_SI_sl_Interflon_Food_Lube_3_H_Aerosol.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_CH_it_Interflon_Food_Lube_3_H_Aerosol.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_CH_de_Interflon_Food_Lube_3_H.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_BE_fr_Interflon_Food_Lube_3_H.pdf",
+    "https://static.interflon.com/assets/TDS2/8452_TDS_BE_fr_Interflon_Food_Lube_3_H_Aerosol.pdf",
+    "https://interflon.com/news/interflon-launches-food-lube-3h-nsf-3h-h1-lubricant-and-release-agent-for-direct-food-contact"
+   ],
+   "confidence": "high",
+   "uncertain_fields": [
+    "formats (contenance de l'aérosol et conditionnements vrac non confirmés)",
+    "temp_min_c/temp_max_c pour la version vrac",
+    "applications (hors démoulage)"
+   ]
+  },
+  {
+   "id": "lube-tf",
+   "name": "Interflon Lube TF",
+   "family": "huile",
+   "range": "maintenance",
+   "description_fr": "Lubrifiant Interflon disponible en liquide et en aérosol, anciennement commercialisé sous le nom « Fin Lube TF ». La page produit Interflon indique une plage d'utilisation de -43 °C à +170 °C.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -43,
+   "temp_max_c": 170,
+   "temp_note": "Plage donnée par la fiche produit Interflon (aérosol) et confirmée par un revendeur ; on ne sait pas si elle s'applique au film sec ou au produit avec son solvant porteur.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "aérosol 500 ml"
+   ],
+   "applications": [
+    "chaines",
+    "cables",
+    "glissieres_guides"
+   ],
+   "properties": [
+    "basse_temperature",
+    "sans_pfas"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Température d'utilisation de -43 °C à +170 °C selon la fiche produit Interflon.",
+    "La fiche produit US mentionne « NSF PFAS free : Yes » (indication sans PFAS, pas une catégorie H).",
+    "Aucune catégorie NSF H1/H2 trouvée pour ce produit."
+   ],
+   "source_urls": [
+    "https://interflon.com/us/products/interflon-lube-tf-aerosol",
+    "https://shop.elvacenter.com/shop/hydraulics-and-accessories/lubricants/interflon-lube-tf-500-ml-aerosol-2/",
+    "https://www.vegagerdin.is/Handbaekur/Varasom_efni.nsf/f810148f83e9522000257988005431c6/776b2b67d3fb65b500257981003d508d/$FILE/Fin_Lube_TF.pdf",
+    "https://us.interflon.com/oils/"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf",
+    "applications (non vérifiées dans les sources, déduites de la gamme)",
+    "properties.sans_pfas (vu seulement via un résumé de recherche ; à recouper avec la présence possible de PTFE, nom « TF »)",
+    "formats (500 ml vient d'un revendeur ; contenances du format liquide inconnues)",
+    "base",
+    "viscosity_iso_vg",
+    "industries",
+    "temp_note (film sec ou produit avec solvant)"
+   ]
+  },
+  {
+   "id": "fin-super",
+   "name": "Interflon Fin Super",
+   "family": "aerosol",
+   "range": "maintenance",
+   "description_fr": "Aérosol multi-usage Interflon à technologie MicPol (micronisation et polarisation). Il agit de -43 °C à +170 °C une fois le solvant porteur entièrement évaporé.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -43,
+   "temp_max_c": 170,
+   "temp_note": "Plage valable une fois le solvant porteur entièrement évaporé (FAQ Interflon US) ; la même plage figure dans la fiche technique distributeur.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "aérosol 300 ml"
+   ],
+   "applications": [
+    "mecanismes_articulations",
+    "degrippage",
+    "protection_anticorrosion"
+   ],
+   "properties": [
+    "film_sec",
+    "basse_temperature",
+    "sans_pfas"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Plage d'utilisation de -43 °C à +170 °C après évaporation complète du solvant porteur.",
+    "Utilise la technologie brevetée MicPol d'Interflon (micronisation et polarisation).",
+    "La fiche produit indique « NSF PFAS free » ; aucune homologation NSF H1 trouvée.",
+    "Densité de 0,84 à 20 °C ; la fiche technique comporte aussi des données électriques."
+   ],
+   "source_urls": [
+    "https://us.interflon.com/faq/What-is-the-temperature-range-of-Fin-Super-aerosol",
+    "https://us.interflon.com/fin-super-aerosol/9560",
+    "https://content.ostermann.eu/webcontent/content/mamdata/PDF_Daten/Technische_Merkblaetter/Trenn-_Gleit-_Reinigungsmittel/Reinigungsmittel/Fin-Super/755-Fin-Super-TM-en_ipdf_dase1.pdf",
+    "https://shop.elvacenter.com/shop/hydraulics-and-accessories/lubricants/interflon-fin-super-300-ml-aerosol-2",
+    "https://content.ostermann.eu/webcontent/content/mamdata/PDF_Daten/Sicherheitsdatenblaetter/Interflon/755-Teflon-Spray-Fin-Super-CH_it.pdf",
+    "https://interflon.com/ca/en/products/interflon-fin-super-aerosol"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "applications (multi-usage non détaillé dans les sources consultées)",
+    "properties.sans_pfas (une ancienne FDS distributeur l'appelle « Teflon Spray Fin Super », donc la formulation a peut-être changé)",
+    "formats (300 ml vient d'un revendeur)",
+    "base",
+    "industries",
+    "nsf"
+   ]
+  },
+  {
+   "id": "fin-super-dry-lube",
+   "name": "Interflon Fin Super Dry Lube",
+   "family": "huile",
+   "range": "maintenance",
+   "description_fr": "Lubrifiant sec multi-usage, pénétrant et longue durée, à technologie MicPol. Il est conditionné sans gaz propulseur (100 % produit) et annoncé sans PFAS.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": null,
+   "temp_max_c": null,
+   "temp_note": "Un revendeur tchèque (3dstisk.com) indique -50 °C à +250 °C pour le 50 ml, chiffre non confirmé par Interflon et non retenu.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "50 ml"
+   ],
+   "applications": [
+    "mecanismes_articulations"
+   ],
+   "properties": [
+    "film_sec",
+    "penetrant",
+    "sans_pfas"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Lubrifiant sec multi-usage, pénétrant et longue durée avec MicPol.",
+    "Sans gaz propulseur : 100 % produit.",
+    "Formulation sans PFAS."
+   ],
+   "source_urls": [
+    "https://interflon.com/ie/products/interflon-fin-super-dry-lube",
+    "https://3dstisk.com/produkt/interflon-fin-super-dry-lube-suche-mazivo-s-micpol-technologii/",
+    "https://swisswaffen.com/markt/aebi/schmiermittel-interflon-fin-super-dry-lube-50ml/m3z9mv9wkoui"
+   ],
+   "confidence": "low",
+   "uncertain_fields": [
+    "temp_min_c",
+    "temp_max_c",
+    "nsf",
+    "applications",
+    "formats (50 ml vu seulement chez des revendeurs)",
+    "base",
+    "industries"
+   ]
+  },
+  {
+   "id": "lube-ep",
+   "name": "Interflon Lube EP",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Lubrifiant extrême pression à film sec avec MicPol, pour chaînes, câbles, convoyeurs et pièces fortement chargées. La fiche technique donne une plage d'application de -45 °C à +170 °C.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -45,
+   "temp_max_c": 170,
+   "temp_note": "Températures d'application de la fiche technique Interflon. La valeur maximale porte un renvoi (**), probablement une note sur le film sec, qui n'a pas pu être lue.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "10 L"
+   ],
+   "applications": [
+    "chaines",
+    "cables",
+    "convoyeurs",
+    "mecanismes_articulations",
+    "autre"
+   ],
+   "properties": [
+    "film_sec",
+    "charges_elevees_chocs",
+    "basse_temperature"
+   ],
+   "industries": [
+    "industrie générale",
+    "levage et manutention"
+   ],
+   "key_claims": [
+    "Température d'application de -45 °C à +170 °C (fiche technique).",
+    "Viscosité cinématique de 24 cSt à 40 °C (ASTM D445) ; densité de 0,85 g/cm³ à 20 °C.",
+    "Rigidité diélectrique de 160 kV/cm ; durée de conservation de 4 ans.",
+    "Applications citées : chaînes, câbles, convoyeurs, câbles métalliques, broches, pignons, axes, bagues, presses, palans, grues, fours de séchage."
+   ],
+   "source_urls": [
+    "https://static.interflon.com/assets/TDS2/8111_TDS_GB_en_Interflon_Lube_EP.pdf",
+    "https://static.interflon.com/assets/TDS2/8119_TDS_GB_en_Interflon_Lube_EP.pdf?v=1721045947",
+    "https://static.interflon.com/assets/TDS2/8111_TDS_CA_fr_Interflon_Lube_EP.pdf",
+    "https://interflon.com/us/products/interflon-lube-ep",
+    "https://us.interflon.com/lube-ep/8261",
+    "https://interflon.com/in/products/interflon-lube-ep",
+    "https://euro-industry.com/main.php?index=details&cat=1677&prod=23206868"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf (non mentionné dans la fiche technique, donc probablement non homologué)",
+    "viscosity_iso_vg (24 cSt à 40 °C, pas un grade ISO VG standard)",
+    "base",
+    "formats (seul le bidon 10 L a été vu, chez un distributeur)",
+    "temp_note (contenu du renvoi ** inconnu)"
+   ]
+  },
+  {
+   "id": "lube-ep",
+   "name": "Interflon Lube EP+",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Lubrifiant extrême pression anti-goutte (non-drip) avec MicPol, pour câbles métalliques, charnières, broches, guides et chaînes fortement chargées. Il existe en liquide et en aérosol.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -20,
+   "temp_max_c": 180,
+   "temp_note": "Températures d'application de la fiche technique FR. La valeur maximale porte un renvoi (**) non lu.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "aérosol"
+   ],
+   "applications": [
+    "chaines",
+    "cables",
+    "convoyeurs",
+    "mecanismes_articulations",
+    "glissieres_guides"
+   ],
+   "properties": [
+    "charges_elevees_chocs",
+    "sans_pfas"
+   ],
+   "industries": [
+    "industrie générale",
+    "transport (poids lourds)"
+   ],
+   "key_claims": [
+    "Température d'application de -20 °C à +180 °C (fiche technique FR).",
+    "Lubrifiant extrême pression anti-goutte pour chaînes et câbles.",
+    "Pour câbles métalliques, charnières, chaînes et guides fortement chargés (tapis roulants, poids lourds, chaînes d'équipements industriels).",
+    "Présenté comme sans PFAS sur la page Interflon US."
+   ],
+   "source_urls": [
+    "https://static.interflon.com/assets/TDS2/8985_TDS_LU_fr_Interflon_Lube_EP_plus.pdf",
+    "https://us.interflon.com/lube-ep-plus/8987",
+    "https://us.interflon.com/lube-ep-plus-aerosol/9593",
+    "https://interflon.com/za/products/interflon-lube-ep-plus-aerosol",
+    "https://interflon.com/gb/products/interflon-lube-ep-plus",
+    "https://interflon.com/fi/products/interflon-lube-ep-plus"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf",
+    "formats (contenances inconnues ; un format liquide existe aussi)",
+    "viscosity_iso_vg",
+    "base",
+    "temp_note (contenu du renvoi ** inconnu)"
+   ]
+  },
+  {
+   "id": "lube-epr",
+   "name": "Interflon Lube EPR",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Lubrifiant longue durée pour aiguillages ferroviaires, applicable au pulvérisateur à dos même par temps de gel. La fiche technique indique une plage de -45 °C à +170 °C et une biodégradabilité de 95 % (OCDE 301F).",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -45,
+   "temp_max_c": 170,
+   "temp_note": "Plage lue sur la fiche technique en portugais (BR) ; la valeur maximale porte un renvoi (**) non lu.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [],
+   "applications": [
+    "glissieres_guides",
+    "autre"
+   ],
+   "properties": [
+    "biodegradable",
+    "resistant_eau",
+    "basse_temperature"
+   ],
+   "industries": [
+    "ferroviaire"
+   ],
+   "key_claims": [
+    "Température d'application de -45 °C à +170 °C (fiche technique).",
+    "Biodégradable à 95 % selon OCDE 301F.",
+    "Applicable rapidement, debout, au pulvérisateur à dos standard, même par température négative.",
+    "Viscosité cinématique de 24 cSt à 40 °C ; densité de 0,85 g/cm³ ; durée de conservation de 4 ans."
+   ],
+   "source_urls": [
+    "https://static.interflon.com/assets/TDS2/8110_TDS_BR_pt_Interflon_Lube_EPR.pdf",
+    "https://static.interflon.com/assets/TDS2/8110_TDS_GB_en_Interflon_Lube_EPR.pdf",
+    "https://static.interflon.com/assets/TDS2/8110_TDS_BE_fr_Interflon_Lube_EPR.pdf",
+    "https://interflon.com/products/interflon-lube-epr",
+    "https://interflon.com/fi/industries/rail/products/interflon-epr"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf",
+    "formats",
+    "viscosity_iso_vg (24 cSt à 40 °C, pas un grade ISO VG)",
+    "base",
+    "properties.resistant_eau (vient d'un argument marketing : insensible au soleil, à la pluie et aux variations de température)"
+   ]
+  },
+  {
+   "id": "lube-ht",
+   "name": "Interflon Lube HT",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Huile de lubrification haute température et extrême pression, en liquide et en aérosol. Après évaporation des solvants, elle conserve son pouvoir lubrifiant jusqu'à 245 °C en continu et 270 °C sur une courte durée.",
+   "nsf": "H2",
+   "nsf_reg_no": "123418",
+   "temp_min_c": null,
+   "temp_max_c": 245,
+   "temp_note": "245 °C en continu et 270 °C sur une courte durée, après évaporation des solvants. Ne pas appliquer sur des pièces à plus de 70 °C. Température minimale non trouvée.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": "synthetique",
+   "formats": [
+    "aérosol"
+   ],
+   "applications": [
+    "chaines"
+   ],
+   "properties": [
+    "haute_temperature",
+    "charges_elevees_chocs",
+    "synthetique"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Conserve son pouvoir lubrifiant jusqu'à 245 °C sur une longue durée, ou 270 °C sur une courte durée, une fois les solvants évaporés.",
+    "Listé NSF pour les applications sans contact prévu avec les aliments (H2).",
+    "Ne pas appliquer sur des pièces dont la température dépasse 70 °C.",
+    "Présenté par Interflon US comme une huile synthétique haute température."
+   ],
+   "source_urls": [
+    "https://us.interflon.com/lube-ht/8502",
+    "https://interflon.com/products/interflon-lube-ht",
+    "https://interflon.com/gb/products/interflon-lube-ht",
+    "https://static.interflon.com/assets/TDS2/8503_TDS_CO_es_Interflon_Lube_HT.pdf",
+    "https://static.interflon.com/assets/TDS2/8503_TDS_GB_en_Interflon_Lube_HT.pdf",
+    "https://interflon.com/ie/products/interflon-lube-ht-aerosol",
+    "https://interflon.com/ar/productos/interflon-lube-ht-aerosol"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "temp_min_c",
+    "nsf_reg_no (123418 vient d'un seul résumé de la fiche technique ES, à ne pas confondre avec 123400 de Lube HT/SF)",
+    "viscosity_iso_vg (la page US donnerait 31 cSt à 40 °C, non confirmé)",
+    "applications (chaînes déduites, non vérifiées)",
+    "formats (contenances inconnues ; un format liquide existe aussi)",
+    "industries"
+   ]
+  },
+  {
+   "id": "lube-ht-sf",
+   "name": "Interflon Lube HT/SF",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Version sans solvant de Lube HT : lubrifiant haute température et extrême pression utilisable de -10 °C à 245 °C (270 °C sur une courte durée). Il est enregistré NSF H2 (n° 123400).",
+   "nsf": "H2",
+   "nsf_reg_no": "123400",
+   "temp_min_c": -10,
+   "temp_max_c": 245,
+   "temp_note": "245 °C en continu, jusqu'à 270 °C sur une courte durée (fiche technique et page GB). Produit sans solvant.",
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [],
+   "applications": [
+    "chaines",
+    "convoyeurs"
+   ],
+   "properties": [
+    "haute_temperature",
+    "charges_elevees_chocs",
+    "sans_pfas"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Température d'application de -10 °C à 245 °C, jusqu'à 270 °C sur une courte durée.",
+    "Enregistrement NSF H2 n° 123400 : applications sans contact prévu avec les aliments.",
+    "Viscosité cinématique de 355 cSt à 40 °C (ASTM D445) ; densité de 0,98 g/cm³ à 20 °C.",
+    "Sans solvant et sans PFAS ; durée de conservation de 4 ans."
+   ],
+   "source_urls": [
+    "https://us.interflon.com/lube-ht-sf/9167",
+    "https://interflon.com/gb/products/interflon-lube-ht-sf",
+    "https://interflon.com/us/products/interflon-lube-ht-sf",
+    "https://static.interflon.com/assets/TDS2/8494_TDS_CO_es_Interflon_Lube_HT_SF.pdf",
+    "https://static.interflon.com/assets/TDS2/8494_TDS_TR_tr_Interflon_Lube_HT_SF.pdf",
+    "https://lubricanthub.com/interflon-lube-ht-sf/"
+   ],
+   "confidence": "high",
+   "uncertain_fields": [
+    "viscosity_iso_vg (355 cSt à 40 °C, pas un grade ISO VG standard)",
+    "base",
+    "formats",
+    "applications (chaînes et convoyeurs déduits, non vérifiés)",
+    "industries"
+   ]
+  },
+  {
+   "id": "lube-pn32",
+   "name": "Interflon Lube PN32",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Huile pneumatique hydrofuge et anti-usure de grade ISO VG 32. La fiche technique donne une plage d'application de -20 °C à +80 °C.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -20,
+   "temp_max_c": 80,
+   "temp_note": null,
+   "viscosity_iso_vg": "32",
+   "nlgi": null,
+   "base": null,
+   "formats": [],
+   "applications": [
+    "verins_pneumatique"
+   ],
+   "properties": [
+    "resistant_eau",
+    "sans_pfas"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Huile de lubrification pneumatique hydrofuge et anti-usure.",
+    "ISO VG 32 : 32 cSt à 40 °C (ASTM D445).",
+    "Température d'application de -20 °C à +80 °C (fiche technique).",
+    "La page produit n'indique côté NSF que « PFAS free » ; la version homologuée H1 est le produit distinct Food Lube PN32."
+   ],
+   "source_urls": [
+    "https://us.interflon.com/lube-pn32/8429",
+    "https://static.interflon.com/assets/TDS2/8424_TDS_GB_en_Interflon_Lube_PN32.pdf",
+    "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Lube_PN32_TDS_en.pdf",
+    "https://www.gluespec.com/Materials/lubricant/interflon/lube-pn32",
+    "https://interflon.com/gb/products/interflon-lube-pn32"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf (aucune catégorie H trouvée)",
+    "base",
+    "formats",
+    "industries"
+   ]
+  },
+  {
+   "id": "lube-pn68",
+   "name": "Interflon Lube PN68",
+   "family": "huile",
+   "range": "industrie",
+   "description_fr": "Huile pneumatique hydrofuge et anti-usure de grade ISO VG 68, utilisable aussi dans les systèmes de graissage centralisé. Interflon donne une plage de -20 °C à +80 °C.",
+   "nsf": null,
+   "nsf_reg_no": null,
+   "temp_min_c": -20,
+   "temp_max_c": 80,
+   "temp_note": null,
+   "viscosity_iso_vg": "68",
+   "nlgi": null,
+   "base": null,
+   "formats": [],
+   "applications": [
+    "verins_pneumatique",
+    "autre"
+   ],
+   "properties": [
+    "resistant_eau"
+   ],
+   "industries": [],
+   "key_claims": [
+    "Huile de lubrification pneumatique hydrofuge et anti-usure.",
+    "ISO VG 68 : 68 cSt à 40 °C (ASTM D445).",
+    "Température d'utilisation de -20 °C à +80 °C (tableau des spécifications Interflon).",
+    "Utilisable dans les systèmes de graissage centralisé ; approuvée par Norgren et Hoerbiger pour les circuits d'air."
+   ],
+   "source_urls": [
+    "https://us.interflon.com/lube-pn68/6843",
+    "https://interflon.com/products/interflon-lube-pn68",
+    "https://interflon.com/gb/products/interflon-lube-pn68"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "nsf",
+    "base",
+    "formats",
+    "industries",
+    "applications.autre (graissage centralisé)"
+   ]
+  },
+  {
+   "id": "food-lube",
+   "name": "Interflon Food Lube",
+   "family": "huile",
+   "range": "food",
+   "description_fr": "Lubrifiant de qualité alimentaire de la gamme Food d'Interflon, en liquide et en aérosol. La liste produits Interflon le classe parmi les produits NSF H1.",
+   "nsf": "H1",
+   "nsf_reg_no": "122875",
+   "temp_min_c": null,
+   "temp_max_c": null,
+   "temp_note": null,
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "aérosol"
+   ],
+   "applications": [],
+   "properties": [],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Classé NSF H1 (contact alimentaire fortuit) dans la liste produits Interflon."
+   ],
+   "source_urls": [
+    "https://us.interflon.com/oils/"
+   ],
+   "confidence": "low",
+   "uncertain_fields": [
+    "nsf_reg_no (122875 déduit de l'URL de la lettre NSF fournie, non consultée)",
+    "temp_min_c",
+    "temp_max_c",
+    "viscosity_iso_vg",
+    "base",
+    "formats",
+    "applications",
+    "properties",
+    "key_claims (budget de recherche épuisé avant la vérification détaillée)"
+   ]
+  },
+  {
+   "id": "food-lube-ht",
+   "name": "Interflon Food Lube HT",
+   "family": "huile",
+   "range": "food",
+   "description_fr": "Huile synthétique de qualité alimentaire pour hautes températures et extrême pression, enregistrée NSF H1 (n° 150687).",
+   "nsf": "H1",
+   "nsf_reg_no": "150687",
+   "temp_min_c": null,
+   "temp_max_c": null,
+   "temp_note": null,
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": "synthetique",
+   "formats": [],
+   "applications": [],
+   "properties": [
+    "haute_temperature",
+    "charges_elevees_chocs",
+    "synthetique"
+   ],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Enregistrement NSF H1 n° 150687 (contact alimentaire fortuit).",
+    "Huile de lubrification synthétique de qualité alimentaire.",
+    "Présentée comme lubrifiant haute température et extrême pression."
+   ],
+   "source_urls": [
+    "https://interflon.com/products/interflon-food-lube-ht",
+    "https://interflon.com/gb/products/interflon-food-lube-ht",
+    "https://us.interflon.com/food-lube-ht/9284",
+    "https://interflon.com/it/prodotti/interflon-food-lube-ht",
+    "https://static.interflon.com/assets/TDS2/9282_TDS_NL_nl_Interflon_Food_Lube_HT.pdf"
+   ],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "temp_min_c",
+    "temp_max_c",
+    "viscosity_iso_vg",
+    "formats",
+    "applications"
+   ]
+  },
+  {
+   "id": "food-lube-g",
+   "name": "Interflon Food Lube G",
+   "family": "aerosol",
+   "range": "food",
+   "description_fr": "Aérosol de la gamme alimentaire Interflon. Sa fiche technique indique qu'il est listé par NSF pour les applications avec contact alimentaire fortuit (H1).",
+   "nsf": "H1",
+   "nsf_reg_no": null,
+   "temp_min_c": null,
+   "temp_max_c": null,
+   "temp_note": null,
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "aérosol"
+   ],
+   "applications": [],
+   "properties": [],
+   "industries": [
+    "agroalimentaire"
+   ],
+   "key_claims": [
+    "Listé par NSF pour les applications avec contact alimentaire fortuit."
+   ],
+   "source_urls": [
+    "https://static.interflon.com/assets/TDS2/8844_TDS_NL_nl_Interflon_Food_Lube_G_aerosol.pdf"
+   ],
+   "confidence": "low",
+   "uncertain_fields": [
+    "nsf (H1 déduit de la mention « contact alimentaire fortuit »)",
+    "nsf_reg_no",
+    "temp_min_c",
+    "temp_max_c",
+    "viscosity_iso_vg",
+    "base",
+    "formats (contenance)",
+    "applications",
+    "properties"
+   ]
+  }
+ ]
+}

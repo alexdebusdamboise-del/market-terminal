@@ -1,0 +1,11 @@
+{
+  "_comment": "Table d'équivalences produits concurrents -> Interflon, à remplir et valider par le service technique. Une ligne = une référence concurrente. Le champ 'interflon' doit reprendre exactement le nom d'un produit de produits.json. Laisser 'equivalences' vide tant que rien n'est validé : l'outil n'affiche alors que la recherche par critères.",
+  "_exemple": {
+    "marque": "Marque X",
+    "reference": "Huile chaîne HT 220",
+    "interflon": "Interflon Lube HT",
+    "note": "même plage de température, film sec",
+    "valide_par": "Service technique, 2026-10"
+  },
+  "equivalences": []
+}

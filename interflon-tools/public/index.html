@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Terminal Interflon</title>
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='black'/><text x='16' y='23' font-size='22' text-anchor='middle' fill='%23ff8800' font-family='monospace'>I</text></svg>" />
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand"><span class="logo">▮</span> TERMINAL <span class="brand-sub">INTERFLON</span></div>
+    <form id="cmdform" autocomplete="off">
+      <span class="prompt">&gt;</span>
+      <input id="cmd" type="text" placeholder="PROS 29 35 viande · SEL · CAT food lube · PIPE · AIDE" spellcheck="false" />
+    </form>
+    <div class="topinfo">
+      <span id="pipe-count" class="pill" title="Prospects enregistrés">0 PROSPECTS</span>
+      <span id="clock" class="clock">--:--</span>
+    </div>
+  </header>
+
+  <nav id="keybar">
+    <button class="fk" data-view="pros">PROS <small>prospection</small></button>
+    <button class="fk" data-view="pipe">PIPE <small>mes prospects</small></button>
+    <span class="sep"></span>
+    <button class="fk" data-view="sel">SEL <small>sélecteur</small></button>
+    <button class="fk" data-view="cat">CAT <small>catalogue</small></button>
+    <span class="sep"></span>
+    <button class="fk" data-view="aide">AIDE</button>
+  </nav>
+
+  <!-- ================= PROSPECTION ================= -->
+  <main id="view-pros" class="view">
+    <aside class="filters panel" id="pros-filters">
+      <div class="phead"><span>CIBLAGE</span><span class="phead-r">PROS</span></div>
+      <div class="fbody">
+        <div class="fgroup">
+          <div class="flabel">1 · SECTEURS <button type="button" class="linkbtn" id="seg-none">aucun</button></div>
+          <div id="seg-list" class="seg-list"></div>
+          <div class="naf-add">
+            <input id="naf-input" type="text" placeholder="+ code NAF ou activité (ex. 28.29B, emballage)" />
+            <div id="naf-suggest" class="suggest hidden"></div>
+          </div>
+          <div id="naf-custom" class="chips"></div>
+        </div>
+
+        <div class="fgroup">
+          <div class="flabel">2 · ZONE</div>
+          <div class="seg-toggle" id="zone-mode">
+            <button type="button" data-mode="dep" class="on">Départements</button>
+            <button type="button" data-mode="region">Région</button>
+            <button type="button" data-mode="autour">Autour de</button>
+          </div>
+          <div class="zone-pane" data-pane="dep">
+            <div class="naf-add">
+              <input id="dep-input" type="text" placeholder="Ajouter : 29, Finistère…" />
+              <div id="dep-suggest" class="suggest hidden"></div>
+            </div>
+            <div id="dep-chips" class="chips"></div>
+          </div>
+          <div class="zone-pane hidden" data-pane="region">
+            <select id="region-select"></select>
+          </div>
+          <div class="zone-pane hidden" data-pane="autour">
+            <div class="naf-add">
+              <input id="city-input" type="text" placeholder="Ville (ex. Quimper)" />
+              <div id="city-suggest" class="suggest hidden"></div>
+            </div>
+            <div class="row">
+              <button type="button" class="btn" id="geo-me">◎ Ma position</button>
+              <button type="button" class="btn" id="geo-map">✛ Choisir sur la carte</button>
+            </div>
+            <div class="row">
+              <label for="radius">Rayon</label>
+              <select id="radius">
+                <option value="10">10 km</option><option value="20" selected>20 km</option>
+                <option value="30">30 km</option><option value="50">50 km (max)</option>
+              </select>
+            </div>
+            <div id="center-label" class="muted small">Aucun point choisi</div>
+          </div>
+        </div>
+
+        <div class="fgroup">
+          <div class="flabel">3 · TAILLE DU SITE</div>
+          <select id="min-size">
+            <option value="0">Tous les sites</option>
+            <option value="10" selected>≥ 10 salariés</option>
+            <option value="20">≥ 20 salariés</option>
+            <option value="50">≥ 50 salariés</option>
+            <option value="100">≥ 100 salariés</option>
+            <option value="250">≥ 250 salariés</option>
+            <option value="500">≥ 500 salariés</option>
+          </select>
+        </div>
+
+        <div class="fgroup">
+          <button type="button" class="btn primary wide" id="pros-search">▶ RECHERCHER</button>
+          <div id="pros-msg" class="muted small"></div>
+        </div>
+
+        <details class="fgroup more">
+          <summary>Filtres d'affichage</summary>
+          <label class="chk"><input type="checkbox" id="f-hide-clients" checked /> Masquer mes clients</label>
+          <label class="chk"><input type="checkbox" id="f-hide-saved" /> Masquer les prospects déjà suivis</label>
+          <label class="chk"><input type="checkbox" id="f-new" /> Seulement les sites créés il y a moins de 2 ans</label>
+          <label class="chk"><input type="checkbox" id="f-no-siege" /> Exclure les bureaux (activité tertiaire)</label>
+          <div class="row cats">
+            <span class="muted">Catégorie :</span>
+            <label class="chk"><input type="checkbox" class="f-cat" value="PME" checked />PME</label>
+            <label class="chk"><input type="checkbox" class="f-cat" value="ETI" checked />ETI</label>
+            <label class="chk"><input type="checkbox" class="f-cat" value="GE" checked />GE</label>
+            <label class="chk"><input type="checkbox" class="f-cat" value="" checked />n.c.</label>
+          </div>
+          <input id="f-text" type="text" placeholder="Filtrer par nom ou commune…" />
+        </details>
+      </div>
+    </aside>
+
+    <section class="results panel">
+      <div class="phead">
+        <span id="res-title">RÉSULTATS</span>
+        <span class="phead-tools">
+          <span class="seg-toggle small" id="res-mode">
+            <button type="button" data-mode="list" class="on">LISTE</button>
+            <button type="button" data-mode="map">CARTE</button>
+          </span>
+          <button type="button" class="btn small" id="pros-more" disabled>+ page suivante</button>
+          <button type="button" class="btn small" id="pros-all" disabled>⇣ tout charger</button>
+          <button type="button" class="btn small" id="pros-csv" disabled>CSV</button>
+        </span>
+      </div>
+      <div id="res-progress" class="progress hidden"><div></div></div>
+      <div id="res-list" class="res-pane">
+        <div class="empty">
+          <p>Choisis un ou plusieurs <b>secteurs</b>, une <b>zone</b>, puis lance la recherche.</p>
+          <p class="muted">Source : API Recherche d'entreprises (data.gouv.fr, base SIRENE de l'Insee), mise à jour quotidienne.</p>
+        </div>
+      </div>
+      <div id="res-map" class="res-pane hidden"><div id="map"></div></div>
+    </section>
+  </main>
+
+  <!-- ================= MES PROSPECTS ================= -->
+  <main id="view-pipe" class="view hidden">
+    <section class="panel full">
+      <div class="phead">
+        <span>MES PROSPECTS</span>
+        <span class="phead-tools">
+          <button type="button" class="btn small" id="pipe-csv">Export CSV</button>
+          <button type="button" class="btn small" id="pipe-json">Sauvegarde JSON</button>
+          <label class="btn small filebtn">Restaurer JSON<input type="file" id="pipe-import" accept=".json,application/json" /></label>
+          <label class="btn small filebtn">Importer mes clients (CSV)<input type="file" id="clients-import" accept=".csv,.txt,text/csv,text/plain" /></label>
+        </span>
+      </div>
+      <div id="pipe-stats" class="pipe-stats"></div>
+      <div class="pipe-tools">
+        <input id="pipe-text" type="text" placeholder="Filtrer…" />
+        <label class="chk"><input type="checkbox" id="pipe-due" /> Relances dues</label>
+        <span id="clients-info" class="muted small"></span>
+      </div>
+      <div id="pipe-list" class="res-pane"></div>
+    </section>
+  </main>
+
+  <!-- ================= SÉLECTEUR ================= -->
+  <main id="view-sel" class="view hidden">
+    <aside class="panel wizard" id="sel-wizard">
+      <div class="phead"><span>BESOIN DU CLIENT</span><button type="button" class="linkbtn" id="sel-reset">réinitialiser</button></div>
+      <div class="fbody" id="sel-form"></div>
+    </aside>
+    <section class="panel results" id="sel-results-panel">
+      <div class="phead">
+        <span id="sel-title">PRODUITS RECOMMANDÉS</span>
+        <span class="phead-tools">
+          <button type="button" class="btn small" id="sel-print">Imprimer / PDF</button>
+        </span>
+      </div>
+      <div id="sel-warning" class="warnbar"></div>
+      <div id="sel-results" class="res-pane"></div>
+    </section>
+  </main>
+
+  <!-- ================= CATALOGUE ================= -->
+  <main id="view-cat" class="view hidden">
+    <section class="panel full">
+      <div class="phead"><span>CATALOGUE PRODUITS</span><span class="phead-r" id="cat-count"></span></div>
+      <div class="pipe-tools">
+        <input id="cat-text" type="text" placeholder="Rechercher un produit, une application…" />
+        <select id="cat-family"><option value="">Toutes familles</option></select>
+        <label class="chk"><input type="checkbox" id="cat-h1" /> NSF H1 uniquement</label>
+      </div>
+      <div id="cat-list" class="res-pane"></div>
+    </section>
+  </main>
+
+  <!-- ================= AIDE ================= -->
+  <main id="view-aide" class="view hidden">
+    <section class="panel full prose" id="aide"></section>
+  </main>
+
+  <!-- detail drawer (prospect or product) -->
+  <div id="drawer" class="drawer hidden" role="dialog" aria-modal="true">
+    <div class="drawer-inner panel">
+      <div class="phead"><span id="drawer-title"></span><button type="button" class="linkbtn" id="drawer-close">✕ fermer</button></div>
+      <div id="drawer-body" class="fbody"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+  <div id="print-area"></div>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="/js/util.js"></script>
+  <script src="/js/selector-core.js"></script>
+  <script src="/js/prospect.js"></script>
+  <script src="/js/pipeline.js"></script>
+  <script src="/js/selector.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

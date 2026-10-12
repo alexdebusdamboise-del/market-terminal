@@ -1,4 +1,4 @@
-# One-click deploy on Render (https://render.com) — runs the Python server as-is.
+# One-click deploy on Render (https://render.com) — runs the Python servers as-is.
 # In Render: New + → Blueprint → connect this GitHub repo → Apply.
 services:
   - type: web
@@ -14,4 +14,18 @@ services:
         sync: false
       # Free CoinGecko "Demo" key -> reliable crypto data from datacenter IPs.
       - key: COINGECKO_API_KEY
+        sync: false
+
+  # Terminal Interflon (interflon-tools/): prospection + sélecteur produit.
+  - type: web
+    name: terminal-interflon
+    runtime: python
+    plan: free
+    rootDir: interflon-tools
+    buildCommand: pip install -r requirements.txt
+    startCommand: python server.py --host 0.0.0.0
+    autoDeploy: true
+    envVars:
+      # Shared password (HTTP Basic auth). Strongly recommended on a public URL.
+      - key: APP_PASSWORD
         sync: false

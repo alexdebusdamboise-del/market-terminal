@@ -1,0 +1,2 @@
+# No third-party dependencies — the backend uses only the Python standard library.
+# This file exists so Python hosts (Render, Railway…) recognise the project.
