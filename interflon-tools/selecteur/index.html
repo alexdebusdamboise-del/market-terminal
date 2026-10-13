@@ -1,0 +1,445 @@
+<title>Sélecteur Interflon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: workshop sheet — questions on the left like a lubrication survey form,
+   ranked product cards on the right; one column with a sticky jump button on phones. */
+:root{
+  --bg:#f3f4f1; --surface:#ffffff; --sunken:#e9ebe6; --line:#d3d7cf; --ink:#1c2226; --ink-2:#56606a;
+  --accent:#b86a00; --accent-ink:#ffffff; --accent-soft:#f6e3c7;
+  --ok:#1d7a4d; --ok-soft:#dcefe4; --warn:#9a6a00; --warn-soft:#f6ebcd; --bad:#b23a32; --bad-soft:#f6dcd9;
+  --info:#2f6690; --info-soft:#dde9f3; --need:#2f6690;
+  --display:"Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#121517; --surface:#1a1f22; --sunken:#0f1214; --line:#2c3439; --ink:#e7e9e6; --ink-2:#9aa4ab;
+  --accent:#f0a23b; --accent-ink:#1a1206; --accent-soft:#3a2a12;
+  --ok:#5cc58f; --ok-soft:#163626; --warn:#e2b54a; --warn-soft:#3a2f12; --bad:#ef7d74; --bad-soft:#3d1c1a;
+  --info:#7db3dd; --info-soft:#17293a; --need:#7db3dd; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#121517; --surface:#1a1f22; --sunken:#0f1214; --line:#2c3439; --ink:#e7e9e6; --ink-2:#9aa4ab;
+  --accent:#f0a23b; --accent-ink:#1a1206; --accent-soft:#3a2a12;
+  --ok:#5cc58f; --ok-soft:#163626; --warn:#e2b54a; --warn-soft:#3a2f12; --bad:#ef7d74; --bad-soft:#3d1c1a;
+  --info:#7db3dd; --info-soft:#17293a; --need:#7db3dd; color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);margin:0}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:var(--info)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:20px 48px}
+
+/* header */
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid var(--ink);margin-bottom:20px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.note{font-size:13px;color:var(--ink-2);max-width:56ch;margin:0}
+
+.layout{display:grid;grid-template-columns:minmax(0,400px) minmax(0,1fr);gap:28px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.form{position:sticky;top:env(safe-area-inset-top,0px);max-height:calc(100vh - 24px);overflow:auto;padding:18px}
+
+/* questions */
+.q{display:flex;flex-direction:column;gap:8px;padding-block:14px;border-top:1px solid var(--line)}
+.q:first-child{border-top:0;padding-top:0}
+.q h2{font:700 15px/1.2 var(--display);font-stretch:100%;margin:0;display:flex;gap:8px;align-items:baseline}
+.q h2 .n{font:500 12px/1 var(--mono);color:var(--accent)}
+.hint{font-size:13px;color:var(--ink-2);margin:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:14px;line-height:1.2;min-height:36px;transition:background .12s,border-color .12s}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.seg button{border:0;border-right:1px solid var(--line);background:var(--surface);padding:9px 6px;font-size:14px;min-height:40px}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.temps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
+.field input{border:1px solid var(--line);background:var(--sunken);border-radius:var(--r);padding:8px 10px;font:500 16px var(--mono);color:var(--ink);width:100%}
+.field input[aria-invalid="true"]{border-color:var(--bad)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{border:1px dashed var(--line);background:transparent;border-radius:var(--r);padding:4px 8px;font-size:13px;color:var(--ink-2)}
+.presets button:hover{border-color:var(--accent);color:var(--ink)}
+.presets b{font:500 12px var(--mono);color:var(--ink)}
+.link{background:none;border:0;padding:0;color:var(--ink-2);text-decoration:underline;font-size:13px}
+.mode{margin-bottom:6px}
+
+/* results */
+.results{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.rhead h2{font:800 22px/1.15 var(--display);font-stretch:90%;margin:0}
+.rhead h2 small{display:block;font:400 14px/1.4 var(--body);color:var(--ink-2);margin-top:2px}
+.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:var(--r);padding:8px 14px;font-weight:600;font-size:14px;min-height:40px}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink)}
+.banner{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:var(--ink);border-radius:var(--r);padding:10px 12px;font-size:14px}
+.banner b{color:var(--warn)}
+.banner.example{background:var(--info-soft)}
+.banner.example b{color:var(--info)}
+.banner.error{background:var(--bad-soft)}
+.banner.error b{color:var(--bad)}
+
+.card{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.card.top1{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.card.out{opacity:.72}
+.ch{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
+.rank{font:500 12px/1 var(--mono);color:var(--accent);letter-spacing:.08em}
+.pname{font:800 21px/1.15 var(--display);font-stretch:88%;margin:2px 0 6px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{font:500 12px/1 var(--mono);padding:4px 7px;border-radius:4px;background:var(--sunken);color:var(--ink-2);white-space:nowrap}
+.badge.h1{background:var(--ok-soft);color:var(--ok)}
+.badge.nsf{background:var(--info-soft);color:var(--info)}
+.badge.ok{background:var(--ok-soft);color:var(--ok)}
+.badge.warn{background:var(--warn-soft);color:var(--warn)}
+.desc{margin:0;max-width:75ch}
+.specs{display:flex;flex-wrap:wrap;gap:4px 18px;font:400 13px/1.4 var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.specs b{color:var(--ink);font-weight:500}
+
+/* temperature scale */
+.tscale{position:relative;height:30px;margin-top:2px}
+.tscale .track{position:absolute;left:0;right:0;top:6px;height:8px;background:var(--sunken);border-radius:4px}
+.tscale .p{position:absolute;top:6px;height:8px;background:var(--accent);border-radius:4px}
+.tscale .unk{position:absolute;top:6px;height:8px;background:repeating-linear-gradient(45deg,var(--accent) 0 3px,transparent 3px 7px);opacity:.6}
+.tscale .need{position:absolute;top:2px;height:16px;border:2px solid var(--need);border-radius:4px}
+.tscale .tick{position:absolute;top:18px;font:400 10px/1 var(--mono);color:var(--ink-2);transform:translateX(-50%)}
+.tscale .tick::before{content:"";position:absolute;left:50%;top:-6px;height:4px;border-left:1px solid var(--line)}
+
+.reasons{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px;font-size:14px}
+.reasons li{display:flex;gap:8px;align-items:baseline}
+.reasons .m{font:600 13px var(--mono);flex:none;width:14px;text-align:center}
+.reasons .y .m{color:var(--ok)} .reasons .u .m{color:var(--warn)} .reasons .n .m{color:var(--bad)}
+.reasons .n{color:var(--bad)}
+.cards{display:flex;flex-direction:column;gap:12px}
+details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;color:var(--ink-2)}
+.empty{padding:28px;text-align:center;color:var(--ink-2)}
+
+/* product sheet */
+.sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;justify-content:flex-end;z-index:20}
+.sheet[hidden]{display:none!important}
+.sheet .inner{width:min(560px,100%);height:100%;overflow:auto;background:var(--surface);padding:20px 22px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h3{font:700 13px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:8px 0 0}
+.kv{display:grid;grid-template-columns:130px minmax(0,1fr);gap:6px 12px;margin:0;font-size:15px}
+.kv dt{color:var(--ink-2)} .kv dd{margin:0;font-variant-numeric:tabular-nums}
+.sheet ul{margin:0;padding-left:18px} .sheet li{margin:3px 0}
+.quote{font-size:13px;color:var(--ink-2)}
+.toast{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r);font-size:14px;z-index:30;max-width:calc(100% - 32px)}
+.jump{display:none}
+
+@media (max-width: 880px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .form{position:static;max-height:none}
+  .jump{display:block;position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));margin-top:-4px;width:100%;z-index:5;box-shadow:0 6px 18px color-mix(in srgb,var(--ink) 25%,transparent)}
+  .kv{grid-template-columns:110px minmax(0,1fr)}
+}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Interflon · aide au choix</span>
+      <h1>Sélecteur de lubrifiants</h1>
+    </div>
+    <p class="note" id="data-note">Fiches établies à partir des sources publiques Interflon : à valider par le service technique avant tout engagement client.</p>
+  </header>
+
+  <div class="layout">
+    <aside class="panel form" aria-label="Besoin du client">
+      <div class="seg mode" role="group" aria-label="Point de départ">
+        <button type="button" id="mode-besoin" data-mode="besoin">Décrire le besoin</button>
+        <button type="button" id="mode-remplacement" data-mode="remplacement">Remplacer un produit</button>
+      </div>
+      <div id="questions"></div>
+      <button type="button" class="link" id="reset">Tout effacer</button>
+    </aside>
+
+    <main class="results" id="results-panel">
+      <div class="rhead">
+        <h2 id="r-title">Produits recommandés</h2>
+        <button type="button" class="btn ghost" id="copy">Copier la recommandation</button>
+      </div>
+      <div id="banners"></div>
+      <div id="results"></div>
+    </main>
+  </div>
+  <button type="button" class="btn jump" id="jump">Voir les produits ↓</button>
+</div>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div class="inner">
+    <div class="ch"><div><span class="rank">FICHE PRODUIT</span><div class="pname" id="sheet-title"></div></div><button type="button" class="btn ghost" id="sheet-close">Fermer</button></div>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/selector-core.js"></script>
+<script>
+(function () {
+  "use strict";
+  const C = window.SelectorCore;
+  const $ = (s, r) => (r || document).querySelector(s);
+  const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  const esc = (s) => (s === null || s === undefined ? "" : String(s).replace(/[&<>"']/g, (c) => ESC[c]));
+  const safeUrl = (u) => (/^https?:\/\//i.test(String(u || "")) ? String(u) : "#");
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  };
+  const LS = "ifx.selecteur.criteres";
+
+  const FAMILIES = { huile: "Huile", graisse: "Graisse", aerosol: "Aérosol", nettoyant: "Nettoyant", degraissant: "Dégraissant", agent_demoulage: "Démoulant", lubrificateur_automatique: "Graisseur automatique", accessoire: "Accessoire", autre: "Autre" };
+  const ENV = [["resistant_eau", "Eau, humidité"], ["lavage_frequent", "Lavages fréquents"], ["environnement_poussiereux", "Poussière, saleté"], ["charges_elevees_chocs", "Charges élevées, chocs"], ["vitesse_elevee", "Vitesse élevée"], ["anti_corrosion", "Corrosion, extérieur"], ["compatible_plastiques_joints", "Plastiques, joints"], ["biodegradable", "Biodégradable exigé"], ["sans_pfas", "Sans PFAS exigé"]];
+  const PRESETS = [["Surgélation", -40, -18], ["Froid", -5, 10], ["Ambiant", 5, 40], ["Chaud", 20, 120], ["Four, étuve", 50, 250], ["Très haute", "", 300]];
+  const EXAMPLE = { mode: "besoin", food: "oui", application: "chaines", tmin: "50", tmax: "250", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "" };
+  const blank = () => ({ mode: "besoin", food: "", application: "", tmin: "", tmax: "", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "" });
+
+  let PRODUCTS = [];
+  let isExample = false;
+  let crit = blank();
+  let ranked = [];
+
+  const known = (x) => x !== null && x !== undefined && x !== "";
+  const tempTxt = (p) => (!known(p.temp_min_c) && !known(p.temp_max_c) ? "non renseignée" : `${known(p.temp_min_c) ? p.temp_min_c : "?"} → ${known(p.temp_max_c) ? p.temp_max_c : "?"} °C`);
+  const isVerified = (p) => p.confidence === "high" && !C.unsure(p, C.NSF_UNSURE) && !C.unsure(p, C.TEMP_UNSURE);
+  function parseTemp(raw) {
+    const s = String(raw === undefined || raw === null ? "" : raw).replace(/[−–—]/g, "-").replace(/°\s*c?|\s/gi, "").replace(",", ".");
+    if (!s || s === "-") return "";
+    return /^-?\d+(\.\d+)?$/.test(s) ? Number(s) : NaN;
+  }
+
+  function sanitize(s) {
+    const c = blank();
+    if (!s || typeof s !== "object") return c;
+    if (["besoin", "remplacement"].includes(s.mode)) c.mode = s.mode;
+    if (["oui", "non", "nsp"].includes(s.food)) c.food = s.food;
+    if (C.APPLICATIONS[s.application]) c.application = s.application;
+    if (C.REPLACE_TYPES[s.replaceType]) c.replaceType = s.replaceType;
+    c.env = (Array.isArray(s.env) ? s.env : []).filter((k) => ENV.some(([e]) => e === k));
+    c.formats = (Array.isArray(s.formats) ? s.formats : []).filter((k) => C.FORMATS[k]);
+    ["tmin", "tmax", "iso_vg", "nlgi", "query"].forEach((k) => { if (typeof s[k] === "string" || typeof s[k] === "number") c[k] = String(s[k]).slice(0, 60); });
+    return c;
+  }
+
+  function effective() {
+    const c = { food: crit.food || null, application: crit.application || null, tmin: parseTemp(crit.tmin), tmax: parseTemp(crit.tmax), env: crit.env.slice(), formats: crit.formats.slice(), query: crit.query };
+    if (crit.mode === "remplacement") {
+      c.iso_vg = crit.iso_vg; c.nlgi = crit.nlgi;
+      const t = C.REPLACE_TYPES[crit.replaceType];
+      if (t) {
+        if (!c.application && t.application) c.application = t.application;
+        if (t.families) c.families = t.families;
+        (t.env || []).forEach((e) => c.env.includes(e) || c.env.push(e));
+      }
+    }
+    c.badTemp = Number.isNaN(c.tmin) || Number.isNaN(c.tmax);
+    return c;
+  }
+  const hasCriteria = (c) => !!(c.food || c.application || c.tmin !== "" || c.tmax !== "" || c.env.length || c.formats.length || c.query || c.families || c.iso_vg || c.nlgi);
+
+  // ------------------------------------------------------------ questions
+  const chips = (name, entries, current, multi) =>
+    `<div class="chips" data-name="${name}" data-multi="${multi ? 1 : 0}">${entries
+      .map(([k, l]) => `<button type="button" class="chip" data-v="${esc(k)}" aria-pressed="${multi ? current.includes(k) : current === k}">${esc(l)}</button>`)
+      .join("")}</div>`;
+
+  function renderQuestions() {
+    $("#mode-besoin").setAttribute("aria-pressed", crit.mode === "besoin");
+    $("#mode-remplacement").setAttribute("aria-pressed", crit.mode === "remplacement");
+    const apps = Object.entries(C.APPLICATIONS).filter(([k]) => k === crit.application || (k !== "autre" && PRODUCTS.some((p) => (p.applications || []).includes(k))));
+    let n = 0;
+    const num = () => String(++n).padStart(2, "0");
+    $("#questions").innerHTML = `
+      ${crit.mode === "remplacement" ? `<section class="q"><h2><span class="n">${num()}</span>Produit utilisé aujourd'hui</h2><p class="hint">Type de produit du client, toutes marques.</p>
+        ${chips("replaceType", Object.entries(C.REPLACE_TYPES).map(([k, v]) => [k, v.label]), crit.replaceType, false)}
+        <div class="temps"><label class="field" for="iso_vg">Viscosité ISO VG<input id="iso_vg" inputmode="numeric" placeholder="ex. 220" value="${esc(crit.iso_vg)}"></label>
+        <label class="field" for="nlgi">Grade NLGI<input id="nlgi" placeholder="ex. 2" value="${esc(crit.nlgi)}"></label></div></section>` : ""}
+      <section class="q"><h2><span class="n">${num()}</span>Contact alimentaire possible ?</h2><p class="hint">Agroalimentaire, boissons, pharmacie, emballage alimentaire : un contact fortuit impose la catégorie NSF H1.</p>
+        <div class="seg" role="group" aria-label="Contact alimentaire" data-name="food">${[["oui", "Oui, NSF H1"], ["non", "Non"], ["nsp", "Je ne sais pas"]].map(([k, l]) => `<button type="button" data-v="${k}" aria-pressed="${crit.food === k}">${l}</button>`).join("")}</div></section>
+      <section class="q"><h2><span class="n">${num()}</span>Organe à lubrifier</h2>${chips("application", apps, crit.application, false)}</section>
+      <section class="q"><h2><span class="n">${num()}</span>Température de fonctionnement</h2>
+        <div class="temps"><label class="field" for="tmin">Mini (°C)<input id="tmin" autocomplete="off" placeholder="ex. -20" value="${esc(crit.tmin)}"></label>
+        <label class="field" for="tmax">Maxi (°C)<input id="tmax" autocomplete="off" placeholder="ex. 180" value="${esc(crit.tmax)}"></label></div>
+        <div class="presets">${PRESETS.map(([l, a, b], i) => `<button type="button" data-preset="${i}">${esc(l)} <b>${a === "" ? "" : a + " / "}${b} °C</b></button>`).join("")}</div></section>
+      <section class="q"><h2><span class="n">${num()}</span>Conditions</h2>${chips("env", ENV, crit.env, true)}</section>
+      <section class="q"><h2><span class="n">${num()}</span>Conditionnement souhaité</h2>${chips("formats", Object.entries(C.FORMATS), crit.formats, true)}</section>
+      <section class="q"><h2><span class="n">${num()}</span>Recherche libre</h2><label class="field" for="query">Nom, mot-clé<input id="query" placeholder="ex. Food Grease" value="${esc(crit.query)}"></label></section>`;
+    markTemp();
+  }
+
+  function markTemp() {
+    ["tmin", "tmax"].forEach((k) => { const el = $("#" + k); if (el) el.setAttribute("aria-invalid", Number.isNaN(parseTemp(crit[k]))); });
+  }
+
+  function changed(rerender) {
+    isExample = false;
+    store.set(LS, crit);
+    if (rerender) renderQuestions();
+    markTemp();
+    renderResults();
+  }
+
+  // ------------------------------------------------------------ results
+  const pos = (x) => Math.max(0, Math.min(100, ((x + 60) / 460) * 100));
+  function tscale(p, c) {
+    const a = known(p.temp_min_c) ? p.temp_min_c : null;
+    const b = known(p.temp_max_c) ? p.temp_max_c : null;
+    if (a === null && b === null) return "";
+    const lo = a === null ? b : a, hi = b === null ? a : b;
+    const unk = a === null ? `<span class="unk" style="left:${Math.max(0, pos(b) - 8)}%;width:${pos(b) - Math.max(0, pos(b) - 8)}%"></span>` : b === null ? `<span class="unk" style="left:${pos(a)}%;width:${Math.min(100, pos(a) + 8) - pos(a)}%"></span>` : "";
+    const tn = typeof c.tmin === "number" && !isNaN(c.tmin) ? c.tmin : null;
+    const tx = typeof c.tmax === "number" && !isNaN(c.tmax) ? c.tmax : null;
+    const need = tn !== null || tx !== null ? `<span class="need" style="left:${pos(tn === null ? tx : tn)}%;width:${Math.max(0.8, pos(tx === null ? tn : tx) - pos(tn === null ? tx : tn))}%" title="Besoin du client"></span>` : "";
+    const ticks = [-40, 0, 100, 200, 300, 400].map((t) => `<span class="tick" style="left:${pos(t)}%">${t}</span>`).join("");
+    return `<div class="tscale" aria-label="Plage du produit ${esc(tempTxt(p))}"><span class="track"></span><span class="p" style="left:${pos(lo)}%;width:${Math.max(0.8, pos(hi) - pos(lo))}%"></span>${unk}${need}${ticks}</div>`;
+  }
+
+  function card(r, c, i) {
+    const p = r.product;
+    const h1 = C.nsfList(p).includes("H1");
+    const specs = [`<span>Température <b>${esc(tempTxt(p))}</b></span>`];
+    if (p.viscosity_iso_vg) specs.push(`<span>ISO VG <b>${esc(p.viscosity_iso_vg)}</b></span>`);
+    if (p.nlgi) specs.push(`<span>NLGI <b>${esc(p.nlgi)}</b></span>`);
+    if ((p.formats || []).length) specs.push(`<span>${esc(p.formats.join(", "))}</span>`);
+    return `<article class="panel card ${r.eligible && i === 0 ? "top1" : ""} ${r.eligible ? "" : "out"}">
+      <div class="ch"><div>${r.eligible && i < 3 ? `<span class="rank">CHOIX ${i + 1}</span>` : ""}<div class="pname">${esc(p.name)}</div>
+        <div class="badges">${p.nsf ? `<span class="badge ${h1 ? "h1" : "nsf"}">NSF ${esc(p.nsf)}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}</div></div>
+        <button type="button" class="btn ghost" data-detail="${esc(p.id)}">Fiche</button></div>
+      ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
+      <div class="specs">${specs.join("")}</div>
+      ${tscale(p, c)}
+      ${r.reasons.length ? `<ul class="reasons">${r.reasons.map((x) => `<li class="${x.s}"><span class="m">${x.s === "y" ? "✓" : x.s === "n" ? "✕" : "?"}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>` : ""}
+    </article>`;
+  }
+
+  function renderResults() {
+    const c = effective();
+    ranked = C.rank(PRODUCTS, c);
+    const ok = ranked.filter((r) => r.eligible);
+    const out = ranked.filter((r) => !r.eligible);
+    const banners = [];
+    if (isExample) banners.push(`<div class="banner example"><b>Exemple</b><span>Chaînes de four en usine alimentaire, 50 à 250 °C. Modifie les réponses ou clique sur « Tout effacer » pour ton propre besoin.</span></div>`);
+    if (c.badTemp) banners.push(`<div class="banner error"><b>Température illisible</b><span>Saisis un nombre, par exemple -20 ou 180. Aucune recommandation tant qu'elle n'est pas comprise.</span></div>`);
+    $("#banners").innerHTML = banners.join("");
+    $("#jump").textContent = hasCriteria(c) && !c.badTemp ? `Voir les ${ok.length} produit${ok.length > 1 ? "s" : ""} ↓` : "Voir les produits ↓";
+    if (!PRODUCTS.length) { $("#results").innerHTML = `<div class="panel empty">Catalogue indisponible.</div>`; return; }
+    if (c.badTemp) { $("#r-title").innerHTML = "Produits recommandés"; $("#results").innerHTML = ""; return; }
+    if (!hasCriteria(c)) {
+      $("#r-title").innerHTML = `Tout le catalogue<small>${PRODUCTS.length} produits · réponds aux questions pour filtrer</small>`;
+      $("#results").innerHTML = `<div class="cards">${ranked.slice().sort((a, b) => a.product.name.localeCompare(b.product.name)).map((r) => card(r, c, 99)).join("")}</div>`;
+      return;
+    }
+    $("#r-title").innerHTML = `${ok.length} produit${ok.length > 1 ? "s conviennent" : " convient"}<small>sur ${PRODUCTS.length} · classés par pertinence · ✓ conforme · ? à vérifier · ✕ non conforme</small>`;
+    $("#results").innerHTML =
+      (ok.length ? `<div class="cards">${ok.map((r, i) => card(r, c, i)).join("")}</div>` : `<div class="panel empty">Aucun produit ne remplit toutes les contraintes. Assouplis la température ou l'organe, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</div>`) +
+      (out.length ? `<details class="more" ${ok.length ? "" : "open"}><summary>Produits écartés (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, 99)).join("")}</div></details>` : "");
+  }
+
+  // ------------------------------------------------------------ product sheet
+  function openSheet(id) {
+    const p = PRODUCTS.find((x) => x.id === id);
+    if (!p) return;
+    const list = (arr, fn) => (arr && arr.length ? `<ul>${arr.map((x) => `<li>${fn ? fn(x) : esc(x)}</li>`).join("")}</ul>` : `<p class="hint">Non renseigné</p>`);
+    $("#sheet-title").textContent = p.name;
+    $("#sheet-body").innerHTML = `
+      <div class="badges">${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "h1" : "nsf"}">NSF ${esc(p.nsf)}${p.nsf_reg_no ? " · n° " + esc(p.nsf_reg_no) : ""}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}</div>
+      ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
+      <dl class="kv"><dt>Température</dt><dd>${esc(tempTxt(p))}${p.temp_note ? `<div class="quote">${esc(p.temp_note)}</div>` : ""}</dd>
+        <dt>Viscosité</dt><dd>${esc(p.viscosity_iso_vg ? "ISO VG " + p.viscosity_iso_vg : "—")}</dd><dt>Grade NLGI</dt><dd>${esc(p.nlgi || "—")}</dd>
+        <dt>Base</dt><dd>${esc(p.base || "—")}</dd><dt>Conditionnements</dt><dd>${esc((p.formats || []).join(", ") || "—")}</dd></dl>
+      <h3>Organes</h3>${list(p.applications, (a) => esc(C.APPLICATIONS[a] || a))}
+      <h3>Propriétés</h3>${list(p.properties, (a) => esc(C.PROPERTIES[a] || a))}
+      ${(p.key_claims || []).length ? `<h3>Arguments (source Interflon)</h3>${list(p.key_claims)}` : ""}
+      <h3>Sources</h3>${list(p.source_urls, (u) => `<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(String(u).replace(/^https?:\/\//, "").slice(0, 64))}</a>`)}
+      ${(p.evidence || []).length ? `<details><summary class="hint" style="cursor:pointer">Preuves (${p.evidence.length}) : citation exacte derrière chaque valeur</summary>${list(p.evidence, (e) => `<b>${esc(e.field)}</b> <span class="quote">« ${esc(e.quote)} »</span> <a href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener">source</a>`)}</details>` : ""}
+      ${(p.uncertain_fields || []).length ? `<h3>À confirmer</h3><p class="hint">${esc(p.uncertain_fields.join(", "))}</p>` : ""}`;
+    $("#sheet").hidden = false;
+    $("#sheet-close").focus();
+  }
+  const closeSheet = () => { $("#sheet").hidden = true; };
+
+  // ------------------------------------------------------------ copy
+  let toastTimer;
+  function toast(t) { const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), 3200); }
+  function recoText() {
+    const c = effective();
+    const ok = ranked.filter((r) => r.eligible).slice(0, 3);
+    const need = [];
+    if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
+    if (c.food) need.push("Contact alimentaire : " + { oui: "oui (homologation NSF requise)", non: "non", nsp: "à préciser" }[c.food]);
+    if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
+    if (c.tmin !== "" || c.tmax !== "") need.push(`Température : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
+    if (c.env.length) need.push("Conditions : " + c.env.map((e) => C.PROPERTIES[e] || e).join(", "));
+    const lines = ["RECOMMANDATION DE LUBRIFICATION", "", "Besoin :", ...need.map((x) => "  - " + x)];
+    ok.forEach((r, i) => {
+      const p = r.product;
+      lines.push("", `${i + 1}. ${p.name}${p.nsf ? " (NSF " + p.nsf + ")" : ""}`);
+      if (c.food && c.food !== "non" && !C.foodOk(p, c.application)) lines.push("  ATTENTION : non homologué pour le contact alimentaire.");
+      if (p.description_fr) lines.push("  " + p.description_fr);
+      r.reasons.forEach((x) => lines.push(`  ${x.s === "y" ? "✓" : x.s === "n" ? "✕" : "?"} ${x.t}`));
+      lines.push(`  Température : ${tempTxt(p)} · ${isVerified(p) ? "fiche vérifiée" : "données à confirmer par le service technique"}`);
+    });
+    lines.push("", "Proposition indicative établie à partir des fiches produits publiques Interflon, à confirmer avec la fiche technique et la FDS en vigueur.");
+    return lines.join("\n");
+  }
+  function copyReco() {
+    const c = effective();
+    if (c.badTemp || !hasCriteria(c) || !ranked.some((r) => r.eligible)) return toast("Décris le besoin et obtiens au moins un produit avant de copier.");
+    const text = recoText();
+    const fallback = () => {
+      $("#sheet-title").textContent = "Recommandation";
+      $("#sheet-body").innerHTML = `<p class="hint">La copie automatique est refusée ici : sélectionne le texte.</p><textarea id="reco" rows="22" style="width:100%;font:13px var(--mono);background:var(--sunken);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:10px" readonly></textarea>`;
+      $("#reco").value = text; $("#sheet").hidden = false; $("#reco").focus(); $("#reco").select();
+    };
+    try { navigator.clipboard.writeText(text).then(() => toast("Recommandation copiée : colle-la dans ton e-mail ou ton compte rendu."), fallback); } catch (e) { fallback(); }
+  }
+
+  // ------------------------------------------------------------ events
+  function bind() {
+    document.querySelector(".mode").addEventListener("click", (e) => { const b = e.target.closest("[data-mode]"); if (b) { crit.mode = b.dataset.mode; changed(true); } });
+    $("#questions").addEventListener("click", (e) => {
+      const pr = e.target.closest("[data-preset]");
+      if (pr) { const [, a, b] = PRESETS[+pr.dataset.preset]; crit.tmin = String(a); crit.tmax = String(b); $("#tmin").value = crit.tmin; $("#tmax").value = crit.tmax; return changed(false); }
+      const btn = e.target.closest("[data-v]");
+      if (!btn) return;
+      const box = btn.parentElement, name = box.dataset.name, v = btn.dataset.v;
+      if (box.dataset.multi === "1") { crit[name] = crit[name].includes(v) ? crit[name].filter((x) => x !== v) : crit[name].concat(v); btn.setAttribute("aria-pressed", crit[name].includes(v)); }
+      else { crit[name] = crit[name] === v ? "" : v; box.querySelectorAll("[data-v]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.v === crit[name])); }
+      changed(false);
+    });
+    $("#questions").addEventListener("input", (e) => { const k = { tmin: "tmin", tmax: "tmax", query: "query", iso_vg: "iso_vg", nlgi: "nlgi" }[e.target.id]; if (k) { crit[k] = e.target.value.trim(); changed(false); } });
+    $("#reset").addEventListener("click", () => { crit = blank(); changed(true); });
+    $("#results").addEventListener("click", (e) => { const d = e.target.closest("[data-detail]"); if (d) openSheet(d.dataset.detail); });
+    $("#copy").addEventListener("click", copyReco);
+    $("#jump").addEventListener("click", () => $("#results-panel").scrollIntoView({ behavior: "smooth", block: "start" }));
+    $("#sheet-close").addEventListener("click", closeSheet);
+    $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
+  }
+
+  async function boot() {
+    bind();
+    const saved = store.get(LS, null);
+    if (saved) crit = sanitize(saved); else { crit = sanitize(EXAMPLE); isExample = true; }
+    try {
+      const doc = await (await fetch("data/produits.json")).json();
+      PRODUCTS = doc.products || [];
+      if (doc._meta && doc._meta.avertissement) $("#data-note").textContent = doc._meta.avertissement + ` ${PRODUCTS.filter((p) => !isVerified(p)).length} fiche(s) sur ${PRODUCTS.length} restent à confirmer.`;
+    } catch (e) {
+      $("#banners").innerHTML = `<div class="banner error"><b>Catalogue indisponible</b><span>Le fichier des produits n'a pas pu être chargé. Recharge la page.</span></div>`;
+    }
+    renderQuestions();
+    renderResults();
+  }
+  boot();
+})();
+</script>
