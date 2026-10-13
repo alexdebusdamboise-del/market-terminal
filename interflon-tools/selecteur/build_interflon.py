@@ -19,11 +19,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 APP = os.path.dirname(HERE)
 OUT = os.path.join(APP, "dist", "selecteur-interflon.html")
 
-# Brand red: adjust to the exact value of the company style guide if needed.
+# Brand red sampled from the official logo (rgb 226, 32, 20); a slightly darker
+# shade is used for small red text so it keeps enough contrast on white.
 BRAND_TOKENS = """:root{
   color-scheme: light;
   --bg:#ffffff; --surface:#ffffff; --sunken:#f4f4f4; --line:#e1e1e1; --ink:#1d1d1b; --ink-2:#5d5d5d;
-  --accent:#d9001b; --accent-ink:#ffffff; --accent-soft:#fde8eb;
+  --accent:#e22014; --accent-text:#c41a0f; --accent-ink:#ffffff; --accent-soft:#fde9e7;
   --ok:#1b7a43; --ok-soft:#e1f2e8; --warn:#8f6400; --warn-soft:#fbf0d4; --bad:#b0122a; --bad-soft:#fde8eb;
   --info:#3a4651; --info-soft:#eff1f3; --need:#1d1d1b;
   --display:"Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
@@ -37,13 +38,14 @@ BRAND_CSS = """
 .top{border-bottom:4px solid var(--accent)}
 .brand{gap:10px}
 .logo{display:flex;align-items:center;min-height:40px}
-.logo img{height:44px;width:auto;display:block}
+.logo img{height:46px;width:auto;max-width:100%;display:block}
 .logo-word{font:800 28px/1 var(--display);font-stretch:100%;letter-spacing:.08em;color:var(--accent)}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .btn{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .btn.ghost{background:var(--surface);color:var(--ink);border-color:var(--line)}
 .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
-.q h2 .n,.rank,.sheet h3{color:var(--accent)}
+.q h2 .n,.rank,.sheet h3{color:var(--accent-text)}
+.btn.ghost:hover{color:var(--accent-text)}
 .badge.h1{background:var(--ok-soft);color:var(--ok)}
 """
 
