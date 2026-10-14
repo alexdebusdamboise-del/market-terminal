@@ -23,6 +23,18 @@ python3 server.py            # puis ouvrir http://127.0.0.1:8766
 
 Sur Mac, double-cliquer sur `start.command`.
 
+### Versions à partager (sans installation)
+
+```bash
+python3 build_offline.py              # dist/terminal-interflon.html : terminal complet en un fichier, avec le logo
+python3 selecteur/build_interflon.py  # dist/selecteur-interflon.html : sélecteur seul, blanc et rouge, avec le logo
+python3 build_artifact.py             # dist/claude-ai/ : page publiée sur claude.ai (sans logo)
+```
+
+Les deux fichiers `dist/*.html` s'ouvrent par double-clic, sans serveur ni connexion.
+La prospection (PROS) y est remplacée par un message : elle passe par `server.py`.
+Le logo officiel est dans `public/img/logo-interflon.png`.
+
 ### Mettre en ligne (Render)
 
 Le `render.yaml` à la racine du dépôt déclare un second service `terminal-interflon`
@@ -91,6 +103,9 @@ apparaît avec le badge « GROUPE CLIENT ».
 
   Les produits écartés restent listés avec la raison.
 - **Une donnée manquante n'écarte jamais un produit** : elle est signalée « ? à vérifier ».
+  Les autres repères : ✔ conforme, ≈ application voisine, ! à vérifier chez le client
+  (contact alimentaire non précisé), ✖ non conforme. Une donnée sans objet (température
+  d'un nettoyant ou d'un additif, NLGI d'une huile, viscosité d'une graisse) n'est pas signalée.
 - **Critères souples**, qui servent au classement : environnement, conditionnement,
   viscosité ISO VG ou grade NLGI identiques au produit remplacé.
 - « Imprimer / PDF » produit une recommandation d'une page à laisser au client.

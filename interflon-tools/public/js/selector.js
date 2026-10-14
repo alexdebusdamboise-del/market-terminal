@@ -276,7 +276,7 @@
       <div class="card-h"><div><span class="pname">${esc(p.name)}</span>
         ${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">NSF ${esc(p.nsf)}</span>` : ""}
         <span class="badge">${esc(famLabel(p.family))}</span>
-        ${isVerified(p) ? '<span class="badge ok" title="Plage de température et NSF confirmées par une source Interflon">fiche vérifiée</span>' : '<span class="badge warn" title="Certaines données restent à confirmer par le service technique">à valider</span>'}
+        ${isVerified(p) ? '<span class="badge ok" title="Chaque donnée de la fiche (NSF, températures, conditionnements, applications…) est appuyée par une source citée">fiche vérifiée</span>' : '<span class="badge warn" title="Certaines données restent à confirmer par le service technique">à valider</span>'}
       </div><button type="button" class="btn small" data-detail="${esc(p.id)}">Détails</button></div>
       <div class="desc">${esc(p.description_fr || "")}</div>
       <div class="small muted">Température : ${esc(tempTxt(p))}${viscTxt(p) ? ` · ${esc(viscTxt(p))}` : ""}${p.nlgi ? ` · NLGI ${esc(p.nlgi)}` : ""}${(p.formats || []).length ? ` · ${esc(p.formats.join(", "))}` : ""}</div>
@@ -397,7 +397,7 @@
         <ul>${r.reasons.filter((x) => x.s === "y").map((x) => `<li>✔ ${esc(x.t)}</li>`).join("")}</ul>
         ${check.length ? `<div><b>À vérifier avant usage :</b></div><ul>${check.map((x) => `<li>${MARK[x.s] || "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
         <div class="muted">Température : ${esc(tempTxt(p))}${(p.formats || []).length ? ` · Conditionnements : ${esc(p.formats.join(", "))}` : ""}
-          · ${isVerified(p) ? "fiche vérifiée sur source Interflon" : "données à confirmer par le service technique Interflon"}</div>`;
+          · ${isVerified(p) ? "fiche vérifiée (chaque donnée appuyée par une source citée)" : "données à confirmer par le service technique Interflon"}</div>`;
           }
         )
         .join("")}
