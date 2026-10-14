@@ -189,7 +189,8 @@
       } else {
         const why = parsed === null ? `Mention NSF illisible « ${p.nsf} » : à vérifier` : p.nsf ? `NSF ${p.nsf} : non adapté au contact alimentaire` : "Pas d'homologation NSF H1";
         if (c.food === "oui") blockers.push(why);
-        else reasons.push({ s: "u", t: `${why} : vérifier l'absence de contact alimentaire` });
+        // "a" = attention for the rep (customer situation unknown), not a data doubt
+        else reasons.push({ s: "a", t: `${why} : vérifier l'absence de contact alimentaire chez le client` });
       }
     }
 
@@ -205,7 +206,8 @@
         const near = (RELATED[c.application] || []).filter((a) => apps.includes(a));
         if (near.length) {
           score += 15;
-          reasons.push({ s: "u", t: `Application voisine (${near.map((a) => APPLICATIONS[a] || a).join(", ")}) : à valider` });
+          // "r" = related application: eligible, close to the requested use
+          reasons.push({ s: "r", t: `Application voisine : ${near.map((a) => APPLICATIONS[a] || a).join(", ")}` });
         } else blockers.push(`Non prévu pour : ${label}`);
       }
     }
@@ -222,7 +224,8 @@
     const tmax = num(c.tmax);
     const pmin = num(p.temp_min_c);
     const pmax = num(p.temp_max_c);
-    if (tmin !== null || tmax !== null) {
+    // temp_na: no service-temperature spec for this kind of product (cleaner, additive…)
+    if ((tmin !== null || tmax !== null) && !p.temp_na) {
       const need = `${fmtT(tmin)} → ${fmtT(tmax)}`;
       let unknown = false;
       if (tmin !== null) {
@@ -277,17 +280,28 @@
     }
 
     // 7. Viscosity / consistency of the product being replaced — soft
-    const vg = (x) => String(x || "").replace(/[^0-9]/g, "");
+    // first number only: "ISO VG 220" -> "220" (never glue several numbers together)
+    const vg = (x) => (String(x || "").match(/\d+/) || [""])[0];
     if (c.iso_vg) {
-      if (!p.viscosity_iso_vg) reasons.push({ s: "u", t: "Viscosité ISO VG non renseignée" });
-      else if (vg(p.viscosity_iso_vg) === vg(c.iso_vg)) {
-        score += 15;
-        reasons.push({ s: "y", t: `Même viscosité ISO VG ${vg(c.iso_vg)}` });
-      } else reasons.push({ s: "n", t: `ISO VG ${p.viscosity_iso_vg} (actuel : ${c.iso_vg})` });
+      const want = +vg(c.iso_vg);
+      const cst = num(p.viscosity_cst40);
+      if (p.viscosity_iso_vg) {
+        if (vg(p.viscosity_iso_vg) === vg(c.iso_vg)) {
+          score += 15;
+          reasons.push({ s: "y", t: `Même viscosité ISO VG ${vg(c.iso_vg)}` });
+        } else reasons.push({ s: "n", t: `ISO VG ${p.viscosity_iso_vg} (actuel : ${c.iso_vg})` });
+      } else if (cst !== null && want) {
+        // measured viscosity outside the ISO grades: ISO 3448 classes span ±10 % around the grade
+        if (Math.abs(cst - want) <= want * 0.1) {
+          score += 15;
+          reasons.push({ s: "y", t: `${cst} cSt à 40 °C : dans la classe ISO VG ${want}` });
+        } else reasons.push({ s: "n", t: `${cst} cSt à 40 °C (actuel : ISO VG ${want})` });
+      } else if (p.family === "huile") reasons.push({ s: "u", t: "Viscosité ISO VG non renseignée" });
     }
     if (c.nlgi) {
-      if (!p.nlgi) reasons.push({ s: "u", t: "Grade NLGI non renseigné" });
-      else if (String(p.nlgi).replace(/\s/g, "") === String(c.nlgi).replace(/\s/g, "")) {
+      if (!p.nlgi) {
+        if (p.family === "graisse") reasons.push({ s: "u", t: "Grade NLGI non renseigné" });
+      } else if (String(p.nlgi).replace(/\s/g, "") === String(c.nlgi).replace(/\s/g, "")) {
         score += 10;
         reasons.push({ s: "y", t: `Même grade NLGI ${c.nlgi}` });
       } else reasons.push({ s: "n", t: `NLGI ${p.nlgi} (actuel : ${c.nlgi})` });

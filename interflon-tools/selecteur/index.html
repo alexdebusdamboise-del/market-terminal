@@ -116,7 +116,7 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;l
 .reasons{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px;font-size:14px}
 .reasons li{display:flex;gap:8px;align-items:baseline}
 .reasons .m{font:600 13px var(--mono);flex:none;width:14px;text-align:center}
-.reasons .y .m{color:var(--ok)} .reasons .u .m{color:var(--warn)} .reasons .n .m{color:var(--bad)}
+.reasons .y .m{color:var(--ok)} .reasons .u .m,.reasons .a .m{color:var(--warn)} .reasons .r .m{color:var(--info)} .reasons .n .m{color:var(--bad)}
 .reasons .n{color:var(--bad)}
 .cards{display:flex;flex-direction:column;gap:12px}
 details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;color:var(--ink-2)}
@@ -209,7 +209,17 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   let ranked = [];
 
   const known = (x) => x !== null && x !== undefined && x !== "";
-  const tempTxt = (p) => (!known(p.temp_min_c) && !known(p.temp_max_c) ? "non renseignée" : `${known(p.temp_min_c) ? p.temp_min_c : "?"} → ${known(p.temp_max_c) ? p.temp_max_c : "?"} °C`);
+  // y conforme · n non conforme · u donnée manquante · a à vérifier chez le client · r application voisine
+  const MARK = { y: "✓", n: "✕", u: "?", a: "!", r: "≈" };
+  const LEGEND = { y: "✓ conforme", r: "≈ application voisine", a: "! à vérifier chez le client", u: "? donnée manquante", n: "✕ non conforme" };
+  const EQUIP = new Set(["lubrificateur_automatique", "accessoire"]);
+  const tempTxt = (p) => (p.temp_na ? "sans objet" : !known(p.temp_min_c) && !known(p.temp_max_c) ? "non renseignée" : `${known(p.temp_min_c) ? p.temp_min_c : "?"} → ${known(p.temp_max_c) ? p.temp_max_c : "?"} °C`);
+  // "temp_max_c (source unique)" -> "Température maxi (source unique)"
+  const FIELD_LABEL = { nsf_reg_no: "N° d'enregistrement NSF", nsf: "Homologation NSF", temp_min_c: "Température mini", temp_max_c: "Température maxi",
+    viscosity_iso_vg: "Viscosité", nlgi: "Grade NLGI", base: "Huile de base", formats: "Conditionnements", applications: "Applications", properties: "Propriétés" };
+  const doubtTxt = (f) => String(f).replace(/^(nsf_reg_no|nsf|temp_min_c|temp_max_c|viscosity_iso_vg|nlgi|base|formats|applications|properties)\b/, (k) => FIELD_LABEL[k]);
+  // ISO VG grade when the source gives one, otherwise the measured viscosity at 40 °C
+  const viscTxt = (p) => (p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : known(p.viscosity_cst40) ? `${p.viscosity_cst40} cSt à 40 °C` : "");
   const isVerified = (p) => p.confidence === "high" && !C.unsure(p, C.NSF_UNSURE) && !C.unsure(p, C.TEMP_UNSURE);
   function parseTemp(raw) {
     const s = String(raw === undefined || raw === null ? "" : raw).replace(/[−–—]/g, "-").replace(/°\s*c?|\s/gi, "").replace(",", ".");
@@ -308,6 +318,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const h1 = C.nsfList(p).includes("H1");
     const specs = [`<span>Température <b>${esc(tempTxt(p))}</b></span>`];
     if (p.viscosity_iso_vg) specs.push(`<span>ISO VG <b>${esc(p.viscosity_iso_vg)}</b></span>`);
+    else if (known(p.viscosity_cst40)) specs.push(`<span><b>${esc(p.viscosity_cst40)}</b> cSt à 40 °C</span>`);
     if (p.nlgi) specs.push(`<span>NLGI <b>${esc(p.nlgi)}</b></span>`);
     if ((p.formats || []).length) specs.push(`<span>${esc(p.formats.join(", "))}</span>`);
     return `<article class="panel card ${r.eligible && i === 0 ? "top1" : ""} ${r.eligible ? "" : "out"}">
@@ -317,7 +328,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
       <div class="specs">${specs.join("")}</div>
       ${tscale(p, c)}
-      ${r.reasons.length ? `<ul class="reasons">${r.reasons.map((x) => `<li class="${x.s}"><span class="m">${x.s === "y" ? "✓" : x.s === "n" ? "✕" : "?"}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>` : ""}
+      ${r.reasons.length ? `<ul class="reasons">${r.reasons.map((x) => `<li class="${x.s}"><span class="m">${MARK[x.s] || "?"}</span><span>${esc(x.t)}</span></li>`).join("")}</ul>` : ""}
     </article>`;
   }
 
@@ -338,7 +349,9 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       $("#results").innerHTML = `<div class="cards">${ranked.slice().sort((a, b) => a.product.name.localeCompare(b.product.name)).map((r) => card(r, c, 99)).join("")}</div>`;
       return;
     }
-    $("#r-title").innerHTML = `${ok.length} produit${ok.length > 1 ? "s conviennent" : " convient"}<small>sur ${PRODUCTS.length} · classés par pertinence · ✓ conforme · ? à vérifier · ✕ non conforme</small>`;
+    const seen = new Set(ranked.flatMap((r) => r.reasons.map((x) => x.s)));
+    const legend = ["y", "r", "a", "u", "n"].filter((k) => seen.has(k)).map((k) => LEGEND[k]).join(" · ");
+    $("#r-title").innerHTML = `${ok.length} produit${ok.length > 1 ? "s conviennent" : " convient"}<small>sur ${PRODUCTS.length} · classés par pertinence${legend ? " · " + legend : ""}</small>`;
     $("#results").innerHTML =
       (ok.length ? `<div class="cards">${ok.map((r, i) => card(r, c, i)).join("")}</div>` : `<div class="panel empty">Aucun produit ne remplit toutes les contraintes. Assouplis la température ou l'organe, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</div>`) +
       (out.length ? `<details class="more" ${ok.length ? "" : "open"}><summary>Produits écartés (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, 99)).join("")}</div></details>` : "");
@@ -354,14 +367,14 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       <div class="badges">${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "h1" : "nsf"}">NSF ${esc(p.nsf)}${p.nsf_reg_no ? " · n° " + esc(p.nsf_reg_no) : ""}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}</div>
       ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
       <dl class="kv"><dt>Température</dt><dd>${esc(tempTxt(p))}${p.temp_note ? `<div class="quote">${esc(p.temp_note)}</div>` : ""}</dd>
-        <dt>Viscosité</dt><dd>${esc(p.viscosity_iso_vg ? "ISO VG " + p.viscosity_iso_vg : "—")}</dd><dt>Grade NLGI</dt><dd>${esc(p.nlgi || "—")}</dd>
+        <dt>Viscosité</dt><dd>${esc(viscTxt(p) || "—")}</dd><dt>Grade NLGI</dt><dd>${esc(p.nlgi || "—")}</dd>
         <dt>Base</dt><dd>${esc(p.base || "—")}</dd><dt>Conditionnements</dt><dd>${esc((p.formats || []).join(", ") || "—")}</dd></dl>
       <h3>Organes</h3>${list(p.applications, (a) => esc(C.APPLICATIONS[a] || a))}
       <h3>Propriétés</h3>${list(p.properties, (a) => esc(C.PROPERTIES[a] || a))}
       ${(p.key_claims || []).length ? `<h3>Arguments (source Interflon)</h3>${list(p.key_claims)}` : ""}
       <h3>Sources</h3>${list(p.source_urls, (u) => `<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(String(u).replace(/^https?:\/\//, "").slice(0, 64))}</a>`)}
       ${(p.evidence || []).length ? `<details><summary class="hint" style="cursor:pointer">Preuves (${p.evidence.length}) : citation exacte derrière chaque valeur</summary>${list(p.evidence, (e) => `<b>${esc(e.field)}</b> <span class="quote">« ${esc(e.quote)} »</span> <a href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener">source</a>`)}</details>` : ""}
-      ${(p.uncertain_fields || []).length ? `<h3>À confirmer</h3><p class="hint">${esc(p.uncertain_fields.join(", "))}</p>` : ""}`;
+      ${(p.uncertain_fields || []).length ? `<h3>À confirmer</h3><ul class="hint">${p.uncertain_fields.map((x) => `<li>${esc(doubtTxt(x))}</li>`).join("")}</ul>` : ""}`;
     $("#sheet").hidden = false;
     $("#sheet-close").focus();
   }
@@ -385,7 +398,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       lines.push("", `${i + 1}. ${p.name}${p.nsf ? " (NSF " + p.nsf + ")" : ""}`);
       if (c.food && c.food !== "non" && !C.foodOk(p, c.application)) lines.push("  ATTENTION : non homologué pour le contact alimentaire.");
       if (p.description_fr) lines.push("  " + p.description_fr);
-      r.reasons.forEach((x) => lines.push(`  ${x.s === "y" ? "✓" : x.s === "n" ? "✕" : "?"} ${x.t}`));
+      r.reasons.forEach((x) => lines.push(`  ${MARK[x.s] || "?"} ${x.t}`));
       lines.push(`  Température : ${tempTxt(p)} · ${isVerified(p) ? "fiche vérifiée" : "données à confirmer par le service technique"}`);
     });
     lines.push("", "Proposition indicative établie à partir des fiches produits publiques Interflon, à confirmer avec la fiche technique et la FDS en vigueur.");
@@ -432,8 +445,9 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (saved) crit = sanitize(saved); else { crit = sanitize(EXAMPLE); isExample = true; }
     try {
       const doc = await (await fetch("data/produits.json")).json();
-      PRODUCTS = doc.products || [];
-      if (doc._meta && doc._meta.avertissement) $("#data-note").textContent = doc._meta.avertissement + ` ${PRODUCTS.filter((p) => !isVerified(p)).length} fiche(s) sur ${PRODUCTS.length} restent à confirmer.`;
+      PRODUCTS = (doc.products || []).filter((p) => !EQUIP.has(p.family));
+      const pending = PRODUCTS.filter((p) => !isVerified(p)).length;
+      if (doc._meta && doc._meta.avertissement) $("#data-note").textContent = doc._meta.avertissement + (pending ? ` ${pending} fiche(s) sur ${PRODUCTS.length} restent à confirmer.` : "");
     } catch (e) {
       $("#banners").innerHTML = `<div class="banner error"><b>Catalogue indisponible</b><span>Le fichier des produits n'a pas pu être chargé. Recharge la page.</span></div>`;
     }

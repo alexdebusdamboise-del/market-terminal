@@ -43,7 +43,7 @@ test("'je ne sais pas' never excludes but favours H1", () => {
   const r = C.rank([indusChain, foodChain], { food: "nsp", application: "chaines" });
   assert.ok(r.every((x) => x.eligible));
   assert.equal(r[0].product.id, "fl");
-  assert.ok(r[1].reasons.some((x) => x.s === "u" && /contact alimentaire/.test(x.t)));
+  assert.ok(r[1].reasons.some((x) => x.s === "a" && /contact alimentaire/.test(x.t)));
 });
 
 test("temperature: hard on known limits, flagged when unknown", () => {
@@ -63,7 +63,7 @@ test("application: exact, related, unrelated, unknown", () => {
   assert.equal(C.evaluate(foodChain, { application: "chaines" }).eligible, true);
   const related = C.evaluate(P({ applications: ["chaines"] }), { application: "convoyeurs" });
   assert.equal(related.eligible, true);
-  assert.ok(related.reasons.some((x) => x.s === "u" && /voisine/.test(x.t)));
+  assert.ok(related.reasons.some((x) => x.s === "r" && /voisine/.test(x.t)));
   assert.equal(C.evaluate(grease, { application: "chaines" }).eligible, false);
   const unk = C.evaluate(unknown, { application: "chaines" });
   assert.equal(unk.eligible, true);
@@ -165,4 +165,23 @@ test("formatKinds handles French thousands separators and grease cartridges", ()
   assert.equal(k("Cartouche 400 g pour graisseur manuel"), "graisse");
   assert.equal(k("Bidon 4 L"), "liquide");
   assert.equal(k("Interflon Single Point Lubricator 125 ml"), "automatique");
+});
+
+test("temp_na products are not judged on temperature", () => {
+  const r = C.evaluate(P({ family: "nettoyant", temp_na: true, applications: ["nettoyage_degraissage"] }), { application: "nettoyage_degraissage", tmin: 5, tmax: 60 });
+  assert.equal(r.eligible, true);
+  assert.ok(!r.reasons.some((x) => /température/i.test(x.t)));
+});
+
+test("viscosity: ISO grade, measured cSt within ±10 %, irrelevant families", () => {
+  const c = { iso_vg: "ISO VG 220" };
+  assert.ok(C.evaluate(P({ family: "huile", viscosity_iso_vg: "220" }), c).reasons.some((x) => x.s === "y"));
+  // 24 cSt at 40 °C falls in ISO VG 22 (19.8 to 24.2), 120 cSt in no grade
+  assert.ok(C.evaluate(P({ family: "huile", viscosity_cst40: 24 }), { iso_vg: "22" }).reasons.some((x) => x.s === "y" && /classe ISO VG 22/.test(x.t)));
+  assert.ok(C.evaluate(P({ family: "huile", viscosity_cst40: 120 }), { iso_vg: "100" }).reasons.some((x) => x.s === "n"));
+  assert.ok(C.evaluate(P({ family: "huile" }), c).reasons.some((x) => x.s === "u"));
+  // a cleaner or a grease has no ISO VG: nothing to flag
+  assert.ok(!C.evaluate(P({ family: "nettoyant" }), c).reasons.some((x) => x.s === "u"));
+  assert.ok(!C.evaluate(P({ family: "huile" }), { nlgi: "2" }).reasons.some((x) => x.s === "u"));
+  assert.ok(C.evaluate(P({ family: "graisse" }), { nlgi: "2" }).reasons.some((x) => x.s === "u"));
 });

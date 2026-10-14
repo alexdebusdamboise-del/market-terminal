@@ -49,10 +49,22 @@
   const famLabel = (f) => FAMILIES[f] || f || "—";
   const appLabel = (a) => C.APPLICATIONS[a] || a;
   const known = (x) => x !== null && x !== undefined && x !== "";
+  // y conforme · n non conforme · u donnée manquante · a à vérifier chez le client · r application voisine
+  const MARK = { y: "✔", n: "✖", u: "?", a: "!", r: "≈" };
+  // equipment (automatic lubricators, accessories) is listed in CAT, not ranked by the selector
+  const EQUIP = new Set(["lubrificateur_automatique", "accessoire"]);
   const tempTxt = (p) =>
-    !known(p.temp_min_c) && !known(p.temp_max_c)
+    p.temp_na
+      ? "sans objet"
+      : !known(p.temp_min_c) && !known(p.temp_max_c)
       ? "n.c."
       : `${known(p.temp_min_c) ? p.temp_min_c : "?"} → ${known(p.temp_max_c) ? p.temp_max_c : "?"} °C`;
+  // "temp_max_c (source unique)" -> "Température maxi (source unique)"
+  const FIELD_LABEL = { nsf_reg_no: "N° d'enregistrement NSF", nsf: "Homologation NSF", temp_min_c: "Température mini", temp_max_c: "Température maxi",
+    viscosity_iso_vg: "Viscosité", nlgi: "Grade NLGI", base: "Huile de base", formats: "Conditionnements", applications: "Applications", properties: "Propriétés" };
+  const doubtTxt = (f) => String(f).replace(/^(nsf_reg_no|nsf|temp_min_c|temp_max_c|viscosity_iso_vg|nlgi|base|formats|applications|properties)\b/, (k) => FIELD_LABEL[k]);
+  // ISO VG grade when the source gives one, otherwise the measured viscosity at 40 °C
+  const viscTxt = (p) => (p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : known(p.viscosity_cst40) ? `${p.viscosity_cst40} cSt à 40 °C` : "");
   const isVerified = (p) => p.confidence === "high" && !C.unsure(p, C.NSF_UNSURE) && !C.unsure(p, C.TEMP_UNSURE);
 
   // "-20", "−30" (U+2212), "180°C", "12,5" -> number; "" -> ""; garbage -> NaN
@@ -267,16 +279,17 @@
         ${isVerified(p) ? '<span class="badge ok" title="Plage de température et NSF confirmées par une source Interflon">fiche vérifiée</span>' : '<span class="badge warn" title="Certaines données restent à confirmer par le service technique">à valider</span>'}
       </div><button type="button" class="btn small" data-detail="${esc(p.id)}">Détails</button></div>
       <div class="desc">${esc(p.description_fr || "")}</div>
-      <div class="small muted">Température : ${esc(tempTxt(p))}${p.viscosity_iso_vg ? ` · ISO VG ${esc(p.viscosity_iso_vg)}` : ""}${p.nlgi ? ` · NLGI ${esc(p.nlgi)}` : ""}${(p.formats || []).length ? ` · ${esc(p.formats.join(", "))}` : ""}</div>
+      <div class="small muted">Température : ${esc(tempTxt(p))}${viscTxt(p) ? ` · ${esc(viscTxt(p))}` : ""}${p.nlgi ? ` · NLGI ${esc(p.nlgi)}` : ""}${(p.formats || []).length ? ` · ${esc(p.formats.join(", "))}` : ""}</div>
       ${tempBar(p, c)}
-      ${r.reasons.length ? `<ul class="reasons">${r.reasons.map((x) => `<li class="${x.s}">${x.s === "y" ? "✔" : x.s === "n" ? "✖" : "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
+      ${r.reasons.length ? `<ul class="reasons">${r.reasons.map((x) => `<li class="${x.s}">${MARK[x.s] || "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
     </div>`;
   }
 
   let lastRanked = [];
   function renderResults() {
     const c = effective();
-    const ranked = C.rank(PRODUCTS, c);
+    const SELECTABLE = PRODUCTS.filter((p) => !EQUIP.has(p.family));
+    const ranked = C.rank(SELECTABLE, c);
     lastRanked = ranked;
     const ok = ranked.filter((r) => r.eligible);
     const out = ranked.filter((r) => !r.eligible);
@@ -284,7 +297,7 @@
     $("#sel-warning").textContent =
       (META.avertissement || "Données issues des sources publiques Interflon : à valider par le service technique.") +
       (low ? ` ${low} fiche(s) sur ${PRODUCTS.length} comportent des données à confirmer.` : "");
-    $("#sel-title").textContent = hasCriteria(c) ? `PRODUITS RECOMMANDÉS · ${ok.length} / ${PRODUCTS.length}` : `TOUS LES PRODUITS · ${PRODUCTS.length}`;
+    $("#sel-title").textContent = hasCriteria(c) ? `PRODUITS RECOMMANDÉS · ${ok.length} / ${SELECTABLE.length}` : `TOUS LES LUBRIFIANTS ET NETTOYANTS · ${SELECTABLE.length}`;
     $("#sel-jump").textContent = hasCriteria(c) && !c.badTemp ? `Voir les ${ok.length} produit${ok.length > 1 ? "s" : ""} ↓` : "Voir les produits ↓";
     if (!PRODUCTS.length) {
       $("#sel-results").innerHTML = `<div class="empty"><p>Catalogue produits vide.</p><p class="muted">Vérifie le fichier public/data/produits.json.</p></div>`;
@@ -332,7 +345,7 @@
       <p>${esc(p.description_fr || "")}</p>
       <dl class="kv">
         <dt>Température</dt><dd>${esc(tempTxt(p))}${p.temp_note ? `<div class="muted small">${esc(p.temp_note)}</div>` : ""}</dd>
-        <dt>Viscosité</dt><dd>${esc(p.viscosity_iso_vg ? "ISO VG " + p.viscosity_iso_vg : "—")}</dd>
+        <dt>Viscosité</dt><dd>${esc(viscTxt(p) || "—")}</dd>
         <dt>Grade NLGI</dt><dd>${esc(p.nlgi || "—")}</dd>
         <dt>Base</dt><dd>${esc(p.base || "—")}</dd>
         <dt>Conditionnements</dt><dd>${esc((p.formats || []).join(", ") || "—")}</dd>
@@ -346,7 +359,7 @@
         p.evidence,
         (e) => `<b>${esc(e.field)}</b> : « ${esc(e.quote)} » <a href="${esc(IFX.safeUrl(e.url))}" target="_blank" rel="noopener">source</a>`
       )}</details>` : ""}
-      ${(p.uncertain_fields || []).length ? `<h3>À CONFIRMER</h3><div class="muted">${esc(p.uncertain_fields.join(", "))}</div>` : ""}
+      ${(p.uncertain_fields || []).length ? `<h3>À CONFIRMER</h3>${list(p.uncertain_fields, (x) => esc(doubtTxt(x)))}` : ""}
       ${p.checked ? `<div class="muted small" style="margin-top:10px">Données vérifiées le ${esc(IFX.fmtDate(p.checked))}</div>` : ""}`;
     IFX.openDrawer(p.name, html);
   }
@@ -379,7 +392,7 @@
         ${notFood ? `<p><b>ATTENTION : produit NON homologué pour le contact alimentaire. À n'utiliser que hors de toute zone de contact avec les denrées.</b></p>` : ""}
         <p>${esc(p.description_fr || "")}</p>
         <ul>${r.reasons.filter((x) => x.s === "y").map((x) => `<li>✔ ${esc(x.t)}</li>`).join("")}</ul>
-        ${check.length ? `<div><b>À vérifier avant usage :</b></div><ul>${check.map((x) => `<li>${x.s === "n" ? "✖" : "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
+        ${check.length ? `<div><b>À vérifier avant usage :</b></div><ul>${check.map((x) => `<li>${MARK[x.s] || "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
         <div class="muted">Température : ${esc(tempTxt(p))}${(p.formats || []).length ? ` · Conditionnements : ${esc(p.formats.join(", "))}` : ""}
           · ${isVerified(p) ? "fiche vérifiée sur source Interflon" : "données à confirmer par le service technique Interflon"}</div>`;
           }
@@ -435,7 +448,7 @@
         .map(
           (p) => `<tr class="clickable" data-detail="${esc(p.id)}"><td><a href="#" class="name" data-detail="${esc(p.id)}">${esc(p.name)}</a></td><td>${esc(famLabel(p.family))}</td>
         <td>${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">${esc(p.nsf)}</span>` : '<span class="muted">—</span>'}</td>
-        <td class="num">${esc(tempTxt(p))}</td><td class="hide-sm">${esc([p.viscosity_iso_vg && "VG " + p.viscosity_iso_vg, p.nlgi && "NLGI " + p.nlgi].filter(Boolean).join(" · ") || "—")}</td>
+        <td class="num">${esc(tempTxt(p))}</td><td class="hide-sm">${esc([viscTxt(p), p.nlgi && "NLGI " + p.nlgi].filter(Boolean).join(" · ") || "—")}</td>
         <td class="hide-sm">${esc((p.applications || []).map(appLabel).join(", "))}</td><td class="hide-sm">${esc((p.formats || []).join(", "))}</td>
         <td>${isVerified(p) ? '<span class="badge ok">vérifiée</span>' : '<span class="badge warn">à valider</span>'}</td></tr>`
         )

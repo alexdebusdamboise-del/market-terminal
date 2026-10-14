@@ -76,6 +76,16 @@ def main():
                 err(f"{where} : {k} = {v} hors plage plausible")
         if isinstance(tmin, (int, float)) and isinstance(tmax, (int, float)) and tmin >= tmax:
             err(f"{where} : temp_min_c ({tmin}) >= temp_max_c ({tmax})")
+        for k in ("temp_na", "nsf_none"):
+            if k in p and not isinstance(p[k], bool):
+                err(f"{where} : {k} doit être true ou false")
+        if p.get("nsf_none") and p.get("nsf"):
+            err(f"{where} : nsf_none incompatible avec une catégorie NSF")
+        if p.get("temp_na") and (tmin is not None or tmax is not None):
+            err(f"{where} : temp_na alors qu'une température est renseignée")
+        cst = p.get("viscosity_cst40")
+        if cst is not None and (not isinstance(cst, (int, float)) or not 1 <= cst <= 5000):
+            err(f"{where} : viscosity_cst40 doit être un nombre de cSt plausible")
         for a in p.get("applications") or []:
             if a not in apps:
                 err(f"{where} : application inconnue '{a}'")

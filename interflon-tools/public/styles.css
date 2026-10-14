@@ -217,6 +217,8 @@ ul.tight li{margin:2px 0;}
 .reasons .y{color:var(--ok);}
 .reasons .n{color:var(--bad);}
 .reasons .u{color:var(--warn);}
+.reasons .a{color:var(--warn);}
+.reasons .r{color:var(--blue);}
 .tbar{position:relative;height:8px;background:#1d1d1d;margin:6px 0 2px;}
 .tbar .p{position:absolute;top:0;bottom:0;background:#6a3c00;}
 .tbar .need{position:absolute;top:-2px;bottom:-2px;border:1px solid var(--blue);}
