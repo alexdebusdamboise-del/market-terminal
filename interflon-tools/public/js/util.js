@@ -4,6 +4,8 @@
   const IFX = (window.IFX = window.IFX || {});
   // Set by the claude.ai build: no Python server behind the page
   IFX.STATIC = !!window.IFX_STATIC;
+  // Set by the offline single-file build (opened by double-click): can print, no server either
+  IFX.OFFLINE = !!window.IFX_OFFLINE;
 
   const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   IFX.esc = (s) => (s === null || s === undefined ? "" : String(s).replace(/[&<>"']/g, (c) => ESC[c]));

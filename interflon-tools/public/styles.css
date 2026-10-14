@@ -39,6 +39,10 @@ a{color:var(--blue);}
   padding:0 10px;height:36px;flex:0 0 auto;}
 .brand{color:var(--amber);font-weight:700;letter-spacing:2px;white-space:nowrap;}
 .brand-sub{color:var(--amber2);font-weight:400;}
+.brand{display:flex;align-items:center;gap:8px;}
+/* official logo on its own white plate, as supplied (red on white) */
+.brand-logo{display:inline-flex;align-items:center;background:#fff;border-radius:3px;padding:2px 6px;height:26px;}
+.brand-logo img{height:20px;width:auto;display:block;}
 #cmdform{flex:1;display:flex;align-items:center;gap:6px;background:#0d0d0d;border:1px solid var(--amber-dim);
   height:26px;padding:0 8px;min-width:0;}
 #cmdform .prompt{color:var(--amber);font-weight:700;}
@@ -284,6 +288,7 @@ ul.tight li{margin:2px 0;}
   body.printing-reco{background:#fff;color:#000;height:auto;overflow:visible;display:block;font-size:11pt;}
   body.printing-reco > *:not(#print-area){display:none !important;}
   body.printing-reco #print-area{display:block !important;color:#000;}
+  #print-area .print-logo{height:34pt;width:auto;display:block;margin:0 0 10pt;}
   #print-area h1{font-size:16pt;margin:0 0 4pt;}
   #print-area h2{font-size:12pt;margin:12pt 0 4pt;border-bottom:1px solid #999;}
   #print-area .muted{color:#555;}

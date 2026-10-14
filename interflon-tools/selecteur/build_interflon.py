@@ -5,8 +5,8 @@
 
 Output: ../dist/selecteur-interflon.html, a standalone page (white and red,
 products and logic embedded) that opens by double-click, without a server.
-Without --logo, the header shows the company name as text until the official
-logo file is supplied.
+The official logo is taken from public/img/logo-interflon.png (or --logo); if
+that file is missing, the header shows the company name as text.
 """
 import argparse
 import base64
@@ -52,7 +52,8 @@ BRAND_CSS = """
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--logo", help="fichier du logo officiel (SVG, PNG ou JPG)")
+    ap.add_argument("--logo", default=os.path.join(APP, "public", "img", "logo-interflon.png"),
+                    help="fichier du logo officiel (SVG, PNG ou JPG) ; par défaut public/img/logo-interflon.png")
     args = ap.parse_args()
 
     page = open(os.path.join(HERE, "index.html"), encoding="utf-8").read()
@@ -65,7 +66,7 @@ def main():
     assert "prefers-color-scheme" not in page, "palette block not replaced"
     page = page.replace("</style>", BRAND_CSS + "</style>", 1)
 
-    if args.logo:
+    if args.logo and os.path.isfile(args.logo):
         mime = mimetypes.guess_type(args.logo)[0] or "image/png"
         uri = f"data:{mime};base64," + base64.b64encode(open(args.logo, "rb").read()).decode()
         logo = f'<img src="{uri}" alt="Interflon">'
@@ -92,7 +93,7 @@ def main():
     assert "<body>" in html
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w", encoding="utf-8").write(html)
-    print(f"{OUT} ({len(html) // 1024} Ko){' avec logo' if args.logo else ' (logo en attente)'}")
+    print(f"{OUT} ({len(html) // 1024} Ko){' avec logo' if 'data:image' in logo else ' (logo en attente)'}")
 
 
 if __name__ == "__main__":

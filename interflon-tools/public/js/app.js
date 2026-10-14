@@ -54,7 +54,7 @@
   // ------------------------------------------------------------------ help
   function renderHelp(meta, segments) {
     $("#aide").innerHTML = `<div class="phead"><span>AIDE</span><span class="phead-r">AIDE / HELP</span></div><div class="fbody">
-      ${IFX.STATIC ? `<h2>VERSION EN LIGNE</h2><p>Cette page en ligne contient le sélecteur, le catalogue et le suivi des prospects. La recherche d'usines (PROS) interroge l'API Recherche d'entreprises : elle fonctionne dans la version installée (<code>python3 server.py</code>, voir le README), car une page claude.ai ne peut pas appeler de service externe.</p>` : ""}
+      ${IFX.STATIC ? `<h2>${IFX.OFFLINE ? "VERSION HORS LIGNE" : "VERSION EN LIGNE"}</h2><p>${IFX.OFFLINE ? "Ce fichier" : "Cette page en ligne"} contient le sélecteur, le catalogue et le suivi des prospects. La recherche d'usines (PROS) interroge l'API Recherche d'entreprises : elle fonctionne dans la version installée (<code>python3 server.py</code>, voir le README), ${IFX.OFFLINE ? "car elle passe par le petit serveur Python" : "car une page claude.ai ne peut pas appeler de service externe"}.</p>` : ""}
       <h2>COMMANDES</h2>
       <p>Tape dans la barre du haut (touche <code>/</code> pour y aller), puis Entrée.</p>
       <table>
@@ -96,6 +96,8 @@
 
   // ------------------------------------------------------------------ boot
   async function loadJson(path, fallback) {
+    // offline single-file build: data embedded in the page
+    if (window.IFX_DATA && window.IFX_DATA[path]) return window.IFX_DATA[path];
     try {
       const r = await fetch(path, { cache: "no-cache" });
       if (!r.ok) throw new Error(r.status);

@@ -797,8 +797,8 @@
   function showStaticNotice() {
     $("#pros-msg").textContent = "Recherche disponible dans la version installée.";
     $("#res-list").innerHTML = `<div class="empty static-note">
-      <p><b>La recherche d'usines n'est pas disponible dans cette page en ligne.</b></p>
-      <p>Elle interroge l'API Recherche d'entreprises (base Sirene de l'Insee), et une page claude.ai ne peut pas appeler de service externe.</p>
+      <p><b>La recherche d'usines n'est pas disponible dans ${IFX.OFFLINE ? "ce fichier hors ligne" : "cette page en ligne"}.</b></p>
+      <p>Elle interroge l'API Recherche d'entreprises (base Sirene de l'Insee) via le petit serveur de la version installée${IFX.OFFLINE ? "" : ", et une page claude.ai ne peut pas appeler de service externe"}.</p>
       <p>Pour prospecter : lance la version installée sur ton ordinateur (<code>python3 server.py</code> dans le dossier <code>interflon-tools</code>), puis ouvre <code>http://127.0.0.1:8766</code>. Tes prospects s'exportent en JSON et se restaurent ici dans PIPE.</p>
       <p>Le sélecteur produit (SEL), le catalogue (CAT) et le suivi des prospects (PIPE) fonctionnent ici normalement.</p>
       <p><a href="https://annuaire-entreprises.data.gouv.fr" target="_blank" rel="noopener">Ouvrir l'Annuaire des entreprises</a></p>

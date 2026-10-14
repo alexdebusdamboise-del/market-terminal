@@ -20,6 +20,9 @@ def main():
     body = re.search(r"<body>(.*)</body>", html, re.S).group(1)
     # no map in the static page (external tiles are blocked there)
     body = re.sub(r'\s*<script src="vendor/leaflet/leaflet.js"></script>', "", body)
+    # the published page is not an official Interflon page: no company logo there
+    body, n = re.subn(r'<span class="brand-logo">.*?</span>', '<span class="logo">▮</span>', body, count=1, flags=re.S)
+    assert n == 1 and "logo-interflon" not in body, "logo not stripped"
     page = (
         "<title>Terminal Interflon</title>\n"
         f"<style>\n{css}\n</style>\n"

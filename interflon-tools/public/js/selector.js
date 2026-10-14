@@ -378,7 +378,10 @@
     if (c.tmin !== "" || c.tmax !== "") need.push(`Température : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
     if (c.env.length) need.push(`Environnement : ${c.env.map((e) => C.PROPERTIES[e] || e).join(", ")}`);
     if (c.formats.length) need.push(`Conditionnement : ${c.formats.map((f) => C.FORMATS[f]).join(", ")}`);
+    // the printed proposal carries the logo of the build when it has one
+    const logo = document.querySelector("#topbar .brand-logo img");
     $("#print-area").innerHTML = `
+      ${logo ? `<img class="print-logo" src="${esc(logo.src)}" alt="Interflon" />` : ""}
       <h1>Recommandation de lubrification</h1>
       <div class="muted">${esc(crit.client || "")}${crit.client ? " · " : ""}${esc(IFX.fmtDate(IFX.today()))}</div>
       <h2>Besoin</h2><ul>${need.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>
@@ -399,7 +402,7 @@
         )
         .join("")}
       <p class="muted" style="margin-top:18pt">Proposition indicative établie à partir des fiches produits publiques. À confirmer avec la fiche technique et la fiche de données de sécurité en vigueur.</p>`;
-    if (IFX.STATIC) return copyReco();
+    if (IFX.STATIC && !IFX.OFFLINE) return copyReco();
     // only this recommendation is printed; other prints (Ctrl+P elsewhere) are left alone
     document.body.classList.add("printing-reco");
     window.print();
@@ -478,7 +481,7 @@
     META = (productsDoc && productsDoc._meta) || {};
     EQUIV = ((equivDoc && equivDoc.equivalences) || []).filter((x) => x && x.marque && x.interflon);
     crit = sanitizeCrit(IFX.store.get(LS_CRIT, null));
-    if (IFX.STATIC) $("#sel-print").textContent = "Copier la recommandation";
+    if (IFX.STATIC && !IFX.OFFLINE) $("#sel-print").textContent = "Copier la recommandation";
     window.addEventListener("afterprint", () => {
       document.body.classList.remove("printing-reco");
       $("#print-area").innerHTML = "";
