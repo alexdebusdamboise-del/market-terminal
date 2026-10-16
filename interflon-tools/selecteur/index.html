@@ -105,6 +105,9 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;l
 .badge.nsf{background:var(--info-soft);color:var(--info)}
 .badge.ok{background:var(--ok-soft);color:var(--ok)}
 .badge.warn{background:var(--warn-soft);color:var(--warn)}
+.vmark{font:500 12px/1 var(--mono);margin-left:4px;white-space:nowrap}
+.vmark.ok{color:var(--ok)}
+.vmark.warn{color:var(--warn)}
 .desc{margin:0;max-width:75ch}
 .specs{display:flex;flex-wrap:wrap;gap:4px 18px;font:400 13px/1.4 var(--mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
 .specs b{color:var(--ink);font-weight:500}
@@ -280,6 +283,14 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   // ISO VG grade when the source gives one, otherwise the measured viscosity at 40 °C
   const viscTxt = (p) => (p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : known(p.viscosity_cst40) ? `${p.viscosity_cst40} cSt à 40 °C` : "");
   const isVerified = C.isVerified;
+  // temperature checked on its own: a sheet that only lacks its packaging keeps a verified range
+  const TEMP_MARK = {
+    ok: `<span class="vmark ok" title="Plage appuyée par une citation de sa source (Fiche ▸ Preuves)">✓ vérifiée</span>`,
+    doubt: `<span class="vmark warn" title="Plage relevée, source à confirmer">à confirmer</span>`,
+  };
+  const tempMark = (p) => TEMP_MARK[C.tempStatus(p)] || "";
+  // badge of the whole sheet, saying what is missing instead of a vague "à valider"
+  const sheetBadge = (p) => (isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn" title="${esc(C.gapsText(p))}">${esc(C.gapsText(p) || "à confirmer")}</span>`);
   function parseTemp(raw) {
     const s = String(raw === undefined || raw === null ? "" : raw).replace(/[−–—]/g, "-").replace(/°\s*c?|\s/gi, "").replace(",", ".");
     if (!s || s === "-") return "";
@@ -384,14 +395,14 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   function card(r, c, i) {
     const p = r.product;
     const h1 = C.nsfList(p).includes("H1");
-    const specs = [`<span>Température <b>${esc(tempTxt(p))}</b></span>`];
+    const specs = [`<span>Température <b>${esc(tempTxt(p))}</b> ${tempMark(p)}</span>`];
     if (p.viscosity_iso_vg) specs.push(`<span>ISO VG <b>${esc(p.viscosity_iso_vg)}</b></span>`);
     else if (known(p.viscosity_cst40)) specs.push(`<span><b>${esc(p.viscosity_cst40)}</b> cSt à 40 °C</span>`);
     if (p.nlgi) specs.push(`<span>NLGI <b>${esc(p.nlgi)}</b></span>`);
     if ((p.formats || []).length) specs.push(`<span>${esc(p.formats.join(", "))}</span>`);
     return `<article class="panel card ${r.eligible && i === 0 ? "top1" : ""} ${r.eligible ? "" : "out"}">
       <div class="ch"><div>${r.eligible && i < 3 ? `<span class="rank">CHOIX ${i + 1}</span>` : ""}<div class="pname">${esc(p.name)}</div>
-        <div class="badges">${p.nsf ? `<span class="badge ${h1 ? "h1" : "nsf"}">NSF ${esc(p.nsf)}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}${currentEquiv() && currentEquiv().interflon === p.name ? `<span class="badge equiv">équivalence proposée</span>` : ""}</div></div>
+        <div class="badges">${p.nsf ? `<span class="badge ${h1 ? "h1" : "nsf"}">NSF ${esc(p.nsf)}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${sheetBadge(p)}${currentEquiv() && currentEquiv().interflon === p.name ? `<span class="badge equiv">équivalence proposée</span>` : ""}</div></div>
         <button type="button" class="btn ghost" data-detail="${esc(p.id)}">Fiche</button></div>
       ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
       <div class="specs">${specs.join("")}</div>
@@ -447,7 +458,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const list = (arr, fn) => (arr && arr.length ? `<ul>${arr.map((x) => `<li>${fn ? fn(x) : esc(x)}</li>`).join("")}</ul>` : `<p class="hint">Non renseigné</p>`);
     $("#sheet-title").textContent = p.name;
     $("#sheet-body").innerHTML = `
-      <div class="badges">${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "h1" : "nsf"}">NSF ${esc(p.nsf)}${p.nsf_reg_no ? " · n° " + esc(p.nsf_reg_no) : ""}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}</div>
+      <div class="badges">${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "h1" : "nsf"}">NSF ${esc(p.nsf)}${p.nsf_reg_no ? " · n° " + esc(p.nsf_reg_no) : ""}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${sheetBadge(p)}</div>
       ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
       ${p.nsf_note ? `<p class="hint">${esc(p.nsf_note)}</p>` : ""}
       <dl class="kv"><dt>Température</dt><dd>${esc(tempTxt(p))}${p.temp_note ? `<div class="quote">${esc(p.temp_note)}</div>` : ""}</dd>
@@ -487,7 +498,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       if (c.food && c.food !== "non" && !C.foodOk(p, c.application)) lines.push("  ATTENTION : non homologué pour le contact alimentaire.");
       if (p.description_fr) lines.push("  " + p.description_fr);
       r.reasons.forEach((x) => lines.push(`  ${MARK[x.s] || "?"} ${x.t}`));
-      lines.push(`  Température : ${tempTxt(p)} · ${isVerified(p) ? "fiche vérifiée" : "données à confirmer par le service technique"}`);
+      lines.push(`  Température : ${tempTxt(p)}${C.tempStatus(p) === "ok" ? " (vérifiée)" : ""} · ${isVerified(p) ? "fiche vérifiée" : `${C.gapsText(p) || "données à confirmer"} (service technique)`}`);
     });
     lines.push("", "Proposition indicative établie à partir des fiches produits Interflon, à confirmer avec la fiche technique et la FDS en vigueur.");
     return lines.join("\n");
@@ -533,7 +544,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
           ${p.description_fr ? `<p>${esc(p.description_fr)}</p>` : ""}
           ${good.length ? `<ul class="pr-ok">${good.map((x) => `<li><span>✓</span>${esc(x.t)}</li>`).join("")}</ul>` : ""}
           ${check.length ? `<p class="pr-sub">À vérifier avant utilisation</p><ul class="pr-check">${check.map((x) => `<li><span>${mark(x.s)}</span>${esc(x.t)}</li>`).join("")}</ul>` : ""}
-          <p class="pr-specs">${esc(specs.join(" · "))} · ${isVerified(p) ? "fiche vérifiée sur document Interflon" : "données à confirmer par le service technique Interflon"}</p>
+          <p class="pr-specs">${esc(specs.join(" · "))} · ${isVerified(p) ? "fiche vérifiée sur document Interflon" : `${C.tempStatus(p) === "ok" ? "température vérifiée · " : ""}${esc(C.gapsText(p) || "données à confirmer")} (service technique Interflon)`}</p>
         </article>`;
       }).join("")}
       <footer class="pr-foot">Proposition indicative établie à partir des fiches produits Interflon. À confirmer avec la fiche technique et la fiche de données de sécurité en vigueur avant utilisation.<br>Interflon® et MicPol® sont des marques déposées d'Interflon BV.</footer>
@@ -645,8 +656,9 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     try {
       const doc = await (await fetch("data/produits.json")).json();
       PRODUCTS = (doc.products || []).filter((p) => !EQUIP.has(p.family));
-      const pending = PRODUCTS.filter((p) => !isVerified(p)).length;
-      if (doc._meta && doc._meta.avertissement) $("#data-note").textContent = doc._meta.avertissement + (pending ? ` ${pending} fiche(s) sur ${PRODUCTS.length} restent à confirmer.` : "");
+      const pending = PRODUCTS.filter((p) => !isVerified(p));
+      const noPack = pending.filter((p) => C.gaps(p).some((g) => g.label === "conditionnements")).length;
+      if (doc._meta && doc._meta.avertissement) $("#data-note").textContent = doc._meta.avertissement + (pending.length ? ` ${pending.length} fiche(s) sur ${PRODUCTS.length} incomplète(s)${noPack ? `, dont ${noPack} sans conditionnements renseignés` : ""} : le badge de chaque fiche dit ce qui manque.` : "");
     } catch (e) {
       $("#banners").innerHTML = `<div class="banner error"><b>Catalogue indisponible</b><span>Le fichier des produits n'a pas pu être chargé. Recharge la page.</span></div>`;
     }

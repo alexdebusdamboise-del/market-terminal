@@ -192,3 +192,16 @@ test("gearbox minimum applies only to closed gears", () => {
   assert.equal(C.evaluate(p, { application: "roulements", tmin: -10 }).eligible, true);
   assert.ok(C.evaluate(p, { application: "engrenages_fermes", tmin: 5 }).reasons.some((x) => x.s === "y" && /en réducteur/.test(x.t)));
 });
+
+test("temperature status is shown on its own; gaps say what a sheet lacks", () => {
+  const ev = [{ field: "temp_min_c", quote: "q", url: "u" }, { field: "temp_max_c", quote: "q", url: "u" }];
+  assert.equal(C.tempStatus(P({ temp_min_c: -10, temp_max_c: 100, evidence: ev })), "ok");
+  assert.equal(C.tempStatus(P({ temp_min_c: -10, temp_max_c: 100, evidence: ev, uncertain_fields: ["temp_max_c (source unique)"] })), "doubt");
+  assert.equal(C.tempStatus(P({ temp_min_c: -10, temp_max_c: 100, evidence: [] })), "doubt");
+  assert.equal(C.tempStatus(P({ temp_min_c: -10 })), "missing");
+  assert.equal(C.tempStatus(P({ family: "nettoyant", temp_na: true })), "na");
+  const p = P({ formats: [], nlgi: null, properties: ["sans_pfas"], uncertain_fields: ["formats", "nlgi", "properties (sans PFAS : produit absent du bilan PFAS interne d'avril 2025, à confirmer)"] });
+  assert.deepEqual(C.gaps(p).map((g) => [g.label, g.missing]), [["conditionnements", true], ["grade NLGI", true], ["sans PFAS", false]]);
+  assert.equal(C.gapsText(p), "conditionnements, grade NLGI à compléter · sans PFAS à confirmer");
+  assert.equal(C.gapsText(P({ uncertain_fields: [] })), "");
+});

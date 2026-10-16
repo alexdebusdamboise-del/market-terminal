@@ -167,6 +167,39 @@
   const CLEANERS = ["nettoyant", "degraissant"];
   const isVerified = (p) => p.confidence === "high" && !unsure(p, NSF_UNSURE) && (CLEANERS.includes(p.family) || !unsure(p, TEMP_UNSURE));
 
+  // Temperature on its own, so a sheet that only lacks its packaging still shows a
+  // verified range: "ok" (both limits quoted from a source), "doubt", "missing", "na".
+  const hasEvidence = (p, field) => (p.evidence || []).some((e) => e && e.field === field);
+  function tempStatus(p) {
+    if (p.temp_na) return "na";
+    if (p.temp_min_c === null || p.temp_min_c === undefined || p.temp_max_c === null || p.temp_max_c === undefined) return "missing";
+    if (unsure(p, TEMP_UNSURE) || !hasEvidence(p, "temp_min_c") || !hasEvidence(p, "temp_max_c")) return "doubt";
+    return "ok";
+  }
+
+  // What keeps a sheet from "fiche vérifiée", in plain words:
+  // [{label, missing}] — missing = no value at all, otherwise a value to confirm.
+  const GAP_LABEL = { formats: "conditionnements", nsf: "NSF", nsf_reg_no: "n° NSF", temp_min_c: "température", temp_max_c: "température",
+    viscosity_iso_vg: "viscosité", nlgi: "grade NLGI", applications: "applications", properties: "propriétés", base: "huile de base" };
+  const EMPTY = (v) => v === null || v === undefined || v === "" || (Array.isArray(v) && !v.length);
+  function gaps(p) {
+    const out = [];
+    (p.uncertain_fields || []).forEach((f) => {
+      const key = (String(f).match(/^[a-z_]+/) || [""])[0];
+      const label = PFAS_UNSURE.test(String(f)) ? "sans PFAS" : GAP_LABEL[key] || key;
+      const value = key === "viscosity_iso_vg" ? p.viscosity_iso_vg || p.viscosity_cst40 : p[key];
+      const missing = !PFAS_UNSURE.test(String(f)) && EMPTY(value);
+      if (label && !out.some((g) => g.label === label)) out.push({ label, missing });
+    });
+    return out;
+  }
+  // "conditionnements à compléter", "sans PFAS à confirmer", "NLGI, viscosité à compléter"…
+  function gapsText(p) {
+    const g = gaps(p);
+    const part = (list, verb) => (list.length ? `${list.map((x) => x.label).join(", ")} ${verb}` : "");
+    return [part(g.filter((x) => x.missing), "à compléter"), part(g.filter((x) => !x.missing), "à confirmer")].filter(Boolean).join(" · ");
+  }
+
   // Requirements the customer states as mandatory ("exigé"): hard constraints
   const REQUIRED_ENV = {
     biodegradable: (props) => props.includes("biodegradable"),
@@ -354,5 +387,5 @@
     demoulant: { label: "Agent de démoulage", application: "demoulage" },
   };
 
-  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, nsfList, nsfParse, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
+  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, tempStatus, gaps, gapsText, nsfList, nsfParse, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
 });

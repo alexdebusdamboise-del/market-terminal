@@ -67,6 +67,18 @@
   // ISO VG grade when the source gives one, otherwise the measured viscosity at 40 °C
   const viscTxt = (p) => (p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : known(p.viscosity_cst40) ? `${p.viscosity_cst40} cSt à 40 °C` : "");
   const isVerified = C.isVerified;
+  // temperature checked on its own: a sheet that only lacks its packaging keeps a verified range
+  const TEMP_MARK = {
+    ok: '<span class="vmark ok" title="Plage appuyée par une citation de sa source (Détails ▸ Preuves)">✔ vérifiée</span>',
+    doubt: '<span class="vmark warn" title="Plage relevée, source à confirmer">à confirmer</span>',
+  };
+  const tempMark = (p) => TEMP_MARK[C.tempStatus(p)] || "";
+  // badge of the whole sheet, saying what is missing instead of a vague "à valider"
+  const sheetBadge = (p, short) => {
+    if (isVerified(p)) return '<span class="badge ok" title="Chaque donnée de la fiche (NSF, températures, conditionnements, applications…) est appuyée par une source citée">fiche vérifiée</span>';
+    const g = C.gapsText(p) || "à confirmer";
+    return `<span class="badge warn" title="${esc(g)}">${esc(short && g.length > 40 ? "à compléter" : g)}</span>`;
+  };
 
   // "-20", "−30" (U+2212), "180°C", "12,5" -> number; "" -> ""; garbage -> NaN
   function parseTemp(raw) {
@@ -302,10 +314,10 @@
       <div class="card-h"><div><span class="pname">${esc(p.name)}</span>
         ${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">NSF ${esc(p.nsf)}</span>` : ""}
         <span class="badge">${esc(famLabel(p.family))}</span>
-        ${isVerified(p) ? '<span class="badge ok" title="Chaque donnée de la fiche (NSF, températures, conditionnements, applications…) est appuyée par une source citée">fiche vérifiée</span>' : '<span class="badge warn" title="Certaines données restent à confirmer par le service technique">à valider</span>'}
+        ${sheetBadge(p)}
       </div><button type="button" class="btn small" data-detail="${esc(p.id)}">Détails</button></div>
       <div class="desc">${esc(p.description_fr || "")}</div>
-      <div class="small muted">Température : ${esc(tempTxt(p))}${viscTxt(p) ? ` · ${esc(viscTxt(p))}` : ""}${p.nlgi ? ` · NLGI ${esc(p.nlgi)}` : ""}${(p.formats || []).length ? ` · ${esc(p.formats.join(", "))}` : ""}</div>
+      <div class="small muted">Température : ${esc(tempTxt(p))} ${tempMark(p)}${viscTxt(p) ? ` · ${esc(viscTxt(p))}` : ""}${p.nlgi ? ` · NLGI ${esc(p.nlgi)}` : ""}${(p.formats || []).length ? ` · ${esc(p.formats.join(", "))}` : ""}</div>
       ${tempBar(p, c)}
       ${r.reasons.length ? `<ul class="reasons">${r.reasons.map((x) => `<li class="${x.s}">${MARK[x.s] || "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
     </div>`;
@@ -319,10 +331,11 @@
     lastRanked = ranked;
     const ok = ranked.filter((r) => r.eligible);
     const out = ranked.filter((r) => !r.eligible);
-    const low = PRODUCTS.filter((p) => !isVerified(p)).length;
+    const low = SELECTABLE.filter((p) => !isVerified(p));
+    const noPack = low.filter((p) => C.gaps(p).some((g) => g.label === "conditionnements")).length;
     $("#sel-warning").textContent =
       (META.avertissement || "Données issues des sources publiques Interflon : à valider par le service technique.") +
-      (low ? ` ${low} fiche(s) sur ${PRODUCTS.length} comportent des données à confirmer.` : "");
+      (low.length ? ` ${low.length} fiche(s) sur ${SELECTABLE.length} incomplète(s)${noPack ? `, dont ${noPack} sans conditionnements renseignés` : ""} : le badge de chaque fiche dit ce qui manque.` : "");
     $("#sel-title").textContent = hasCriteria(c) ? `PRODUITS RECOMMANDÉS · ${ok.length} / ${SELECTABLE.length}` : `TOUS LES LUBRIFIANTS ET NETTOYANTS · ${SELECTABLE.length}`;
     $("#sel-jump").textContent = hasCriteria(c) && !c.badTemp ? `Voir les ${ok.length} produit${ok.length > 1 ? "s" : ""} ↓` : "Voir les produits ↓";
     if (!PRODUCTS.length) {
@@ -367,11 +380,11 @@
     const html = `
       <div>${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">NSF ${esc(p.nsf)}${p.nsf_reg_no ? " · n° " + esc(p.nsf_reg_no) : ""}</span>` : '<span class="badge">pas de NSF</span>'}
         <span class="badge">${esc(famLabel(p.family))}</span><span class="badge">${esc(p.range || "")}</span>
-        ${isVerified(p) ? '<span class="badge ok">fiche vérifiée</span>' : '<span class="badge warn">à valider</span>'}</div>
+        ${sheetBadge(p)}</div>
       <p>${esc(p.description_fr || "")}</p>
       ${p.nsf_note ? `<p class="muted small">${esc(p.nsf_note)}</p>` : ""}
       <dl class="kv">
-        <dt>Température</dt><dd>${esc(tempTxt(p))}${p.temp_note ? `<div class="muted small">${esc(p.temp_note)}</div>` : ""}</dd>
+        <dt>Température</dt><dd>${esc(tempTxt(p))} ${tempMark(p)}${p.temp_note ? `<div class="muted small">${esc(p.temp_note)}</div>` : ""}</dd>
         <dt>Viscosité</dt><dd>${esc(viscTxt(p) || "—")}</dd>
         <dt>Grade NLGI</dt><dd>${esc(p.nlgi || "—")}</dd>
         <dt>Base</dt><dd>${esc(p.base || "—")}</dd>
@@ -425,7 +438,7 @@
         <ul>${r.reasons.filter((x) => x.s === "y").map((x) => `<li>✔ ${esc(x.t)}</li>`).join("")}</ul>
         ${check.length ? `<div><b>À vérifier avant usage :</b></div><ul>${check.map((x) => `<li>${MARK[x.s] || "?"} ${esc(x.t)}</li>`).join("")}</ul>` : ""}
         <div class="muted">Température : ${esc(tempTxt(p))}${(p.formats || []).length ? ` · Conditionnements : ${esc(p.formats.join(", "))}` : ""}
-          · ${isVerified(p) ? "fiche vérifiée (chaque donnée appuyée par une source citée)" : "données à confirmer par le service technique Interflon"}</div>`;
+          · ${isVerified(p) ? "fiche vérifiée (chaque donnée appuyée par une source citée)" : `${C.tempStatus(p) === "ok" ? "température vérifiée · " : ""}${esc(C.gapsText(p) || "données à confirmer")} (service technique Interflon)`}</div>`;
           }
         )
         .join("")}
@@ -481,7 +494,7 @@
         <td>${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">${esc(p.nsf)}</span>` : '<span class="muted">—</span>'}</td>
         <td class="num">${esc(tempTxt(p))}</td><td class="hide-sm">${esc([viscTxt(p), p.nlgi && "NLGI " + p.nlgi].filter(Boolean).join(" · ") || "—")}</td>
         <td class="hide-sm">${esc((p.applications || []).map(appLabel).join(", "))}</td><td class="hide-sm">${esc((p.formats || []).join(", "))}</td>
-        <td>${isVerified(p) ? '<span class="badge ok">vérifiée</span>' : '<span class="badge warn">à valider</span>'}</td></tr>`
+        <td>${sheetBadge(p, true)}</td></tr>`
         )
         .join("")}</tbody></table>`
       : `<div class="empty"><p>Aucun produit.</p></div>`;

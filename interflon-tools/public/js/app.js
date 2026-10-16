@@ -79,7 +79,7 @@
       <ul class="tight">
         <li>Les contraintes <b>dures</b> (NSF H1 si contact alimentaire, plage de température, application, famille de produit) écartent un produit ; les produits écartés restent visibles avec la raison.</li>
         <li>Une donnée <b>manquante</b> n'écarte jamais un produit : elle est signalée « ? à vérifier ».</li>
-        <li>Badge <span class="badge ok">fiche vérifiée</span> : NSF et température confirmées par une source Interflon. <span class="badge warn">à valider</span> : au moins une donnée critique reste à confirmer.</li>
+        <li>Badge <span class="badge ok">fiche vérifiée</span> : chaque donnée de la fiche est appuyée par une source citée. Sinon le badge dit ce qui manque (ex. <span class="badge warn">conditionnements à compléter</span>). La température porte sa propre marque <span class="vmark ok">✔ vérifiée</span> quand ses deux limites sont citées d'une source.</li>
         <li>« Imprimer / PDF » produit une recommandation d'une page à laisser au client.</li>
       </ul>
 
