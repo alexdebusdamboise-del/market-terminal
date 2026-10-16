@@ -645,7 +645,10 @@
         <a href="https://www.linkedin.com/search/results/people/?keywords=${q(`maintenance ${co.nom}`)}" target="_blank" rel="noopener">LinkedIn : maintenance</a>
         <a href="https://www.google.com/search?q=${q(`"${co.nom}" ${et.commune} responsable maintenance`)}" target="_blank" rel="noopener">Google : resp. maintenance</a>
         <a href="https://www.google.com/search?q=${q(`"${co.nom}" ${et.commune}`)}" target="_blank" rel="noopener">Site web</a>
-      </div>`;
+      </div>
+
+      <h3>OUTILS</h3>
+      <div class="links">${IFX.TOOLS.map(([label, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>`).join("")}</div>`;
 
     IFX.openDrawer(co.nom, html, (root) => {
       // capture this sheet's own fields: a pending autosave must not read the next sheet's ones
@@ -798,8 +801,8 @@
     $("#pros-msg").textContent = "Recherche disponible dans la version installée.";
     $("#res-list").innerHTML = `<div class="empty static-note">
       <p><b>La recherche d'usines n'est pas disponible dans ${IFX.OFFLINE ? "ce fichier hors ligne" : "cette page en ligne"}.</b></p>
-      <p>Elle interroge l'API Recherche d'entreprises (base Sirene de l'Insee) via le petit serveur de la version installée${IFX.OFFLINE ? "" : ", et une page claude.ai ne peut pas appeler de service externe"}.</p>
-      <p>Pour prospecter : lance la version installée sur ton ordinateur (<code>python3 server.py</code> dans le dossier <code>interflon-tools</code>), puis ouvre <code>http://127.0.0.1:8766</code>. Tes prospects s'exportent en JSON et se restaurent ici dans PIPE.</p>
+      <p>Elle interroge l'API Recherche d'entreprises (base Sirene de l'Insee)${IFX.OFFLINE ? " depuis la version installée" : ", et une page claude.ai ne peut pas appeler de service externe"}.</p>
+      <p>Pour prospecter : lance la version installée sur ton ordinateur (double-clic sur <code>Lancer le terminal.bat</code>), elle s'ouvre dans ton navigateur. Tes prospects s'exportent en JSON et se restaurent ici dans PIPE.</p>
       <p>Le sélecteur produit (SEL), le catalogue (CAT) et le suivi des prospects (PIPE) fonctionnent ici normalement.</p>
       <p><a href="https://annuaire-entreprises.data.gouv.fr" target="_blank" rel="noopener">Ouvrir l'Annuaire des entreprises</a></p>
     </div>`;

@@ -10,6 +10,16 @@
   const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
   IFX.esc = (s) => (s === null || s === undefined ? "" : String(s).replace(/[&<>"']/g, (c) => ESC[c]));
 
+  // The other field tools (private claude.ai pages of the same account). The selector
+  // opens locally in the installed version, where it shares this catalogue.
+  IFX.TOOLS = [
+    ["Relevé de visite", "https://claude.ai/artifact/E9SD5iW2k8UiQVpfaErkji"],
+    ["Relevé technique", "https://claude.ai/artifact/2zu93hewvkyqpHjZYwaNpD"],
+    ["Calculateur ROI lubrification", "https://claude.ai/artifact/NpWuPsDVKqCXGw4fprEW1T"],
+    ["Calculateur ROI express", "https://claude.ai/artifact/MPXTksVpZrpnCqE4VxQ2Df"],
+    ["Sélecteur (version client)", IFX.STATIC ? "https://claude.ai/artifact/8eEKcabg9CgnSv3ftaxSWU" : "/selecteur/"],
+  ];
+
   // Only http(s) links from data files may become hrefs (no javascript: URLs)
   IFX.safeUrl = (u) => (/^https?:\/\//i.test(String(u || "")) ? String(u) : "#");
 
@@ -72,6 +82,8 @@
   };
 
   IFX.api = async (path, params, signal) => {
+    // company and place searches go straight to the public APIs (js/sources.js)
+    if (IFX.sources && IFX.sources[path]) return IFX.sources[path](params || {}, signal);
     const qs = new URLSearchParams();
     Object.entries(params || {}).forEach(([k, v]) => {
       if (v === undefined || v === null || v === "" || (Array.isArray(v) && !v.length)) return;

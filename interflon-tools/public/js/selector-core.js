@@ -160,6 +160,12 @@
   const unsure = (p, re) => (p.uncertain_fields || []).some((f) => re.test(String(f)));
   const NSF_UNSURE = /^nsf\b(?!_)/i;
   const TEMP_UNSURE = /^temp_(min|max)/i;
+  const PFAS_UNSURE = /pfas/i;
+
+  // "Fiche vérifiée": NSF and temperature confirmed by an Interflon source.
+  // Cleaners have no operating range to confirm, so only their NSF counts.
+  const CLEANERS = ["nettoyant", "degraissant"];
+  const isVerified = (p) => p.confidence === "high" && !unsure(p, NSF_UNSURE) && (CLEANERS.includes(p.family) || !unsure(p, TEMP_UNSURE));
 
   // Requirements the customer states as mandatory ("exigé"): hard constraints
   const REQUIRED_ENV = {
@@ -256,8 +262,9 @@
       const label = PROPERTIES[e] || e;
       if (REQUIRED_ENV[e]) {
         if (REQUIRED_ENV[e](props)) {
-          score += 8;
-          reasons.push({ s: "y", t: label });
+          const doubt = e === "sans_pfas" && unsure(p, PFAS_UNSURE);
+          score += doubt ? 3 : 8;
+          reasons.push(doubt ? { s: "u", t: `${label} : à confirmer (absent du bilan PFAS Interflon d'avril 2025)` } : { s: "y", t: label });
         } else if (!props.length) reasons.push({ s: "u", t: `${label} : non renseigné, à vérifier` });
         else blockers.push(`${label} : exigé, non revendiqué`);
         return;
@@ -347,5 +354,5 @@
     demoulant: { label: "Agent de démoulage", application: "demoulage" },
   };
 
-  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, nsfList, nsfParse, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
+  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, nsfList, nsfParse, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
 });

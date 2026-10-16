@@ -1,8 +1,9 @@
 {
  "_meta": {
   "genere": "2026-10-16",
-  "methode": "Fiches constituées à partir de sources publiques (pages interflon.com, fiches techniques et FDS publiées, certificats NSF, distributeurs) via recherche web. Chaque valeur (NSF, températures, viscosité, NLGI, conditionnements, applications) est appuyée par une citation exacte de sa source, contrôlée automatiquement puis relue par deux vérificateurs indépendants (bon produit, bonne valeur). Sans preuve, la valeur reste vide. Quand deux sources Interflon divergent, la valeur la plus prudente est retenue et la fiche l'explique.",
-  "avertissement": "Données issues de sources publiques, à valider par le service technique Interflon avant tout engagement client."
+  "methode": "Fiches constituées à partir de sources publiques (pages interflon.com, fiches techniques et FDS publiées, certificats NSF, distributeurs) via recherche web. Chaque valeur (NSF, températures, viscosité, NLGI, conditionnements, applications) est appuyée par une citation exacte de sa source, contrôlée automatiquement puis relue par deux vérificateurs indépendants (bon produit, bonne valeur). Sans preuve, la valeur reste vide. Quand deux sources Interflon divergent, la valeur la plus prudente est retenue et la fiche l'explique. Complété le 2026-10-13 avec des documents internes Interflon France (book de vente TC 2026, bilan PFAS d'avril 2025, liste NSF ISO 21469, fiche technique Eco EM100+), cités dans les preuves de chaque fiche.",
+  "avertissement": "Données issues de sources publiques et de documents Interflon France, à valider par le service technique avant tout engagement client.",
+  "mis_a_jour": "2026-10-16"
  },
  "products": [
   {
@@ -23,12 +24,15 @@
    "applications": [
     "filetages_montage"
    ],
-   "properties": [],
+   "properties": [
+    "sans_pfas"
+   ],
    "industries": [],
    "key_claims": [
     "Pâte de montage polyvalente et très adhérente renforcée MicPol®.",
     "Enregistrée NSF H2 sous le n° 157210.",
-    "Plage annoncée -30 °C à +145 °C selon une page Interflon, -30 à 140 °C selon la page filtre US ; limite haute retenue : 140 °C."
+    "Plage annoncée -30 °C à +145 °C selon une page Interflon, -30 à 140 °C selon la page filtre US ; limite haute retenue : 140 °C.",
+    "Sans PFAS à partir du lot 091121-F (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/Listings.asp?Company=N04071",
@@ -85,6 +89,11 @@
      "url": "https://interflon.com/products/interflon-assembly-grease"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 091121-F",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "nsf",
      "quote": "It is listed by the NSF for use on equipment in the food industry where there is no possibility of the lubricant or lubricated part contacting edible products.",
      "url": "https://static.interflon.com/assets/TDS2/8028_TDS_DE_de_Interflon_Assembly_Grease.pdf"
@@ -95,7 +104,10 @@
      "url": "https://static.interflon.com/assets/TDS2/8028_TDS_DE_de_Interflon_Assembly_Grease.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "bio-grease-mp2",
@@ -130,7 +142,8 @@
    "key_claims": [
     "Certifiée EU Ecolabel et rapidement biodégradable (OECD 301).",
     "Sans PFAS selon la page produit.",
-    "Usages annoncés incluant les câbles ; adaptée aux zones où le lubrifiant perdu peut atteindre le sol ou l'eau."
+    "Usages annoncés incluant les câbles ; adaptée aux zones où le lubrifiant perdu peut atteindre le sol ou l'eau.",
+    "Sans PFAS à partir du lot 22010180 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-bio-grease-mp2",
@@ -165,6 +178,11 @@
      "url": "https://interflon.com/products/interflon-bio-grease-mp2"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 22010180",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "temp_min_c",
      "quote": "Wide temperature range (-35°C to +120°C)",
      "url": "https://interflon.com/gb/products/interflon-bio-grease-mp2"
@@ -181,6 +199,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -198,7 +219,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "spray"
+    "Spray"
    ],
    "applications": [
     "autre"
@@ -282,7 +303,7 @@
    "nlgi": "3",
    "base": null,
    "formats": [
-    "aérosol"
+    "Aérosol"
    ],
    "applications": [
     "autre"
@@ -290,7 +311,8 @@
    "properties": [
     "biodegradable",
     "anti_corrosion",
-    "resistant_eau"
+    "resistant_eau",
+    "sans_pfas"
    ],
    "industries": [
     "ferroviaire"
@@ -299,7 +321,8 @@
     "Graisse biodégradable pour plateaux et douilles de tampons du matériel roulant.",
     "Protection longue durée contre l'usure et excellentes propriétés anticorrosion.",
     "Résiste à l'eau, aux agents de nettoyage et à la pollution.",
-    "Première couche au rouleau, relubrification en aérosol sans dételer les trains."
+    "Première couche au rouleau, relubrification en aérosol sans dételer les trains.",
+    "Toujours fabriqué sans PFAS (bilan PFAS Interflon, avril 2025)."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-bufferguard-aerosol",
@@ -345,6 +368,11 @@
      "url": "https://interflon.com/fi/industries/rail/products/interflon-bufferguard"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : toujours",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "temp_min_c",
      "quote": "De Hongaarse versie vermeldt eveneens -30 °C als laagste en 120 °C als hoogste toepassingstemperatuur, en ook NLGI-klasse 3.",
      "url": "https://static.interflon.com/assets/TDS2/6902_TDS_HU_hu_Interflon_Buffer_Guard_aerosol.pdf"
@@ -361,6 +389,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -537,7 +568,7 @@
    "range": "maintenance",
    "description_fr": "Dégraissant multifonction de qualité alimentaire à haut rendement, enregistré NSF K1/K3 (n° 128500), disponible en vrac (bidon 10 L) et en aérosol. Son évaporation lente permet de traiter les salissures tenaces sans laisser de résidu ; il peut attaquer élastomères et caoutchoucs.",
    "nsf": "K1, K3",
-   "nsf_reg_no": "128500",
+   "nsf_reg_no": "122875 (aérosol), 122876 (vrac)",
    "temp_min_c": null,
    "temp_max_c": null,
    "temp_note": "Sans objet : dégraissant, pas de plage de service (température d'application : voir la fiche technique).",
@@ -545,13 +576,18 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "aérosol",
-    "bidon 10 L"
+    "Aérosol 500 ml",
+    "Bidon 10 L",
+    "Bidon 20 L",
+    "Fût 60 L",
+    "Fût 200 L"
    ],
    "applications": [
     "nettoyage_degraissage"
    ],
-   "properties": [],
+   "properties": [
+    "faible_odeur"
+   ],
    "industries": [
     "agroalimentaire",
     "plasturgie (nettoyage de moules)",
@@ -562,7 +598,9 @@
     "Évaporation lente : traite les salissures tenaces sans laisser de résidu.",
     "Admis par NSF pour usage en industrie alimentaire comme dégraissant et pour retirer colles et étiquettes.",
     "Nettoyant très puissant pouvant affecter élastomères et caoutchoucs.",
-    "Certifié Kosher Parve (version aérosol)."
+    "Certifié Kosher Parve (version aérosol).",
+    "Dégraissant à froid, odeur naturelle douce, sans glycol ni éthers, évaporation lente.",
+    "Le n° NSF 128500 trouvé sur le web diffère du book 2026, qui fait foi ici."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/Listings.asp?Company=N04071",
@@ -604,9 +642,22 @@
      "field": "applications",
      "quote": "Its French data sheet says it is admitted by NSF for food-industry use as a degreaser and for removing glue and stickers.",
      "url": "https://static.interflon.com/assets/TDS2/8488_TDS_FR_fr_Interflon_Degreaser_EM30_plus.pdf"
+    },
+    {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-K1, K3 : Aérosol : 122875 - Vrac : 122876",
+     "doc": "Book de vente TC 2026, Interflon France, slide 229"
+    },
+    {
+     "field": "formats",
+     "quote": "500 ml · 10 litres, 20 litres · 60 litres, 200 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 229"
     }
    ],
-   "checked": "2026-10-12",
+   "checked": "2026-10-13",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France"
+   ],
    "temp_na": true
   },
   {
@@ -624,7 +675,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "bidon 10 L"
+    "Bidon 10 L"
    ],
    "applications": [
     "nettoyage_degraissage"
@@ -691,7 +742,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "aérosol 500 ml"
+    "Aérosol 500 ml"
    ],
    "applications": [
     "nettoyage_degraissage",
@@ -799,13 +850,16 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "Pulvérisateur 750 ml"
+    "Pulvérisateur 750 ml",
+    "Bidon 10 L",
+    "Fût 200 L"
    ],
    "applications": [
     "nettoyage_degraissage"
    ],
    "properties": [
-    "compatible_plastiques_joints"
+    "compatible_plastiques_joints",
+    "biodegradable"
    ],
    "industries": [
     "agroalimentaire"
@@ -814,7 +868,8 @@
     "Dégraissant prêt à l'emploi, ininflammable, exempt d'étiquetage de danger.",
     "Enregistré NSF A1 (n° 153150) : nettoyant général pour toutes surfaces dans et autour des zones de transformation alimentaire.",
     "Convient à l'inox, au plastique et au verre ; utilisable en bain à ultrasons selon un revendeur.",
-    "EU Ecolabel ; activité virucide contre les virus enveloppés selon une fiche technique néerlandaise."
+    "EU Ecolabel ; activité virucide contre les virus enveloppés selon une fiche technique néerlandaise.",
+    "Écolabel européen, entièrement biodégradable. Sans pictogramme de danger, pas d'ADR."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/letters/153150.pdf",
@@ -852,12 +907,30 @@
      "url": "https://interflon.com/products/interflon-eco-degreaser"
     },
     {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-A1 : 153150",
+     "doc": "Book de vente TC 2026, Interflon France, slide 217"
+    },
+    {
+     "field": "properties",
+     "quote": "Muni de l'Écolabel européen. Entièrement biodégradable",
+     "doc": "Book de vente TC 2026, Interflon France, slide 217"
+    },
+    {
+     "field": "formats",
+     "quote": "750ml · 10 litres · 200 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 217"
+    },
+    {
      "field": "formats",
      "quote": "describes a 750 ml pack with no propellant, in a recyclable plastic container with a trigger",
      "url": "https://interflon.com/gb/products/interflon-eco-degreaser"
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France"
+   ],
    "temp_na": true
   },
   {
@@ -889,7 +962,9 @@
     "Contient un inhibiteur de corrosion contre la rouille éclair.",
     "Exempté ATEX et ADR ; rapidement biodégradable, faible écotoxicité.",
     "Fluide prévu pour la fontaine de dégraissage à froid Interflon Parts Cleaner.",
-    "Statut NSF variable selon les sources : K1/K3 (listing US) ou nettoyant général (distributeur)."
+    "Statut NSF variable selon les sources : K1/K3 (listing US) ou nettoyant général (distributeur).",
+    "Biodégradable à 80 % (ASTM D7373). Non soumis ATEX et ADR. Halal et casher.",
+    "Convient aux fontaines de nettoyage."
    ],
    "source_urls": [
     "https://us.interflon.com/eco-em100-plus/8969",
@@ -926,6 +1001,21 @@
      "url": "https://interflon.com/products/interflon-eco-em100-plus"
     },
     {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF 141221 · NSF K1, K3",
+     "doc": "Fiche technique Interflon Eco EM100+ du 01/09/2023, tableau des propriétés"
+    },
+    {
+     "field": "temp_max_c",
+     "quote": "Température maximale d'application : 70°C",
+     "doc": "Fiche technique Interflon Eco EM100+ du 01/09/2023, tableau des propriétés"
+    },
+    {
+     "field": "properties",
+     "quote": "Biodégradabilité 80% (ASTM D7373) · Laisse une couche protectrice protégeant ainsi contre la rouille",
+     "doc": "Fiche technique Interflon Eco EM100+ du 01/09/2023, page 1"
+    },
+    {
      "field": "nsf",
      "quote": "An NSF certificate lists the product (registration 141221, categories K1 and K3).",
      "url": "https://info.nsf.org/USDA/letters/141221.pdf"
@@ -942,6 +1032,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Fiche technique Interflon Eco EM100+ du 01/09/2023"
+   ],
    "temp_na": true
   },
   {
@@ -1322,7 +1415,11 @@
    ],
    "properties": [
     "resistant_eau",
-    "sans_pfas"
+    "sans_pfas",
+    "anti_corrosion",
+    "compatible_plastiques_joints",
+    "sans_silicone",
+    "faible_odeur"
    ],
    "industries": [
     "agroalimentaire",
@@ -1333,7 +1430,10 @@
     "Enregistrée NSF H1 (n° 123184, codes 537 et H1) pour le contact alimentaire fortuit.",
     "Plage d'utilisation de -20 °C à +150 °C ; épaississant inorganique, grade NLGI 2.",
     "Chasse l'eau et la saleté ; sans PFAS.",
-    "Recommandée pour les éjecteurs, colonnes de guidage et canaux des moules d'injection, avec un film qui ne goutte pas."
+    "Recommandée pour les éjecteurs, colonnes de guidage et canaux des moules d'injection, avec un film qui ne goutte pas.",
+    "Conforme DIN 51825 KFP2N-20.",
+    "Film transparent et totalement inodore.",
+    "Sans PFAS à partir du lot 020621-F (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/letters/123184.pdf",
@@ -1409,6 +1509,31 @@
      "url": "https://interflon.com/industries/injection-moulding"
     },
     {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-H1 : 123184",
+     "doc": "Book de vente TC 2026, Interflon France, slide 161"
+    },
+    {
+     "field": "temp_min_c",
+     "quote": "résiste de -20°C à 150°C",
+     "doc": "Book de vente TC 2026, Interflon France, slide 161"
+    },
+    {
+     "field": "nlgi",
+     "quote": "répondant aux normes DIN 51825 KFP2N-20",
+     "doc": "Book de vente TC 2026, Interflon France, slide 161"
+    },
+    {
+     "field": "formats",
+     "quote": "300 ml (aérosol)",
+     "doc": "Book de vente TC 2026, Interflon France, slide 161"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 020621-F",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "formats",
      "quote": "Interflon 8020 Teflon Schmierfett Fin Grease - 300ml",
      "url": "https://www.ebay.de/p/1104777620"
@@ -1419,7 +1544,11 @@
      "url": "https://archiwum.allegro.pl/oferta/interflon-fin-grease-smar-w-aerozolu-wzbogacany-czastkami-micpol-300-ml-i15182727552.html"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "fin-super",
@@ -1464,7 +1593,8 @@
     "Libère les pièces grippées : particules MicPol® de 0,05 à 0,15 micron selon la FAQ Interflon.",
     "Protège les contacts électriques contre la corrosion.",
     "Ne contient ni solvants chlorés ni silicones ; présenté comme sans PFAS (aucune homologation NSF H1 trouvée).",
-    "Interflon annonce une lubrification jusqu'à 10 fois plus longue que les huiles conventionnelles."
+    "Interflon annonce une lubrification jusqu'à 10 fois plus longue que les huiles conventionnelles.",
+    "Sans PFAS à partir du lot 180621-F (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://us.interflon.com/faq/What-is-the-temperature-range-of-Fin-Super-aerosol",
@@ -1526,6 +1656,11 @@
      "url": "https://interflon.com/industries/printing-and-publishing"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 180621-F",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "formats",
      "quote": "Retailers list the aerosol at 300 ml.",
      "url": "https://shop.elvacenter.com/shop/hydraulics-and-accessories/lubricants/interflon-fin-super-300-ml-aerosol-2"
@@ -1537,6 +1672,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -1574,7 +1712,8 @@
     "Sans gaz propulseur (100 % produit) et sans PFAS.",
     "Résiste au lessivage par l'eau et à la corrosion ; anti-rouille.",
     "Fiche technique : densité 0,84 g/cm3 à 20 °C, température minimale d'application -43 °C, conservation 4 ans.",
-    "Conseillé pour vélos, matériel de pêche, serrures, portes et composants électriques ; câbles métalliques cités parmi ses usages."
+    "Conseillé pour vélos, matériel de pêche, serrures, portes et composants électriques ; câbles métalliques cités parmi ses usages.",
+    "Sans PFAS à partir du lot 22020016 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/9868_TDS_RO_ro_Interflon_Fin_Super_Dry_Lube.pdf",
@@ -1623,9 +1762,17 @@
      "field": "properties",
      "quote": "Interflon lists it as a multipurpose dry lubricant that is high penetrating, sold in practical packing, and resists water wash-off and corrosion.",
      "url": "https://interflon.com/us/products/interflon-fin-super-dry-lube"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 22020016",
+     "doc": "Bilan PFAS Interflon, avril 2025"
     }
    ],
    "checked": "2026-10-12",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -1978,6 +2125,16 @@
      "url": "https://us.interflon.com/cleaners/"
     },
     {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-A1 : 138681",
+     "doc": "Book de vente TC 2026, Interflon France, slide 213"
+    },
+    {
+     "field": "formats",
+     "quote": "500 ml (aérosol)",
+     "doc": "Book de vente TC 2026, Interflon France, slide 213"
+    },
+    {
      "field": "formats",
      "quote": "Interflon, Foam clean 500 ml (aerosol)",
      "url": "https://shop.elvacenter.com/shop/hydraulics-and-accessories/lubricants/interflon-foam-clean-500-ml-aerosol-2/"
@@ -1999,6 +2156,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France"
+   ],
    "temp_na": true
   },
   {
@@ -2031,7 +2191,9 @@
     "Enregistrée NSF H1 (n° 119638, codes 21469, 537 et H1).",
     "Grade NLGI 000 selon la fiche technique espagnole.",
     "Température minimale d'application de -20 °C (0 °C pour les réducteurs).",
-    "Ne pas utiliser lorsque la graisse doit être pompée dans des tubes de diamètre intérieur inférieur à 6 mm."
+    "Ne pas utiliser lorsque la graisse doit être pompée dans des tubes de diamètre intérieur inférieur à 6 mm.",
+    "Sans PFAS à partir du lot 270920-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/Listings.asp?Company=N04071",
@@ -2091,6 +2253,16 @@
      "url": "https://interflon.com/gb/products/interflon-food-grease-000"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 270920-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease 000",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_max_c",
      "quote": "The Polish technical data sheet for Interflon Food Grease 000 gives a maximum application temperature of 120°C.",
      "url": "https://static.interflon.com/assets/TDS2/8422_TDS_PL_pl_Interflon_Food_Grease_000.pdf"
@@ -2117,6 +2289,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ],
    "temp_min_gearbox_c": 0
   },
   {
@@ -2149,7 +2325,9 @@
     "Graisse alimentaire multi-usage, plage d'utilisation de -20 °C à +150 °C selon la page GB.",
     "Certificat NSF n° 122684 (29 janvier 2026) : codes 537, H1 et ISO 21469.",
     "Graisse à haut pouvoir EP, avec une aptitude au pompage améliorée.",
-    "Recommandée pour les engrenages ouverts des remplisseuses dans un cas Interflon de l'industrie des boissons."
+    "Recommandée pour les engrenages ouverts des remplisseuses dans un cas Interflon de l'industrie des boissons.",
+    "Sans PFAS à partir du lot 310820-AF, puis à partir du lot 240321-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://info.nsf.org/usda/letters/122684.pdf",
@@ -2200,6 +2378,16 @@
      "url": "https://interflon.com/us/industries/beverage-2/filling-machines"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 310820-AF, puis à partir du lot 240321-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease 1",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "nlgi",
      "quote": "NLGI-Klasse 1 ASTM D217",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_1_TDS_de.pdf"
@@ -2220,7 +2408,11 @@
      "url": "https://interflon.com/ie/products/interflon-food-grease-1"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-2",
@@ -2229,20 +2421,28 @@
    "range": "food",
    "description_fr": "Graisse multi-usage de qualité alimentaire enrichie en MicPol®, particulièrement adaptée à la lubrification des machines de l'industrie alimentaire. Elle est listée NSF H1 et sa température minimale d'utilisation est de -20 °C.",
    "nsf": "H1",
-   "nsf_reg_no": null,
+   "nsf_reg_no": "123822",
    "temp_min_c": -20,
    "temp_max_c": 150,
    "temp_note": "Seule la température minimale (-20 °C) figure dans le corpus (page US) ; maximum non trouvé.",
    "viscosity_iso_vg": null,
    "nlgi": "2",
    "base": null,
-   "formats": [],
+   "formats": [
+    "Cartouche 400 ml",
+    "Pot 1 L",
+    "Seau 10 L",
+    "Fût 30 L",
+    "Fût 60 L"
+   ],
    "applications": [
     "roulements",
     "glissieres_guides"
    ],
    "properties": [
-    "sans_pfas"
+    "sans_pfas",
+    "resistant_eau",
+    "anti_corrosion"
    ],
    "industries": [
     "agroalimentaire",
@@ -2252,7 +2452,9 @@
     "Graisse alimentaire multi-usage enrichie en MicPol®, sans PFAS, listée NSF H1.",
     "Adaptée aux roulements des machines de remplissage, d'emballage et de moulage, aux mélangeurs et presses, aux glissières et aux engrenages.",
     "Température minimale d'utilisation de -20 °C selon la page US.",
-    "Produit distinct de Food Grease MP2 : aucune source n'indique que MP2 la remplace."
+    "Produit distinct de Food Grease MP2 : aucune source n'indique que MP2 la remplace.",
+    "Pour paliers à roulements à billes, à aiguilles et paliers lisses (facteur DN 250 000). Pas de point de goutte.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/us/products/interflon-food-grease-2",
@@ -2264,12 +2466,14 @@
    ],
    "confidence": "medium",
    "uncertain_fields": [
-    "formats"
+    "properties (sans PFAS : produit absent du bilan PFAS interne d'avril 2025, à confirmer)"
    ],
    "verified_fields": [
     "applications",
+    "formats",
     "nlgi",
     "nsf",
+    "nsf_reg_no",
     "temp_max_c",
     "temp_min_c"
    ],
@@ -2295,6 +2499,26 @@
      "url": "https://interflon.com/us/products/interflon-food-grease-2"
     },
     {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-H1 : 123822",
+     "doc": "Book de vente TC 2026, Interflon France, slide 170"
+    },
+    {
+     "field": "temp_max_c",
+     "quote": "Résiste aux températures de -20°C à 150°C",
+     "doc": "Book de vente TC 2026, Interflon France, slide 170"
+    },
+    {
+     "field": "formats",
+     "quote": "400 ml · 1 litre · 10 litres · 30 litres, 60 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 170"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease 2",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "Lowest application temperature -20°C. Highest application temperature 150°C",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_2_TDS_en.pdf"
@@ -2315,7 +2539,11 @@
      "url": "https://interflon.com/za/products/interflon-food-grease-2"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-3h",
@@ -2350,7 +2578,9 @@
     "Enregistrée NSF 3H (contact alimentaire direct) et H1 (contact fortuit) sous le n° 151962 ; certaines pages régionales mentionnent aussi NSF 537.",
     "Sans PFAS ; résiste à l'eau, à la vapeur et à la saleté.",
     "Pour roulements à billes, à rouleaux et lisses, rails de guidage et engrenages ouverts.",
-    "Décrite sur la page produit comme graisse universelle et agent de démoulage."
+    "Décrite sur la page produit comme graisse universelle et agent de démoulage.",
+    "Sans PFAS à partir du lot 30076-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/news/for-direct-food-and-incidental-food-contact",
@@ -2392,6 +2622,16 @@
      "url": "https://interflon.com/products/interflon-food-grease-3h"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 30076-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease 3H",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "The minimum application temperature is -20°C and the maximum is 120°C",
      "url": "https://static.interflon.com/assets/TDS2/9853_TDS_DE_de_Interflon_Food_Grease_3_H.pdf"
@@ -2407,7 +2647,11 @@
      "url": "https://interflon.com/products/interflon-food-grease-3h"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-ep",
@@ -2443,7 +2687,9 @@
     "Fiche technique : enregistrement NSF n° 123607, grade NLGI 2, durée de conservation de 4 ans.",
     "Pour roulements, guidages, articulations, broches, arbres, glissières et engrenages ouverts à vitesse lente à modérée.",
     "Une FDS au nom de « Fin Food Grease EP » indique la classification DIN 51825 KFP2N-20.",
-    "Utilisée sur les roulements de broyeurs à fruits pour la protection contre l'humidité et la corrosion (cas Interflon)."
+    "Utilisée sur les roulements de broyeurs à fruits pour la protection contre l'humidité et la corrosion (cas Interflon).",
+    "Sans PFAS à partir du lot 300820-AF et 250321-AF, puis à partir du lot 410821-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-food-grease-ep",
@@ -2491,6 +2737,16 @@
      "url": "https://nextsds.com/sds/nl/281331501263906/interflon-fin-food-grease-ep"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 300820-AF et 250321-AF, puis à partir du lot 410821-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease EP",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "Lowest application temperature -20°C, Highest application temperature 170°C",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_EP_TDS_en.pdf"
@@ -2511,7 +2767,11 @@
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_EP_TDS_en.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-hd00",
@@ -2533,7 +2793,8 @@
     "autre"
    ],
    "properties": [
-    "charges_elevees_chocs"
+    "charges_elevees_chocs",
+    "sans_pfas"
    ],
    "industries": [
     "agroalimentaire"
@@ -2542,7 +2803,9 @@
     "Graisse EP semi-fluide pour réducteurs industriels.",
     "Fiche technique : grade NLGI 00, épaississant sulfonate de calcium, enregistrement NSF H1.",
     "Température maximale d'application de 145 °C.",
-    "Utilisable aussi dans les systèmes de graissage centralisé."
+    "Utilisable aussi dans les systèmes de graissage centralisé.",
+    "Sans PFAS à partir du lot 330820-AF, puis à partir du lot 490421-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_HD00_TDS_en.pdf",
@@ -2595,6 +2858,16 @@
      "url": "https://static.interflon.com/assets/TDS2/9175_TDS_MA_fr_Interflon_Food_Grease_HD00.pdf"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 330820-AF, puis à partir du lot 490421-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease HD00",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_max_c",
      "quote": "Lowest application temperature -25°C (for applications in gearboxes: 0°C ) Highest application temperature 145°C",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_HD00_TDS_en.pdf"
@@ -2631,6 +2904,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ],
    "temp_min_gearbox_c": 0
   },
   {
@@ -2653,7 +2930,8 @@
    ],
    "properties": [
     "basse_temperature",
-    "charges_elevees_chocs"
+    "charges_elevees_chocs",
+    "sans_pfas"
    ],
    "industries": [
     "agroalimentaire"
@@ -2662,7 +2940,9 @@
     "Graisse EP semi-fluide pour basses températures, destinée aux réducteurs industriels.",
     "Listée NSF pour les applications avec contact alimentaire fortuit.",
     "Formulée avec la technologie MicPol®.",
-    "Figure dans le tableau du certificat Halal d'Interflon."
+    "Figure dans le tableau du certificat Halal d'Interflon.",
+    "Toujours fabriqué sans PFAS (bilan PFAS Interflon, avril 2025).",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/gb/products/interflon-food-grease-hd000",
@@ -2694,6 +2974,16 @@
      "url": "https://interflon.com/gb/products/interflon-food-grease-hd000"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : toujours",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease HD000",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "The Turkish HD000 data sheet lists the lowest application temperature as -40 (for gearbox applications: -25°C), with the highest application temperature at 145°C.",
      "url": "https://static.interflon.com/assets/TDS2/6878_TDS_TR_tr_Interflon_Food_Grease_HD000.pdf"
@@ -2720,6 +3010,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ],
    "temp_min_gearbox_c": -25
   },
   {
@@ -2737,7 +3031,7 @@
    "nlgi": "2",
    "base": null,
    "formats": [
-    "aérosol 500 ml",
+    "Aérosol 500 ml",
     "Cartouche 400 ml"
    ],
    "applications": [
@@ -2767,7 +3061,9 @@
     "Pour les applications sous forte pression, humides et poussiéreuses, jusqu'à 180 °C.",
     "Graisse et agent anticorrosion en un seul produit ; sans PFAS ; propriétés de lubrification de secours grâce à MicPol®.",
     "Viscosité de l'huile de base : 400 à 40 °C (unité non précisée dans la source) ; adaptée aux systèmes de lubrification automatique jusqu'à -15 °C.",
-    "Dans un abattoir de volailles, la consommation de graisse des trieuses Marel a baissé de 75 % ou de 87 % selon les versions du cas Interflon."
+    "Dans un abattoir de volailles, la consommation de graisse des trieuses Marel a baissé de 75 % ou de 87 % selon les versions du cas Interflon.",
+    "Sans PFAS à partir du lot 280920-AF, puis à partir du lot 480421-AF (aérosol : 050621-F) (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/gb/products/interflon-food-grease-hd2",
@@ -2832,6 +3128,16 @@
      "url": "https://us.interflon.com/food-grease-hd2/91510"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 280920-AF, puis à partir du lot 480421-AF (aérosol : 050621-F)",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease HD2",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "Lowest application temperature -30°C; highest application temperature 180°C, and NLGI grade 2 (ASTM D217)",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_HD2_TDS_en.pdf"
@@ -2862,7 +3168,11 @@
      "url": "https://eezee.sg/m/product/interflon-9153-food-grease-hd2-400ml-catridges-e7a6d3f23a"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-lt2",
@@ -2883,7 +3193,8 @@
     "roulements"
    ],
    "properties": [
-    "basse_temperature"
+    "basse_temperature",
+    "sans_pfas"
    ],
    "industries": [
     "agroalimentaire",
@@ -2893,7 +3204,9 @@
     "Graisse alimentaire pour basses températures, plage de -45 °C à +150 °C selon la page produit Interflon.",
     "Certificat NSF n° 123533 (14 mars 2024) : H1 et ISO 21469.",
     "Décrite comme graisse pompable pour les températures extrêmes.",
-    "Sur les pinces de télécabines, l'intervalle de regraissage passerait d'environ quatre fois par an à une fois tous les deux ans selon Interflon."
+    "Sur les pinces de télécabines, l'intervalle de regraissage passerait d'environ quatre fois par an à une fois tous les deux ans selon Interflon.",
+    "Sans PFAS à partir du lot 290820-AF, puis à partir du lot 170321-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/letters/123533.pdf",
@@ -2957,12 +3270,26 @@
      "url": "https://refrigeratedfrozenfood.com/articles/96292-high-performance-lubricants"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 290820-AF, puis à partir du lot 170321-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease LT2",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "nlgi",
      "quote": "Interflon's English technical data sheet lists NLGI grade 2 under ASTM D217",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Grease_LT2_TDS_en.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-mp2",
@@ -2994,7 +3321,9 @@
     "Plage d'utilisation de -45 °C à 150 °C, avec des pointes jusqu'à 180 °C.",
     "Listée NSF H1 pour le contact alimentaire fortuit ; certifiée NSF H1 et NSF 537 selon Interflon.",
     "Sur les roulements d'un dépalettiseur, la consommation de lubrifiant a baissé de 75 % et la main-d'œuvre de 80 % (cas Interflon).",
-    "Produit distinct de Food Grease 2 : aucune source n'indique que MP2 la remplace."
+    "Produit distinct de Food Grease 2 : aucune source n'indique que MP2 la remplace.",
+    "Sans PFAS à partir du lot 290820-AF, puis à partir du lot 170321-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-food-grease-mp2",
@@ -3039,12 +3368,26 @@
      "url": "https://interflon.com/industries/beverage/depalletizers/bearings"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 290820-AF, puis à partir du lot 170321-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease MP2",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "nsf",
      "quote": "The MP2 product pages say it is NSF H1-listed but give no registration number.",
      "url": "https://interflon.com/products/interflon-food-grease-mp2"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-grease-s1-2",
@@ -3058,7 +3401,7 @@
    "temp_max_c": 180,
    "temp_note": "Plage d'application -40 °C à 180 °C indiquée pour le produit (bloc S160, dont la source principale est la TDS Interflon Food Grease S1/2).",
    "viscosity_iso_vg": null,
-   "nlgi": "1.5",
+   "nlgi": "1/2",
    "base": null,
    "formats": [],
    "applications": [
@@ -3079,7 +3422,9 @@
     "Graisse 100 % synthétique, sans silicone, compatible avec les joints EPDM.",
     "Enregistrée NSF H1 (contact alimentaire fortuit) sous le n° 158847 ; non destinée au contact alimentaire direct (contrairement à Food Grease 3H).",
     "Également commercialisée comme graisse de montage.",
-    "Recommandée dans un cas Interflon pour les roulements centraux et joints de remplisseuses (industrie des boissons)."
+    "Recommandée dans un cas Interflon pour les roulements centraux et joints de remplisseuses (industrie des boissons).",
+    "Toujours fabriqué sans PFAS (bilan PFAS Interflon, avril 2025).",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/9843_TDS_GB_en_Interflon_Food_Grease_S1_2.pdf",
@@ -3143,12 +3488,26 @@
      "url": "https://interflon.com/industries/beverage/filling-machines"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : toujours",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Grease S1/2",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "nlgi",
      "quote": "The same datasheet lists an application range of -40°C to 180°C, with an NLGI grade of 1/2.",
      "url": "https://static.interflon.com/assets/TDS2/9843_TDS_CH_de_Interflon_Food_Grease_S1_2.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube",
@@ -3165,7 +3524,7 @@
    "nlgi": null,
    "base": "vegetale_synthetique",
    "formats": [
-    "aérosol",
+    "Aérosol",
     "1 L"
    ],
    "applications": [
@@ -3192,7 +3551,8 @@
     "Selon la FDS suisse datée du 08.01.2024, mélange d'huiles végétales et synthétiques avec additifs et MicPol (un distributeur la décrit comme huile minérale).",
     "Application par aérosol ou par distributeur automatique selon le communiqué de lancement.",
     "Cas client Interflon (volailles) : remplacement des chaînes passé de 6-10 semaines à 78 semaines (estimation) et lubrification une fois par mois.",
-    "Présentée comme sans PFAS par Interflon."
+    "Présentée comme sans PFAS par Interflon.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://info.nsf.org/usda/letters/122875.pdf",
@@ -3206,8 +3566,10 @@
     "https://static.interflon.com/assets/SDS2/8195_SDS_CH_it_Interflon_Food_Lube.pdf",
     "https://static.interflon.com/assets/TDS2/8195_TDS_PE_es_Interflon_Food_Lube.pdf"
    ],
-   "confidence": "high",
-   "uncertain_fields": [],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "properties (sans PFAS : produit absent du bilan PFAS interne d'avril 2025, à confirmer)"
+   ],
    "verified_fields": [
     "applications",
     "formats",
@@ -3289,12 +3651,20 @@
      "url": "https://interflon.com/products/interflon-food-lube-aerosol"
     },
     {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "viscosity_cst40",
      "quote": "a Spanish-language sheet for Interflon Food Lube (document 8195), which lists a kinematic viscosity of 21 cSt at 40°C",
      "url": "https://static.interflon.com/assets/TDS2/8195_TDS_PE_es_Interflon_Food_Lube.pdf"
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ],
    "viscosity_cst40": 21
   },
   {
@@ -3312,8 +3682,8 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "vrac",
-    "aérosol"
+    "Vrac",
+    "Aérosol"
    ],
    "applications": [
     "demoulage",
@@ -3350,8 +3720,10 @@
     "https://static.interflon.com/assets/TDS2/8452_TDS_BE_nl_Interflon_Food_Lube_3_H.pdf",
     "https://static.interflon.com/assets/TDS2/8452_TDS_NL_nl_Interflon_Food_Lube_3_H.pdf"
    ],
-   "confidence": "high",
-   "uncertain_fields": [],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "properties (sans PFAS : produit absent du bilan PFAS interne d'avril 2025, à confirmer)"
+   ],
    "verified_fields": [
     "applications",
     "formats",
@@ -3483,7 +3855,9 @@
     "Certifié Halal, Kosher et ISO 21469 ; présenté comme sans PFAS.",
     "Annoncé sans MOSH-MOAH, avec la réserve d'Interflon que les techniques d'analyse ne distinguent pas à 100 % les MOSH des composants synthétiques.",
     "Cas client (embouteillage de bocaux en verre) : durée de vie des chaînes portée à environ 1,5 an et 114 000 $ d'économies revendiquées.",
-    "Cas client (boulangerie) : durée de vie des chaînes de convoyeur prolongée d'au moins 50 %."
+    "Cas client (boulangerie) : durée de vie des chaînes de convoyeur prolongée d'au moins 50 %.",
+    "Sans PFAS à partir du lot 400920-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-food-lube-al",
@@ -3554,6 +3928,16 @@
      "url": "https://interflon.com/products/interflon-food-lube-al"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 400920-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube AL",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "viscosity_cst40",
      "quote": "Its listed specs include a kinematic viscosity of 22 cSt at 40°C, an operating range of -20°C to 180°C, and a 4-year shelf life.",
      "url": "https://us.interflon.com/food-lube-al/6732"
@@ -3565,6 +3949,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ],
    "viscosity_cst40": 22
   },
   {
@@ -3640,7 +4028,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "aérosol"
+    "Aérosol"
    ],
    "applications": [
     "chaines",
@@ -3661,7 +4049,9 @@
     "Listée NSF classe H-1 et sans PFAS.",
     "Réduit les risques de rouille et de corrosion selon la page produit française.",
     "Recommandée par Interflon, avec Lube EP+, pour les charges supérieures à 25 kg/mm².",
-    "Sur des chaînes de moissonneuses-batteuses, Interflon annonce une durée de vie au moins multipliée par 5."
+    "Sur des chaînes de moissonneuses-batteuses, Interflon annonce une durée de vie au moins multipliée par 5.",
+    "Sans PFAS à partir du lot 170721-F (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-food-lube-g-aerosol",
@@ -3708,6 +4098,16 @@
      "url": "https://interflon.com/fr/produits/interflon-food-lube-g-aerosol"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 170721-F",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "Laagste gebruikstemperatuur -10°C; Hoogste gebruikstemperatuur** 100°C",
      "url": "https://static.interflon.com/assets/TDS2/8844_TDS_NL_nl_Interflon_Food_Lube_G_aerosol.pdf"
@@ -3733,7 +4133,11 @@
      "url": "https://static.interflon.com/assets/TDS2/8844_TDS_NL_nl_Interflon_Food_Lube_G_aerosol.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-g100",
@@ -3769,7 +4173,9 @@
     "Listée NSF sous le n° 122318 avec les codes 21469, 537 et H1.",
     "Destinée aux chaînes, réducteurs et glissières fortement chargés en milieu humide.",
     "Certifiée Halal, Kosher et ISO 21469 ; sans PFAS selon la page produit.",
-    "Cas client (encaisseuses) : durée de vie de la chaîne principale triplée et consommation de lubrifiant réduite de 65 %."
+    "Cas client (encaisseuses) : durée de vie de la chaîne principale triplée et consommation de lubrifiant réduite de 65 %.",
+    "Sans PFAS à partir du lot 230820-F, puis à partir du lot 230221-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/Listings.asp?Company=N04071",
@@ -3819,6 +4225,16 @@
      "url": "https://interflon.com/products/interflon-food-lube-g100"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 230820-F, puis à partir du lot 230221-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G100",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "The Romanian technical data sheet lists a lowest application temperature of -10°C, but the upper limit is cut off in the snippet",
      "url": "https://static.interflon.com/assets/TDS2/8593_TDS_RO_ro_Interflon_Food_Lube_G100.pdf"
@@ -3834,7 +4250,11 @@
      "url": "https://www.perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Lube_G100_TDS_de.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-g150",
@@ -3877,7 +4297,9 @@
     "Décrite par Interflon comme huile pour chaînes à forte adhérence, sans PFAS.",
     "Certifiée Halal, Kosher et ISO 21469 selon sa page produit.",
     "Cas client (volailles, 4 500 m de chaîne de transport) : durée de vie des chaînes presque doublée et environ 80 000 $/an d'économies revendiquées.",
-    "Cas client (convoyeurs à rouleaux de sacs d'engrais) : lubrification passée de toutes les 2-4 semaines à tous les six mois."
+    "Cas client (convoyeurs à rouleaux de sacs d'engrais) : lubrification passée de toutes les 2-4 semaines à tous les six mois.",
+    "Sans PFAS à partir du lot 220820-AF, puis à partir du lot 370221-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/gb/products/interflon-food-lube-g150",
@@ -3936,6 +4358,16 @@
      "url": "https://interflon.com/industries/poultry/stunning-and-slaughter/bleeding-lines"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 220820-AF, puis à partir du lot 370221-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G150",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "A technical data sheet hosted by distributor Perma-tec lists a lowest application temperature of -10°C and a highest of 100°C.",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Lube_G150_TDS_en.pdf"
@@ -3961,7 +4393,11 @@
      "url": "https://www.wsimachinery.com/products/interflon-food-lube-g150-5-liter-00f0909304b"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-g220",
@@ -4000,7 +4436,9 @@
     "Certifiée NSF H1 et NSF 537, ainsi que Halal, Kosher et ISO 21469.",
     "FDS : aucune classification de danger, point d'ébullition supérieur à 380 °C.",
     "Cas client (pasteurisateur de jambons cuits) : durée de vie des chaînes de 18 à 42 mois avec Food Lube G220 et Food Lube HT.",
-    "Cas client (abattoir) : la G220 a résisté au lessivage et mis fin aux pannes des chaînes d'étourdissement."
+    "Cas client (abattoir) : la G220 a résisté au lessivage et mis fin aux pannes des chaînes d'étourdissement.",
+    "Sans PFAS à partir du lot 210820-A, puis à partir du lot 141120-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/gb/products/interflon-food-lube-g220",
@@ -4067,6 +4505,16 @@
      "url": "https://interflon.com/cases/reducing-downtime-and-extending-lubrication-intervals-2"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 210820-A, puis à partir du lot 141120-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G220",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "nsf",
      "quote": "It also notes the product is released by NSF under registration number 119641 for applications with incidental food contact (NSF-H1).",
      "url": "https://www.perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Lube_G220_TDS_de.pdf"
@@ -4117,7 +4565,11 @@
      "url": "https://us.interflon.com/food-lube-g220/6764"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-g320",
@@ -4141,7 +4593,8 @@
     "convoyeurs"
    ],
    "properties": [
-    "charges_elevees_chocs"
+    "charges_elevees_chocs",
+    "sans_pfas"
    ],
    "industries": [
     "agroalimentaire"
@@ -4149,7 +4602,9 @@
    "key_claims": [
     "Huile CLP ISO VG 320 multifonctionnelle à usage intensif avec MicPol® (fiche technique italienne).",
     "Classée NSF H1 ; certifiée Halal, Kosher et ISO 21469 selon sa page produit.",
-    "Cas client (transformation de pommes) : appliquée sur le convoyeur à bande pour limiter l'usure prématurée."
+    "Cas client (transformation de pommes) : appliquée sur le convoyeur à bande pour limiter l'usure prématurée.",
+    "Sans PFAS à partir du lot 200820-AF, puis à partir du lot 600221-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/cases/enhanced-reliability-in-apple-processing",
@@ -4196,6 +4651,16 @@
      "url": "https://static.interflon.com/assets/TDS2/8752_TDS_CH_it_Interflon_Food_Lube_G320.pdf"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 200820-AF, puis à partir du lot 600221-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G320",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "An Italian technical data sheet for G320 gives the range as -10°C to 100°C (Temperatura minima di esercizio -10°C; Temperatura massima di esercizio 100°C).",
      "url": "https://static.interflon.com/assets/TDS2/8752_TDS_CH_it_Interflon_Food_Lube_G320.pdf"
@@ -4211,7 +4676,11 @@
      "url": "https://interflon.com/fi/products/interflon-food-lube-g320"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-g460",
@@ -4233,14 +4702,18 @@
     "chaines",
     "glissieres_guides"
    ],
-   "properties": [],
+   "properties": [
+    "sans_pfas"
+   ],
    "industries": [
     "agroalimentaire"
    ],
    "key_claims": [
     "Huile CLP multi-usages NSF H1 pour engrenages, chaînes et glissières.",
     "Grade de viscosité ISO VG 460, de la même famille que la G320.",
-    "Certifiée Halal, Kosher et ISO 21469 selon sa page produit."
+    "Certifiée Halal, Kosher et ISO 21469 selon sa page produit.",
+    "Sans PFAS à partir du lot 500620-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/us/products/interflon-food-lube-g460",
@@ -4277,6 +4750,16 @@
      "url": "https://us.interflon.com/"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 500620-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G460",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "That page's specification table lists a minimum operating temperature of -11°C and a maximum of 100°C for ISO VG 460 oil",
      "url": "https://us.interflon.com/food-lube-g460/9218"
@@ -4297,7 +4780,11 @@
      "url": "https://us.interflon.com/food-lube-g460/9218"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-g680",
@@ -4320,14 +4807,17 @@
     "glissieres_guides"
    ],
    "properties": [
-    "charges_elevees_chocs"
+    "charges_elevees_chocs",
+    "sans_pfas"
    ],
    "industries": [
     "agroalimentaire"
    ],
    "key_claims": [
     "Huile CLP multi-usages à usage intensif, renforcée MicPol®, positionnée pour chaînes d'entraînement, réducteurs et glissières.",
-    "Certification NSF H1, grade ISO VG 680."
+    "Certification NSF H1, grade ISO VG 680.",
+    "Sans PFAS à partir du lot 240120-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/us/products/interflon-food-lube-g680",
@@ -4364,6 +4854,16 @@
      "url": "https://interflon.com/us/products/interflon-food-lube-g680"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 240120-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube G680",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "temp_min_c",
      "quote": "The Spanish TDS gives a minimum application temperature of -7°C and a maximum of 100°C",
      "url": "https://static.interflon.com/assets/TDS2/9210_TDS_ES_es_Interflon_Food_Lube_G680.pdf"
@@ -4384,7 +4884,11 @@
      "url": "https://static.interflon.com/assets/TDS2/9210_TDS_ES_es_Interflon_Food_Lube_G680.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-gsc46",
@@ -4502,7 +5006,8 @@
     "Huile hydraulique alimentaire de la série Food Lube H (ISO VG 32, 46 et 68), renforcée MicPol®.",
     "Série certifiée NSF H1 et NSF 537 (contact fortuit avec aliments ou médicaments).",
     "Avantages annoncés : température de fonctionnement plus basse, meilleure séparation de l'eau, formulation sans PFAS.",
-    "Utilisable aussi dans les presses à injecter, réducteurs et systèmes de lubrification centralisée."
+    "Utilisable aussi dans les presses à injecter, réducteurs et systèmes de lubrification centralisée.",
+    "Sans PFAS à partir du lot 24080061 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://interflon.com/fi/products/interflon-food-lube-h32",
@@ -4552,6 +5057,11 @@
      "url": "https://interflon.com/fi/products/interflon-food-lube-h32"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 24080061",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "formats",
      "quote": "One Interflon page is titled PI 2021 Interflon Food Lube H32 5 ltr can, which confirms a 5 L size for H32.",
      "url": "https://interflon.com/products/interflon-food-lube-h32"
@@ -4562,7 +5072,10 @@
      "url": "https://interflon.com/fi/products/interflon-food-lube-h32"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "food-lube-h46",
@@ -4595,7 +5108,8 @@
     "Huile hydraulique NSF H1, biodégradable et entièrement synthétique, sans PFAS (page Interflon US).",
     "Certifiée NSF H1 et NSF 537 selon le site Interflon.",
     "Série disponible en ISO VG 32, 46 et 68.",
-    "Utilisable aussi dans les réducteurs et les systèmes de lubrification centralisée."
+    "Utilisable aussi dans les réducteurs et les systèmes de lubrification centralisée.",
+    "Sans PFAS à partir du lot 24020038 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://interflon.com/us/products/interflon-food-lube-h46",
@@ -4642,6 +5156,11 @@
      "url": "https://interflon.com/us/products/interflon-food-lube-h46"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 24020038",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "temp_min_c",
      "quote": "Interflon's US product page lists a maximum operating temperature of 90 °C and a minimum of -39 °C.",
      "url": "https://interflon.com/us/products/interflon-food-lube-h46"
@@ -4672,7 +5191,10 @@
      "url": "https://interflon.com/se/products/interflon-food-lube-h46"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "food-lube-h68",
@@ -4705,7 +5227,8 @@
     "Plage d'application de -34 °C à +90 °C (fiche technique espagnole) ; éviter le stockage sous 0 °C.",
     "Biodégradable à 65 % selon la fiche technique espagnole ; norme OECD 301B citée sur la page US.",
     "Densité de 0,96 g/cm3 à 20 °C et durée de conservation de 4 ans (page US).",
-    "Présentée comme sans PFAS ; la série H est aussi utilisable dans les réducteurs et la lubrification centralisée."
+    "Présentée comme sans PFAS ; la série H est aussi utilisable dans les réducteurs et la lubrification centralisée.",
+    "Sans PFAS à partir du lot 24070295 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8768_TDS_CL_es_Interflon_Food_Lube_H68.pdf",
@@ -4774,6 +5297,11 @@
      "url": "https://static.interflon.com/assets/TDS2/8768_TDS_CL_es_Interflon_Food_Lube_H68.pdf"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 24070295",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_iso_vg",
      "quote": "The US page lists ISO VG 68",
      "url": "https://us.interflon.com/food-lube-h68/8762"
@@ -4794,7 +5322,10 @@
      "url": "https://static.interflon.com/assets/SDS2/8768_SDS_IE_en_Interflon_Food_Lube_H68.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "food-lube-ht",
@@ -4817,7 +5348,8 @@
    "properties": [
     "haute_temperature",
     "charges_elevees_chocs",
-    "synthetique"
+    "synthetique",
+    "sans_pfas"
    ],
    "industries": [
     "agroalimentaire",
@@ -4828,7 +5360,9 @@
     "Huile synthétique longue durée avec MicPol®, de qualité alimentaire, pour hautes températures et fortes charges.",
     "Certificat NSF n° 150687 (H1, ISO 21469) daté du 26/02/2025 ; NSF H1 et NSF 537 selon la page australienne.",
     "Plage d'utilisation de -15 °C à +270 °C, 300 °C brièvement, selon la fiche produit.",
-    "Cas client (pasteurisateur de jambons cuits) : durée de vie des chaînes de 18 à 42 mois et plus de 30 000 € d'économies tous les 3 ans (avec Food Lube G220)."
+    "Cas client (pasteurisateur de jambons cuits) : durée de vie des chaînes de 18 à 42 mois et plus de 30 000 € d'économies tous les 3 ans (avec Food Lube G220).",
+    "Sans PFAS à partir du lot 470120-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/letters/150687.pdf",
@@ -4898,6 +5432,16 @@
      "url": "https://interflon.com/us/products/interflon-food-lube-ht"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 470120-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Food Lube HT",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "nsf_reg_no",
      "quote": "Its NSF registration number is 150687.",
      "url": "https://interflon.com/products/interflon-food-lube-ht"
@@ -4928,7 +5472,11 @@
      "url": "https://us.interflon.com/food-lube-ht/9284"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ]
   },
   {
    "id": "food-lube-lt",
@@ -4975,6 +5523,7 @@
    ],
    "confidence": "medium",
    "uncertain_fields": [
+    "properties (sans PFAS : produit absent du bilan PFAS interne d'avril 2025, à confirmer)",
     "formats"
    ],
    "verified_fields": [
@@ -5081,7 +5630,8 @@
     "Viscosité 32 cSt à 40 °C ; densité 0,85 g/cm3 (fiche GB) ou 0,87 g/cm3 (fiche allemande) à 20 °C.",
     "Réduction de la consommation d'huile jusqu'à 90 % selon la fiche technique (les pages produit parlent de jusqu'à 9 fois moins d'huile).",
     "Bonne séparation de l'eau, anti-usure ; sans PFAS selon la page produit.",
-    "Cas client (plumaison de canards) : aucun remplacement de roulement après 18 mois d'utilisation."
+    "Cas client (plumaison de canards) : aucun remplacement de roulement après 18 mois d'utilisation.",
+    "Sans PFAS à partir du lot 24080063 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://info.nsf.org/USDA/letters/119639.pdf",
@@ -5156,6 +5706,11 @@
      "url": "https://interflon.com/gb/products/interflon-food-lube-pn32"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 24080063",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "temp_max_c",
      "quote": "The lowest application temperature is -10°C and the highest is 80°C.",
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Lube_PN32_TDS_de.pdf"
@@ -5171,7 +5726,10 @@
      "url": "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Food_Lube_PN32_TDS_de.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "grease-hs2",
@@ -5303,7 +5861,7 @@
    "nlgi": "2",
    "base": null,
    "formats": [
-    "aérosol",
+    "Aérosol",
     "Cartouche 400 ml"
    ],
    "applications": [
@@ -5315,7 +5873,8 @@
     "synthetique",
     "haute_temperature",
     "charges_elevees_chocs",
-    "resistant_eau"
+    "resistant_eau",
+    "sans_pfas"
    ],
    "industries": [
     "boulangerie",
@@ -5326,7 +5885,8 @@
     "Plage de -25 °C à +240 °C, pointe à 270 °C.",
     "Enregistrée NSF H2.",
     "Cas boulangerie : roulements de four relubrifiés mensuellement au lieu d'hebdomadairement.",
-    "Au-delà de 150 °C, relubrification régulière nécessaire."
+    "Au-delà de 150 °C, relubrification régulière nécessaire.",
+    "Sans PFAS à partir du lot 22050228 (aérosol : 24030015) (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://us.interflon.com/grease-htg/8163",
@@ -5399,6 +5959,11 @@
      "url": "https://us.interflon.com/Greases/"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 22050228 (aérosol : 24030015)",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "nlgi",
      "quote": "It is a synthetic, MicPol-technology grease with an inorganic thickener, rated NLGI grade 2 under ASTM D217.",
      "url": "https://static.interflon.com/assets/TDS2/8165_TDS_LU_fr_Interflon_Grease_HTG.pdf"
@@ -5449,7 +6014,10 @@
      "url": "https://www.ebay.de/itm/ws/eBayISAPI.dll?ViewItem=&item=151024214762"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "grease-ls1-2",
@@ -5463,22 +6031,29 @@
    "temp_max_c": 120,
    "temp_note": "Plage d'application -20 °C à 120 °C selon la fiche technique (TDS Interflon distribuée par perma-tec). Ne pas confondre avec Grease LS2 (-10 °C à 120 °C).",
    "viscosity_iso_vg": null,
-   "nlgi": "1.5",
+   "nlgi": "1/2",
    "base": "huiles minérales, épaississant complexe lithium-calcium",
    "formats": [
-    "boîte (tin)"
+    "Cartouche 400 ml",
+    "Pot 1 L",
+    "Seau 10 L",
+    "Fût 30 L",
+    "Fût 60 L"
    ],
    "applications": [
     "roulements",
     "glissieres_guides",
-    "engrenages_ouverts"
+    "engrenages_ouverts",
+    "mecanismes_articulations"
    ],
    "properties": [
     "resistant_eau",
     "charges_elevees_chocs",
     "environnement_poussiereux",
     "basse_temperature",
-    "sans_pfas"
+    "sans_pfas",
+    "anti_corrosion",
+    "lavage_frequent"
    ],
    "industries": [
     "offshore",
@@ -5493,7 +6068,10 @@
     "Délavage à l'eau de seulement 0,2 % (ASTM D-1264).",
     "Plage d'application -20 °C à 120 °C ; durée de conservation 4 ans ; sans PFAS.",
     "Utilisable en application manuelle et en systèmes automatiques prévus pour des graisses NLGI 1.",
-    "Base huiles minérales selon la FDS ; aucune version alimentaire confirmée."
+    "Base huiles minérales selon la FDS ; aucune version alimentaire confirmée.",
+    "Conforme DIN 51825 KPF1/2K-20.",
+    "Pour paliers lisses et à roulements sous charges extrêmes et faible vitesse (facteur DN 120 000). Convient aux systèmes de lubrification centralisés.",
+    "Sans PFAS à partir du lot 050321-M (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://www.perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Grease_LS1_2_TDS_en.pdf",
@@ -5544,6 +6122,36 @@
      "url": "https://interflon.com/products/interflon-grease-ls1-2"
     },
     {
+     "field": "nlgi",
+     "quote": "répondant aux normes DIN 51825 KPF1/2K-20",
+     "doc": "Book de vente TC 2026, Interflon France, slide 122"
+    },
+    {
+     "field": "temp_min_c",
+     "quote": "Résiste aux températures de -20°C à 120°C",
+     "doc": "Book de vente TC 2026, Interflon France, slide 122"
+    },
+    {
+     "field": "applications",
+     "quote": "Roulements, guides, surfaces de glissement, joints · Engrenages ouverts · Pièces de machines à vitesses lentes à moyennes · Graissage de toutes les articulations, axes, pivots, rotules, douilles et bagues des trains",
+     "doc": "Book de vente TC 2026, Interflon France, slide 123"
+    },
+    {
+     "field": "properties",
+     "quote": "Zones de lavage intensif à l'eau (y compris eau de mer) · Basses températures · Systèmes de graissage centralisé",
+     "doc": "Book de vente TC 2026, Interflon France, slide 123"
+    },
+    {
+     "field": "formats",
+     "quote": "400 ml · 1 litre · 10 litres · 30 litres, 60 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 122"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 050321-M",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "applications",
      "quote": "The data sheet describes it as an extreme-pressure grease aimed at bearings, guides, and open gears that run slowly or moderately under heavy loads",
      "url": "https://www.perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Grease_LS1_2_TDS_en.pdf"
@@ -5565,6 +6173,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -5592,7 +6204,8 @@
    "properties": [
     "resistant_eau",
     "charges_elevees_chocs",
-    "anti_corrosion"
+    "anti_corrosion",
+    "sans_pfas"
    ],
    "industries": [
     "marine / offshore",
@@ -5604,7 +6217,8 @@
     "Graisse à complexe lithium-calcium « long threaded », extrême pression, résistante à l'eau salée et aux chocs.",
     "Délavage à l'eau de 0,2 % (ASTM D-1264) ; protection maintenue même sous l'eau.",
     "Cas sidérurgie : pivots et roulements de roues de wagons-bennes portés à 10 ans de durée de vie, consommation de graisse divisée par 3.",
-    "Cas câbles en milieu marin : durée de vie des câbles triplée (2 à 6 ans)."
+    "Cas câbles en milieu marin : durée de vie des câbles triplée (2 à 6 ans).",
+    "Sans PFAS à partir du lot 170421-M (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-grease-ls2",
@@ -5664,6 +6278,11 @@
      "url": "https://interflon.com/us/products/greases"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 170421-M",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "temp_min_c",
      "quote": "The English TDS gives Lowest application temperature -10°C; Highest application temperature 120°C.",
      "url": "https://www.perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Grease_LS2_TDS_en.pdf"
@@ -5705,6 +6324,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -5731,7 +6353,8 @@
     "glissieres_guides"
    ],
    "properties": [
-    "charges_elevees_chocs"
+    "charges_elevees_chocs",
+    "sans_pfas"
    ],
    "industries": [
     "sidérurgie",
@@ -5743,7 +6366,8 @@
     "Conçue pour les réducteurs industriels et les systèmes de lubrification centralisée.",
     "Excellente stabilité au cisaillement, réduisant les fuites des réducteurs.",
     "Cas sidérurgie : réducteurs de ponts roulants sans fuite et durée de vie multipliée par 4 à 6.",
-    "Probablement l'ancienne 'Fin Grease MP 00' (renommage non confirmé)."
+    "Probablement l'ancienne 'Fin Grease MP 00' (renommage non confirmé).",
+    "Sans PFAS à partir du lot 060321-M (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-grease-mp00",
@@ -5787,6 +6411,11 @@
      "field": "applications",
      "quote": "Overhead crane gearboxes: with Interflon Grease MP00, the gearboxes not only stop leaking, but also last 4 to 6 times longer.",
      "url": "https://interflon.com/industries/primary-metal"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 060321-M",
+     "doc": "Bilan PFAS Interflon, avril 2025"
     },
     {
      "field": "nsf",
@@ -5834,7 +6463,10 @@
      "url": "https://shop.elvacenter.com/shop/hydraulics-and-accessories/lubricants/interflon-grease-mp00-30-liter-ton/"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "grease-mp1",
@@ -5858,7 +6490,8 @@
     "mecanismes_articulations"
    ],
    "properties": [
-    "charges_elevees_chocs"
+    "charges_elevees_chocs",
+    "sans_pfas"
    ],
    "industries": [
     "ferroviaire"
@@ -5868,7 +6501,8 @@
     "Enregistrée NSF H2 (DIN V 10517) sous le n° 145889.",
     "Plage de -30 °C à 145 °C ; viscosité de l'huile de base 185 cSt à 40 °C ; conservation 4 ans.",
     "Présentée comme très stable dans les systèmes de lubrification automatiques et centralisés (la fiche technique US indique toutefois une application manuelle).",
-    "Utilisée dans le ferroviaire pour signaux, barrières et manivelles."
+    "Utilisée dans le ferroviaire pour signaux, barrières et manivelles.",
+    "Sans PFAS à partir du lot 430521-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8731_TDS_IT_it_Interflon_Grease_MP1.pdf",
@@ -5934,6 +6568,11 @@
      "url": "https://interflon.com/industries/rail/products/interflon-grease-mp1"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 430521-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "nsf",
      "quote": "It is listed by the NSF in accordance with DIN V 10517 for food-industry equipment where there is no possibility of contact with edible products (NSF-H2, registration 145889).",
      "url": "https://interflon.com/gb/products/interflon-grease-mp1"
@@ -5984,24 +6623,31 @@
      "url": "https://interflon.com/products/interflon-grease-mp1"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "grease-mp2-3",
    "name": "Interflon Grease MP2/3",
    "family": "graisse",
    "range": "industrie",
-   "description_fr": "Graisse multifonction « heavy duty » à complexe lithium avec MicPol®, de grade NLGI 2,5, enregistrée NSF H2 (n° 144639) et sans PFAS. Plage de -30 °C à 145 °C selon la fiche technique ; utilisée notamment pour roulements et moteurs électriques.",
+   "description_fr": "Graisse multifonction « heavy duty » à complexe lithium avec MicPol®, de grade NLGI 2/3 (DIN 51825 KPF2/3N-20), enregistrée NSF H2 (n° 144639) et sans PFAS. Plage de -30 °C à 145 °C selon la fiche technique ; utilisée notamment pour roulements et moteurs électriques.",
    "nsf": "H2",
    "nsf_reg_no": "144639",
    "temp_min_c": -30,
    "temp_max_c": 145,
    "temp_note": "TDS : -30 °C à 145 °C (valeur retenue). La page produit GB indique -25 °C à +145 °C ; la TDS est jugée plus fiable, mais la limite basse diffère de 5 °C selon la source.",
    "viscosity_iso_vg": null,
-   "nlgi": "2.5",
+   "nlgi": "2/3",
    "base": null,
    "formats": [
-    "400 ml"
+    "Cartouche 400 ml",
+    "Pot 1 L",
+    "Seau 10 L",
+    "Fût 30 L",
+    "Fût 60 L"
    ],
    "applications": [
     "roulements",
@@ -6010,7 +6656,11 @@
    "properties": [
     "charges_elevees_chocs",
     "environnement_poussiereux",
-    "sans_pfas"
+    "sans_pfas",
+    "resistant_eau",
+    "anti_corrosion",
+    "lavage_frequent",
+    "vitesse_elevee"
    ],
    "industries": [
     "papier / carton ondulé",
@@ -6022,11 +6672,14 @@
     "plasturgie"
    ],
    "key_claims": [
-    "Graisse multifonction heavy duty à complexe lithium avec MicPol®, grade NLGI 2,5.",
+    "Graisse multifonction heavy duty à complexe lithium avec MicPol®, grade NLGI 2/3.",
     "Enregistrée NSF H2 (n° 144639) et sans PFAS.",
     "Reste en place sous charge et ne s'échappe pas des roulements.",
     "Cas cataphorèse : absorption électrique des pompes réduite de 28 % en 45 jours, intervalle de lubrification porté de 3 à 6 mois.",
-    "Référencée chez un distributeur sous l'intitulé « Interflon Fin Grease MP 2/3 400 ml » ; les noms et conditionnements varient selon les revendeurs."
+    "Référencée chez un distributeur sous l'intitulé « Interflon Fin Grease MP 2/3 400 ml » ; les noms et conditionnements varient selon les revendeurs.",
+    "Conforme DIN 51825 KPF2/3N-20.",
+    "Facteur DN 680 000 : convient aux roulements à vitesse de rotation importante.",
+    "Sans PFAS à partir du lot 100221-M (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8027_TDS_GB_en_Interflon_Grease_MP2_3.pdf",
@@ -6099,9 +6752,43 @@
      "field": "properties",
      "quote": "Interflon Grease MP2/3 is promoted as staying in place under load supports heavy loads and is not pushed away from its lubrication point.",
      "url": "https://interflon.com/products/interflon-grease-mp2-3"
+    },
+    {
+     "field": "nlgi",
+     "quote": "répondant aux normes DIN 51825 KPF2/3N-20",
+     "doc": "Book de vente TC 2026, Interflon France, slide 118"
+    },
+    {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-H2 : 144639",
+     "doc": "Book de vente TC 2026, Interflon France, slide 118"
+    },
+    {
+     "field": "temp_min_c",
+     "quote": "Résiste aux températures de -30°C à 145°C",
+     "doc": "Book de vente TC 2026, Interflon France, slide 118"
+    },
+    {
+     "field": "properties",
+     "quote": "Demeure sur le point de graissage, même sous l'action de nettoyages intensifs. Protège contre la rouille [...] Excellente résistance au contact de l'eau",
+     "doc": "Book de vente TC 2026, Interflon France, slide 118"
+    },
+    {
+     "field": "formats",
+     "quote": "400 ml · 1 litre · 10 litres · 30 litres, 60 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 118"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 100221-M",
+     "doc": "Bilan PFAS Interflon, avril 2025"
     }
    ],
-   "checked": "2026-10-12"
+   "checked": "2026-10-13",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   },
   {
    "id": "grease-og",
@@ -6118,7 +6805,12 @@
    "nlgi": "0",
    "base": null,
    "formats": [
-    "Aérosol 500 ml"
+    "Cartouche 400 ml",
+    "Aérosol 500 ml",
+    "Pot 1 L",
+    "Seau 10 L",
+    "Fût 30 L",
+    "Fût 60 L"
    ],
    "applications": [
     "engrenages_ouverts",
@@ -6129,7 +6821,8 @@
     "resistant_eau",
     "anti_corrosion",
     "charges_elevees_chocs",
-    "environnement_poussiereux"
+    "environnement_poussiereux",
+    "sans_pfas"
    ],
    "industries": [
     "mines et carrières",
@@ -6142,7 +6835,10 @@
     "Grade NLGI 0, point de goutte > 250 °C, charge de soudure 4 billes > 800 kg, conservation 4 ans.",
     "Ne coule pas et ne durcit pas ; très faible délavage à l'eau, protection contre la corrosion.",
     "Version aérosol sans PFAS, utilisable tête en bas.",
-    "Ferroviaire : moteurs d'aiguillage, pointes d'aiguilles, contrepoids."
+    "Ferroviaire : moteurs d'aiguillage, pointes d'aiguilles, contrepoids.",
+    "Conforme DIN 51825 OGPF0K-10.",
+    "Test 4 billes > 800 kg (ASTM D-2596).",
+    "Sans PFAS à partir du lot 080321-M (aérosol : 030621-M) (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://perma-tec.com/_Resources/Lubricants/Interflon/Interflon_Grease_OG_TDS_en.pdf",
@@ -6207,6 +6903,26 @@
      "url": "https://interflon.com/us/products/interflon-grease-og"
     },
     {
+     "field": "nlgi",
+     "quote": "répondant aux normes DIN 51825 OGPF0K-10",
+     "doc": "Book de vente TC 2026, Interflon France, slide 109"
+    },
+    {
+     "field": "temp_min_c",
+     "quote": "Pour application universelle, résiste aux températures de -10°C à 120°C",
+     "doc": "Book de vente TC 2026, Interflon France, slide 109"
+    },
+    {
+     "field": "formats",
+     "quote": "400 ml · 500 ml · 1 litre · 10 litres · 30 litres, 60 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 109"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 080321-M (aérosol : 030621-M)",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "formats",
      "quote": "A UK retailer lists Interflon Grease OG 500ml Aerosol at £52.53.",
      "url": "https://howcroft-group1.odoo.com/shop/category/tools-664/page/226"
@@ -6223,6 +6939,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -6240,8 +6960,8 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "pompe Impulse Connect (réf. 7213)",
-    "pack batterie (réf. 7215)"
+    "Pompe Impulse Connect (réf. 7213)",
+    "Pack batterie (réf. 7215)"
    ],
    "applications": [],
    "properties": [],
@@ -6295,7 +7015,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "bidon 10 L"
+    "Bidon 10 L"
    ],
    "applications": [
     "nettoyage_degraissage"
@@ -6431,8 +7151,10 @@
     "https://interflon.com/industries/concrete-cement",
     "https://interflon.com/us/products/interflon-lube-ep"
    ],
-   "confidence": "high",
-   "uncertain_fields": [],
+   "confidence": "medium",
+   "uncertain_fields": [
+    "properties (sans PFAS : produit absent du bilan PFAS interne d'avril 2025, à confirmer)"
+   ],
    "verified_fields": [
     "applications",
     "formats",
@@ -6532,7 +7254,8 @@
     "Viscosité cinématique de 120 cSt à 40 °C selon la page US.",
     "Pour câbles métalliques, charnières, broches, guides et chaînes fortement chargés (tapis roulants, poids lourds, chaînes d'équipements industriels).",
     "Durée de vie des chaînes jusqu'à 5 fois plus longue revendiquée avec une lubrification régulière.",
-    "Présenté comme sans PFAS ; résistant à l'eau et très pénétrant (version aérosol)."
+    "Présenté comme sans PFAS ; résistant à l'eau et très pénétrant (version aérosol).",
+    "Sans PFAS à partir du lot 510821-AF (aérosol : 160921-F) (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8985_TDS_LU_fr_Interflon_Lube_EP_plus.pdf",
@@ -6606,6 +7329,11 @@
      "url": "https://interflon.com/industries/concrete-cement"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 510821-AF (aérosol : 160921-F)",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_cst40",
      "quote": "The Interflon US product page lists kinematic viscosity at 40°C as 120 cSt, per ASTM D445",
      "url": "https://us.interflon.com/lube-ep-plus/8987"
@@ -6632,6 +7360,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "viscosity_cst40": 120,
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
@@ -6760,8 +7491,8 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "vrac",
-    "aérosol"
+    "Vrac",
+    "Aérosol"
    ],
    "applications": [
     "chaines",
@@ -6783,7 +7514,8 @@
     "Enregistrée NSF H2 sous le n° 123418 ; la version aérosol est enregistrée H2 sous le n° 123534.",
     "Huile synthétique longue durée avec technologie MicPol®, pour hautes températures et charges très élevées, présentée comme sans PFAS.",
     "Ne pas appliquer sur des pièces à plus de 70 °C (indication relevée pour la version aérosol).",
-    "Utilisée selon Interflon sur des chaînes de rames textiles (tenter) à 180 °C et sur une ligne de peinture industrielle (four de cuisson)."
+    "Utilisée selon Interflon sur des chaînes de rames textiles (tenter) à 180 °C et sur une ligne de peinture industrielle (four de cuisson).",
+    "Sans PFAS à partir du lot 38015-A (aérosol : 01055-M) (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8503_TDS_CO_es_Interflon_Lube_HT.pdf",
@@ -6872,6 +7604,11 @@
      "url": "https://interflon.com/ar/productos/interflon-lube-ht-aerosol"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 38015-A (aérosol : 01055-M)",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_cst40",
      "quote": "Its data sheet lists a 40°C kinematic viscosity of 31 cSt (ASTM D445) and an NSF registration number 123418 with NSF H2",
      "url": "https://static.interflon.com/assets/TDS2/8503_TDS_CO_es_Interflon_Lube_HT.pdf"
@@ -6913,6 +7650,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "viscosity_cst40": 31
   },
   {
@@ -6950,7 +7690,8 @@
     "Enregistrement NSF H2 n° 123400 : usage sans contact prévu avec les aliments.",
     "Viscosité cinématique de 355 cSt à 40 °C (ASTM D445) ; densité de 0,98 g/cm³ à 20 °C ; durée de conservation de 4 ans.",
     "Sans solvant volatil et sans PFAS ; à appliquer sur des pièces déjà chaudes.",
-    "Sur une presse à bois Siempelkamp, la consommation de lubrifiant des chaînes a été divisée par 10 selon Interflon."
+    "Sur une presse à bois Siempelkamp, la consommation de lubrifiant des chaînes a été divisée par 10 selon Interflon.",
+    "Sans PFAS à partir du lot 45054-A (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8494_TDS_CO_es_Interflon_Lube_HT_SF.pdf",
@@ -7010,6 +7751,11 @@
      "url": "https://interflon.com/cases/oven-chains-lubrication-on-a-steel-capsule-painting-line"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 45054-A",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_cst40",
      "quote": "Kinematische Viskosität 355 cSt bei 40 °C",
      "url": "https://static.interflon.com/assets/SDS2/8494_SDS_DE_de_Interflon_Lube_HT_SF.pdf"
@@ -7041,6 +7787,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "viscosity_cst40": 355
   },
   {
@@ -7078,7 +7827,8 @@
     "ISO VG 32 : 32 cSt à 40 °C (ASTM D445).",
     "Température d'application de -20 °C à +80 °C (fiche technique).",
     "Approuvée et recommandée par Norgren et Hoerbiger selon Interflon.",
-    "Aucun enregistrement NSF H1/H2 trouvé : la version alimentaire est le produit distinct Food Lube PN32."
+    "Aucun enregistrement NSF H1/H2 trouvé : la version alimentaire est le produit distinct Food Lube PN32.",
+    "Sans PFAS à partir du lot 161121-AF (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8424_TDS_GB_en_Interflon_Lube_PN32.pdf",
@@ -7124,6 +7874,11 @@
      "url": "https://interflon.com/us/cases/conveyor-chain-in-concrete-plant"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 161121-AF",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_iso_vg",
      "quote": "Interflon describes it as a premium, water-repellent oil designed for compressed air systems, and it is also listed in ISO VG 32",
      "url": "https://interflon.com/gb/products/interflon-lube-pn32"
@@ -7135,6 +7890,9 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -7156,14 +7914,17 @@
     "verins_pneumatique",
     "autre"
    ],
-   "properties": [],
+   "properties": [
+    "sans_pfas"
+   ],
    "industries": [],
    "key_claims": [
     "Huile haute viscosité pour outils pneumatiques à usage intensif, qui renforce la protection contre l'usure.",
     "ISO VG 68 : 68 cSt à 40 °C (ASTM D445).",
     "Température d'utilisation de -20 °C à +80 °C (tableau des spécifications Interflon).",
     "Utilisable sur les entraînements linéaires et dans les systèmes de graissage centralisé ; approuvée par Norgren et Hoerbiger.",
-    "Réduction de la consommation d'huile jusqu'à 90 % selon le site US d'Interflon."
+    "Réduction de la consommation d'huile jusqu'à 90 % selon le site US d'Interflon.",
+    "Sans PFAS à partir du lot 25030074 (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://us.interflon.com/lube-pn68/6843",
@@ -7207,12 +7968,20 @@
      "url": "https://interflon.com/products/interflon-lube-pn68"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 25030074",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_iso_vg",
      "quote": "in central lubrication systems (ISO VG 68)",
      "url": "https://interflon.com/products/interflon-lube-pn68"
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
   {
@@ -7230,8 +7999,11 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "aérosol",
-    "vrac"
+    "Aérosol 500 ml",
+    "Bidon 1 L",
+    "Bidon 5 L",
+    "Bidon 10 L",
+    "Bidon 20 L"
    ],
    "applications": [
     "chaines",
@@ -7249,7 +8021,8 @@
     "environnement_poussiereux",
     "basse_temperature",
     "sans_pfas",
-    "compatible_plastiques_joints"
+    "compatible_plastiques_joints",
+    "sans_silicone"
    ],
    "industries": [
     "papier-carton",
@@ -7266,7 +8039,8 @@
     "Pénètre, nettoie, dégrippe les pièces grippées ou rouillées et chasse l'humidité, y compris dans les applications électriques.",
     "N'abîme pas le caoutchouc ni le plastique selon la page produit.",
     "Ancien nom « Interflon Fin Lube TF », encore présent sur d'anciennes FDS.",
-    "Dans une papeterie, la lubrification des chaînes est passée de quotidienne à environ toutes les deux semaines (cas Interflon)."
+    "Dans une papeterie, la lubrification des chaînes est passée de quotidienne à environ toutes les deux semaines (cas Interflon).",
+    "Sans PFAS à partir du lot 430621-AF (aérosol : 020721-F) (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://interflon.com/us/products/interflon-lube-tf-aerosol",
@@ -7344,6 +8118,26 @@
      "url": "https://interflon.com/products/interflon-lube-tf-aerosol"
     },
     {
+     "field": "temp_min_c",
+     "quote": "Large plage d'utilisation, résiste aux températures de -43°C à 170°C",
+     "doc": "Book de vente TC 2026, Interflon France, slide 014"
+    },
+    {
+     "field": "formats",
+     "quote": "500ml · 1 litre · 5 litres, 10 litres, 20 litres",
+     "doc": "Book de vente TC 2026, Interflon France, slide 014"
+    },
+    {
+     "field": "properties",
+     "quote": "N'attaque pas le caoutchouc ou les matières plastiques car ne contient pas de solvants chlorés ni de silicone",
+     "doc": "Book de vente TC 2026, Interflon France, slide 014"
+    },
+    {
+     "field": "properties",
+     "quote": "Sans PFAS : 430621-AF (aérosol : 020721-F)",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "viscosity_cst40",
      "quote": "Viscosità cinematica 40°C 23 cSt ASTM D445",
      "url": "https://static.interflon.com/assets/TDS2/8105_TDS_CH_it_Interflon_Lube_TF.pdf"
@@ -7360,6 +8154,10 @@
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Bilan PFAS Interflon, avril 2025"
+   ],
    "viscosity_cst40": 23,
    "nsf_note": "Aucune homologation NSF trouvée dans les fiches techniques Interflon ni dans les certificats NSF consultés : à réserver aux zones sans contact alimentaire."
   },
@@ -7396,7 +8194,9 @@
     "Enregistré NSF H1 (n° 156455) pour usage en industrie alimentaire.",
     "Évaporation rapide, sans résidu ; rapidement biodégradable ; sans solvants chlorés.",
     "Peut remplacer acétone, diluant ou alcool ; ne convient pas au caoutchouc, aux plastiques ni au verre de sécurité.",
-    "Certaines pages (GB, ferroviaire) présentent un produit nommé simplement « Interflon Metal Clean » ; son équivalence avec Metal Clean F n'est pas confirmée par le corpus."
+    "Certaines pages (GB, ferroviaire) présentent un produit nommé simplement « Interflon Metal Clean » ; son équivalence avec Metal Clean F n'est pas confirmée par le corpus.",
+    "Biodégradable à 98 % selon OECD 302-B. Sans solvants chlorés, sans pictogramme GHS08.",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021)."
    ],
    "source_urls": [
     "https://interflon.com/products/interflon-metal-clean-f-aerosol",
@@ -7447,12 +8247,36 @@
      "url": "https://interflon.com/gb/industries/rail/rail-products/interflon-metal-clean"
     },
     {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-H1 : 156455",
+     "doc": "Book de vente TC 2026, Interflon France, slide 226"
+    },
+    {
+     "field": "properties",
+     "quote": "Biodégradable à 98% selon OECD 302-B",
+     "doc": "Book de vente TC 2026, Interflon France, slide 226"
+    },
+    {
+     "field": "formats",
+     "quote": "500 ml (aérosol)",
+     "doc": "Book de vente TC 2026, Interflon France, slide 226"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Metal Clean F",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
      "field": "formats",
      "quote": "Interflon, Metal Clean F 500 ml (aerosol)",
      "url": "https://shop.elvacenter.com/shop/hydraulics-and-accessories/lubricants/interflon-metal-clean-f-500-ml-aerosol-2"
     }
    ],
    "checked": "2026-10-14",
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France",
+    "Liste officielle NSF ISO 21469 du 20/12/2021"
+   ],
    "temp_na": true
   },
   {
@@ -7470,7 +8294,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "unité Oil Dispenser (réf. 7267 / 7268)"
+    "Unité Oil Dispenser (réf. 7267 / 7268)"
    ],
    "applications": [
     "chaines"
@@ -7539,7 +8363,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "unités réf. 7272 à 7275"
+    "Unités réf. 7272 à 7275"
    ],
    "applications": [],
    "properties": [],
@@ -7614,7 +8438,10 @@
     "Pour filetages et assemblages en aluminium, inox, métaux légers et alliages jusqu'à +1200 °C.",
     "Alternative à la pâte au cuivre ; ne sèche pas et ne forme pas de croûte.",
     "Prévient le fretting et la corrosion ; sans PFAS.",
-    "Disponible aussi en aérosol (également enregistrée NSF pour contact alimentaire fortuit)."
+    "Disponible aussi en aérosol (également enregistrée NSF pour contact alimentaire fortuit).",
+    "Toujours fabriqué sans PFAS (bilan PFAS Interflon, avril 2025).",
+    "Certifié ISO 21469 (liste officielle NSF du 20/12/2021).",
+    "Certifiée NSF H1 et ISO 21469 (certificat du 14/03/2024) : contact alimentaire fortuit, aussi utilisable comme film antirouille ou agent de démoulage sur joints."
    ],
    "source_urls": [
     "https://interflon.com/gb/products/interflon-paste-ht1200",
@@ -7690,6 +8517,21 @@
      "url": "https://interflon.com/products/interflon-paste-ht1200"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : toujours",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
+     "field": "key_claims",
+     "quote": "Listé : Interflon Paste HT1200",
+     "doc": "Liste officielle NSF ISO 21469 du 20/12/2021"
+    },
+    {
+     "field": "nsf_reg_no",
+     "quote": "Category Code: H1, ISO21469 · Certificate No. 122320",
+     "doc": "Certificat NSF Interflon Paste HT1200 du 14/03/2024"
+    },
+    {
      "field": "nsf",
      "quote": "Interflon's US and UK pages list it as NSF H1",
      "url": "https://interflon.com/us/products/interflon-paste-ht1200"
@@ -7745,7 +8587,69 @@
      "url": "https://static.interflon.com/assets/TDS2/8432_TDS_PL_pl_Interflon_Paste_HT1200.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025",
+    "Liste officielle NSF ISO 21469 du 20/12/2021",
+    "Certificat NSF Interflon Paste HT1200 du 14/03/2024"
+   ]
+  },
+  {
+   "id": "power-wipes",
+   "name": "Interflon Power Wipes",
+   "family": "nettoyant",
+   "range": "nettoyants",
+   "description_fr": "Lingettes nettoyantes très résistantes, imprégnées d'une solution nettoyante industrielle (technologie F-Active®), pour les services de maintenance, l'industrie alimentaire et pharmaceutique.",
+   "nsf": "A1",
+   "nsf_reg_no": "141508",
+   "temp_min_c": null,
+   "temp_max_c": null,
+   "viscosity_iso_vg": null,
+   "nlgi": null,
+   "base": null,
+   "formats": [
+    "Boîte de 90 lingettes"
+   ],
+   "applications": [
+    "nettoyage_degraissage"
+   ],
+   "properties": [],
+   "industries": [
+    "Maintenance",
+    "Agroalimentaire",
+    "Pharmacie",
+    "Chantiers"
+   ],
+   "key_claims": [
+    "Grand format 22,5 × 30,5 cm, très résistantes.",
+    "Enlèvent peinture, colle, huile, graisse, crasse industrielle, silicones.",
+    "N'attaquent pas la peau, contiennent de l'aloe vera. Restent humides plus d'une heure."
+   ],
+   "source_urls": [],
+   "confidence": "high",
+   "uncertain_fields": [],
+   "verified_fields": [
+    "formats",
+    "nsf_reg_no"
+   ],
+   "evidence": [
+    {
+     "field": "nsf_reg_no",
+     "quote": "Numéro d'enregistrement NSF-A1 : 141508",
+     "doc": "Book de vente TC 2026, Interflon France, slide 236"
+    },
+    {
+     "field": "formats",
+     "quote": "90 pièces",
+     "doc": "Book de vente TC 2026, Interflon France, slide 236"
+    }
+   ],
+   "source_docs": [
+    "Book de vente TC 2026, Interflon France"
+   ],
+   "checked": "2026-10-13",
+   "temp_na": true,
+   "temp_note": "Sans objet : nettoyant, pas de plage de service (température d'application : voir la fiche technique)."
   },
   {
    "id": "rotalube-ep",
@@ -7819,7 +8723,7 @@
    "base": null,
    "formats": [
     "6 tailles pour chaînes à rouleaux standard (simplex et duplex)",
-    "version alimentaire optionnelle (pignons bleus)"
+    "Version alimentaire optionnelle (pignons bleus)"
    ],
    "applications": [
     "chaines"
@@ -8012,7 +8916,7 @@
    "nlgi": null,
    "base": null,
    "formats": [
-    "aérosol"
+    "Aérosol"
    ],
    "applications": [
     "convoyeurs",
@@ -8132,7 +9036,8 @@
     "Enregistrée NSF pour applications avec contact alimentaire fortuit (H1).",
     "Protection contre l'usure et l'oxydation, résistance à l'eau, à la vapeur et à la salissure, propriétés anticorrosion.",
     "Plage de -20 °C à 150 °C ; densité 0,94 g/cm³ ; conservation 4 ans ; sans PFAS.",
-    "Couleur : blanche selon la TDS (une page autrichienne la décrit comme transparente)."
+    "Couleur : blanche selon la TDS (une page autrichienne la décrit comme transparente).",
+    "Sans PFAS à partir du lot 081121-F (bilan PFAS Interflon, avril 2025) : vérifier le n° de lot du stock client."
    ],
    "source_urls": [
     "https://static.interflon.com/assets/TDS2/8983_TDS_GB_en_Interflon_White_Grease.pdf",
@@ -8188,6 +9093,11 @@
      "url": "https://interflon.com/products/interflon-white-grease"
     },
     {
+     "field": "properties",
+     "quote": "Sans PFAS : 081121-F",
+     "doc": "Bilan PFAS Interflon, avril 2025"
+    },
+    {
      "field": "formats",
      "quote": "PI 2021 Interflon WHITE GREASE tube 320x320",
      "url": "https://interflon.com/co/productos/interflon-white-grease"
@@ -8203,7 +9113,10 @@
      "url": "https://static.interflon.com/assets/TDS2/8983_TDS_NL_nl_Interflon_White_Grease.pdf"
     }
    ],
-   "checked": "2026-10-14"
+   "checked": "2026-10-14",
+   "source_docs": [
+    "Bilan PFAS Interflon, avril 2025"
+   ]
   }
  ]
 }

@@ -60,20 +60,28 @@ def main():
     core = open(os.path.join(APP, "public", "js", "selector-core.js"), encoding="utf-8").read()
     data = json.load(open(os.path.join(APP, "public", "data", "produits.json"), encoding="utf-8"))
 
-    # palette: one light white/red look instead of the light/dark pair
-    page = re.sub(r":root\{\n  --bg:.*?\n\}\n@media \(prefers-color-scheme: dark\)\{.*?\n\}\}\n:root\[data-theme=\"dark\"\]\{.*?\n\}\n",
-                  BRAND_TOKENS + "\n", page, count=1, flags=re.S)
-    assert "prefers-color-scheme" not in page, "palette block not replaced"
-    page = page.replace("</style>", BRAND_CSS + "</style>", 1)
+    # palette: one light white/red look instead of the light/dark pair (pages that
+    # already carry the Interflon look and the logo are left as they are)
+    branded = 'src="img/logo-interflon.png"' in page
+    if not branded:
+        page = re.sub(r":root\{\n  --bg:.*?\n\}\n@media \(prefers-color-scheme: dark\)\{.*?\n\}\}\n:root\[data-theme=\"dark\"\]\{.*?\n\}\n",
+                      BRAND_TOKENS + "\n", page, count=1, flags=re.S)
+        assert "prefers-color-scheme" not in page, "palette block not replaced"
+        page = page.replace("</style>", BRAND_CSS + "</style>", 1)
 
     if args.logo and os.path.isfile(args.logo):
         mime = mimetypes.guess_type(args.logo)[0] or "image/png"
         uri = f"data:{mime};base64," + base64.b64encode(open(args.logo, "rb").read()).decode()
         logo = f'<img src="{uri}" alt="Interflon">'
     else:
+        uri = None
         logo = '<span class="logo-word" aria-label="Interflon">INTERFLON</span>'
-    page = page.replace('<span class="eyebrow">Interflon · aide au choix</span>',
-                        f'<div class="logo">{logo}</div>', 1)
+    if branded:
+        assert uri, "logo file required for this page"
+        page = page.replace('src="img/logo-interflon.png"', f'src="{uri}"')
+    else:
+        page = page.replace('<span class="eyebrow">Interflon · aide au choix</span>',
+                            f'<div class="logo">{logo}</div>', 1)
 
     # embed logic and data so the file works offline, by double-click
     page = page.replace('<script src="js/selector-core.js"></script>', f"<script>\n{core}\n</script>", 1)
@@ -82,6 +90,12 @@ def main():
                         f'<script type="application/json" id="produits-data">{blob}</script>\n<script>\n(function () {{', 1)
     page = page.replace('const doc = await (await fetch("data/produits.json")).json();',
                         'const doc = JSON.parse(document.getElementById("produits-data").textContent);', 1)
+    equiv = json.load(open(os.path.join(APP, "public", "data", "equivalences.json"), encoding="utf-8"))
+    eblob = json.dumps(equiv, ensure_ascii=False).replace("</", "<\\/")
+    page = page.replace('<script type="application/json" id="produits-data">',
+                        f'<script type="application/json" id="equivalences-data">{eblob}</script>\n<script type="application/json" id="produits-data">', 1)
+    page = page.replace('const eqDoc = await (await fetch("data/equivalences.json")).json();',
+                        'const eqDoc = JSON.parse(document.getElementById("equivalences-data").textContent);', 1)
     assert "fetch(" not in page and 'src="js/' not in page
 
     html = ('<!doctype html>\n<html lang="fr">\n<head>\n<meta charset="utf-8">\n'
@@ -93,7 +107,7 @@ def main():
     assert "<body>" in html
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     open(OUT, "w", encoding="utf-8").write(html)
-    print(f"{OUT} ({len(html) // 1024} Ko){' avec logo' if 'data:image' in logo else ' (logo en attente)'}")
+    print(f"{OUT} ({len(html) // 1024} Ko){' avec logo' if uri else ' (logo en attente)'}")
 
 
 if __name__ == "__main__":

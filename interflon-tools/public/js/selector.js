@@ -66,7 +66,7 @@
   const doubtTxt = (f) => String(f).replace(/^(nsf_reg_no|nsf|temp_min_c|temp_max_c|viscosity_iso_vg|nlgi|base|formats|applications|properties)\b/, (k) => FIELD_LABEL[k]);
   // ISO VG grade when the source gives one, otherwise the measured viscosity at 40 °C
   const viscTxt = (p) => (p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : known(p.viscosity_cst40) ? `${p.viscosity_cst40} cSt à 40 °C` : "");
-  const isVerified = (p) => p.confidence === "high" && !C.unsure(p, C.NSF_UNSURE) && !C.unsure(p, C.TEMP_UNSURE);
+  const isVerified = C.isVerified;
 
   // "-20", "−30" (U+2212), "180°C", "12,5" -> number; "" -> ""; garbage -> NaN
   function parseTemp(raw) {
@@ -137,7 +137,7 @@
           <div><label for="sel-vg">Viscosité ISO VG (si connue)</label><input id="sel-vg" type="text" inputmode="numeric" placeholder="ex. 220" value="${esc(crit.iso_vg)}"/></div>
           <div><label for="sel-nlgi">Grade NLGI (graisse)</label><input id="sel-nlgi" type="text" placeholder="ex. 2" value="${esc(crit.nlgi)}"/></div>
         </div>
-        ${EQUIV.length ? `<div style="margin-top:6px"><label class="muted small" for="sel-equiv">Référence concurrente (table validée)</label>
+        ${EQUIV.length ? `<div style="margin-top:6px"><label class="muted small" for="sel-equiv">Référence concurrente (marque ou produit)</label>
           <input id="sel-equiv" type="text" placeholder="Marque ou référence…"/><div id="sel-equiv-res"></div></div>` : ""}
       </div>` : ""}
       <div class="q"><div class="qt">1 · CONTACT ALIMENTAIRE POSSIBLE ?</div>
@@ -160,6 +160,8 @@
   function bindForm() {
     const form = $("#sel-form");
     form.addEventListener("click", (e) => {
+      const apply = e.target.closest("[data-equiv-apply]");
+      if (apply) return applyEquiv(EQUIV[+apply.dataset.equivApply]);
       const detail = e.target.closest("[data-detail]");
       if (detail) {
         e.preventDefault();
@@ -235,14 +237,37 @@
     if (!box) return;
     const words = norm(q).split(/\s+/).filter(Boolean);
     if (!words.length) return (box.innerHTML = "");
-    const hits = EQUIV.filter((x) => words.every((w) => norm(`${x.marque} ${x.reference}`).includes(w))).slice(0, 8);
+    const hits = EQUIV.map((x, i) => [x, i]).filter(([x]) => words.every((w) => norm(`${x.marque} ${x.reference} ${x.type || ""}`).includes(w))).slice(0, 8);
+    const temps = (x) => (known(x.temp_min_c) || known(x.temp_max_c) ? `${known(x.temp_min_c) ? x.temp_min_c : "?"} → ${known(x.temp_max_c) ? x.temp_max_c : "?"} °C` : "");
+    const specs = (x) => [x.type, x.nsf ? `NSF ${x.nsf}` : "", temps(x), x.iso_vg ? `ISO VG ${x.iso_vg}` : "", x.nlgi ? `NLGI ${x.nlgi}` : ""].filter(Boolean).join(" · ");
     box.innerHTML = hits.length
       ? `<ul class="tight">${hits
-          .map((x) => `<li><b>${esc(x.marque)} ${esc(x.reference)}</b> → ${
-            findProduct(x.interflon) ? `<a href="#" data-detail="${esc(findProduct(x.interflon).id)}">${esc(x.interflon)}</a>` : `${esc(x.interflon)} <span class="badge bad">introuvable dans le catalogue</span>`
-          }${x.note ? ` <span class="muted">· ${esc(x.note)}</span>` : ""}${x.valide_par ? ` <span class="badge ok">validé ${esc(x.valide_par)}</span>` : ""}</li>`)
+          .map(([x, i]) => {
+            const p = x.interflon ? findProduct(x.interflon) : null;
+            const direct = x.interflon ? ` → ${p ? `<a href="#" data-detail="${esc(p.id)}">${esc(x.interflon)}</a>` : `${esc(x.interflon)} <span class="badge bad">introuvable dans le catalogue</span>`}` : "";
+            const canApply = x.replace_type || x.application;
+            return `<li><b>${esc(x.marque)} ${esc(x.reference)}</b>${direct}
+              ${x.valide_par ? `<span class="badge ok">validé ${esc(x.valide_par)}</span>` : `<span class="badge warn">à valider</span>`}
+              <div class="muted small">${esc(specs(x))}${x.note ? ` · ${esc(x.note)}` : ""}${x.source ? ` · <a href="${esc(IFX.safeUrl(x.source))}" target="_blank" rel="noopener">fiche</a>` : x.origine ? ` · ${esc(x.origine)}` : ""}</div>
+              ${canApply ? `<button type="button" class="btn small" data-equiv-apply="${i}">Appliquer ses critères</button>` : `<div class="muted small">Pas d'équivalent Interflon.</div>`}</li>`;
+          })
           .join("")}</ul>`
-      : `<div class="muted small">Pas d'équivalence enregistrée : utilise les critères ci-dessous.</div>`;
+      : `<div class="muted small">Référence absente de la table : utilise les critères ci-dessous.</div>`;
+  }
+
+  // Competitor -> criteria (type, food contact, its published range, viscosity / grade)
+  function applyEquiv(x) {
+    crit.replaceType = C.REPLACE_TYPES[x.replace_type] ? x.replace_type : "";
+    crit.application = x.application && C.APPLICATIONS[x.application] ? x.application : "";
+    crit.food = x.nsf === "H1" ? "oui" : "";
+    // a data-sheet range is a product limit, not the machine's temperature:
+    // only heat-purpose products (oven chain oils…) pass their upper limit on
+    crit.tmin = "";
+    crit.tmax = x.besoin_temp && known(x.temp_max_c) ? String(x.temp_max_c) : "";
+    crit.iso_vg = x.iso_vg ? String(x.iso_vg) : "";
+    crit.nlgi = x.nlgi ? String(x.nlgi) : "";
+    changed(true);
+    IFX.toast(`Critères de ${x.marque} ${x.reference} appliqués : indique la température réelle de la machine pour affiner.`);
   }
 
   // ------------------------------------------------------------------ results
@@ -357,9 +382,10 @@
       ${(p.industries || []).length ? `<h3>SECTEURS</h3><div>${esc(p.industries.join(" · "))}</div>` : ""}
       ${(p.key_claims || []).length ? `<h3>ARGUMENTS (SOURCE INTERFLON)</h3>${list(p.key_claims)}` : ""}
       <h3>SOURCES</h3>${list(p.source_urls, (u) => `<a href="${esc(IFX.safeUrl(u))}" target="_blank" rel="noopener">${esc(u.replace(/^https?:\/\//, "").slice(0, 70))}</a>`)}
+      ${(p.source_docs || []).length ? `<h3>DOCUMENTS INTERFLON INTERNES</h3>${list(p.source_docs)}` : ""}
       ${(p.evidence || []).length ? `<details><summary class="muted" style="cursor:pointer;margin-top:10px">PREUVES (${p.evidence.length}) : citation exacte derrière chaque valeur</summary>${list(
         p.evidence,
-        (e) => `<b>${esc(e.field)}</b> : « ${esc(e.quote)} » <a href="${esc(IFX.safeUrl(e.url))}" target="_blank" rel="noopener">source</a>`
+        (e) => `<b>${esc(e.field)}</b> : « ${esc(e.quote)} » ${e.url ? `<a href="${esc(IFX.safeUrl(e.url))}" target="_blank" rel="noopener">source</a>` : `<span class="muted">(${esc(e.doc || "document interne")})</span>`}`
       )}</details>` : ""}
       ${(p.uncertain_fields || []).length ? `<h3>À CONFIRMER</h3>${list(p.uncertain_fields, (x) => esc(doubtTxt(x)))}` : ""}
       ${p.checked ? `<div class="muted small" style="margin-top:10px">Données vérifiées le ${esc(IFX.fmtDate(p.checked))}</div>` : ""}`;
@@ -481,7 +507,7 @@
   S.init = (productsDoc, equivDoc) => {
     PRODUCTS = (productsDoc && productsDoc.products) || [];
     META = (productsDoc && productsDoc._meta) || {};
-    EQUIV = ((equivDoc && equivDoc.equivalences) || []).filter((x) => x && x.marque && x.interflon);
+    EQUIV = ((equivDoc && equivDoc.equivalences) || []).filter((x) => x && x.marque && x.reference);
     crit = sanitizeCrit(IFX.store.get(LS_CRIT, null));
     if (IFX.STATIC && !IFX.OFFLINE) $("#sel-print").textContent = "Copier la recommandation";
     window.addEventListener("afterprint", () => {
@@ -515,4 +541,5 @@
   };
   S.openProductByName = (name) => openProduct(name);
   S.products = () => PRODUCTS;
+  S.equivCount = () => EQUIV.length;
 })();

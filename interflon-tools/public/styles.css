@@ -191,6 +191,8 @@ ul.tight li{margin:2px 0;}
 .st-client{color:var(--ok);}
 .st-perdu{color:var(--bad);}
 .overdue{color:var(--bad);font-weight:700;}
+#sync-info{flex-basis:100%;}
+#sync-info.sync-on{color:var(--ok);}
 .grid select.inline{width:auto;padding:2px 4px;}
 .grid input.inline{padding:2px 4px;}
 

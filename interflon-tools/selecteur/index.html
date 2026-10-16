@@ -4,33 +4,24 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: workshop sheet — questions on the left like a lubrication survey form,
-   ranked product cards on the right; one column with a sticky jump button on phones. */
+   ranked product cards on the right; one column with a sticky jump button on phones.
+   Interflon colours: white page, Interflon red (sampled from the logo) for brand and
+   selection, dark grey text. Light only, like the brand. */
 :root{
-  --bg:#f3f4f1; --surface:#ffffff; --sunken:#e9ebe6; --line:#d3d7cf; --ink:#1c2226; --ink-2:#56606a;
-  --accent:#b86a00; --accent-ink:#ffffff; --accent-soft:#f6e3c7;
-  --ok:#1d7a4d; --ok-soft:#dcefe4; --warn:#9a6a00; --warn-soft:#f6ebcd; --bad:#b23a32; --bad-soft:#f6dcd9;
+  color-scheme:light;
+  --bg:#ffffff; --surface:#ffffff; --sunken:#f4f4f4; --line:#e1e1e1; --ink:#1e1e1e; --ink-2:#5c5c5c;
+  --accent:#e2231a; --accent-hover:#c21b13; --accent-ink:#ffffff; --accent-soft:#fdecea;
+  --ok:#1d7a4d; --ok-soft:#dcefe4; --warn:#9a6a00; --warn-soft:#f6ebcd; --bad:#a3160e; --bad-soft:#fbe3e1;
   --info:#2f6690; --info-soft:#dde9f3; --need:#2f6690;
   --display:"Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   --body:"Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --r:6px;
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --bg:#121517; --surface:#1a1f22; --sunken:#0f1214; --line:#2c3439; --ink:#e7e9e6; --ink-2:#9aa4ab;
-  --accent:#f0a23b; --accent-ink:#1a1206; --accent-soft:#3a2a12;
-  --ok:#5cc58f; --ok-soft:#163626; --warn:#e2b54a; --warn-soft:#3a2f12; --bad:#ef7d74; --bad-soft:#3d1c1a;
-  --info:#7db3dd; --info-soft:#17293a; --need:#7db3dd; color-scheme:dark;
-}}
-:root[data-theme="dark"]{
-  --bg:#121517; --surface:#1a1f22; --sunken:#0f1214; --line:#2c3439; --ink:#e7e9e6; --ink-2:#9aa4ab;
-  --accent:#f0a23b; --accent-ink:#1a1206; --accent-soft:#3a2a12;
-  --ok:#5cc58f; --ok-soft:#163626; --warn:#e2b54a; --warn-soft:#3a2f12; --bad:#ef7d74; --bad-soft:#3d1c1a;
-  --info:#7db3dd; --info-soft:#17293a; --need:#7db3dd; color-scheme:dark;
-}
 
 *{box-sizing:border-box}
 html,body{height:100%}
-body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);margin:0;border-top:6px solid var(--accent)}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 a{color:var(--info)}
@@ -38,9 +29,11 @@ a{color:var(--info)}
 .wrap{max-width:1320px;margin:0 auto;padding-inline:clamp(16px,3vw,32px);padding-block:20px 48px}
 
 /* header */
-.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:end;justify-content:space-between;padding-bottom:16px;border-bottom:2px solid var(--ink);margin-bottom:20px}
-.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
-.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.top{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between;padding-bottom:16px;border-bottom:3px solid var(--accent);margin-bottom:20px}
+.brand{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;min-width:0}
+.logo{display:block;height:46px;width:auto}
+.titles{display:flex;flex-direction:column;gap:4px;padding-left:22px;border-left:1px solid var(--line);min-width:0}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
 h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;letter-spacing:-.01em;text-wrap:balance}
 .note{font-size:13px;color:var(--ink-2);max-width:56ch;margin:0}
 
@@ -61,7 +54,7 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;l
 .seg{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .seg button{border:0;border-right:1px solid var(--line);background:var(--surface);padding:9px 6px;font-size:14px;min-height:40px}
 .seg button:last-child{border-right:0}
-.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
 .temps{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .field{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink-2)}
 .field input{border:1px solid var(--line);background:var(--sunken);border-radius:var(--r);padding:8px 10px;font:500 16px var(--mono);color:var(--ink);width:100%}
@@ -71,6 +64,13 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;l
 .presets button:hover{border-color:var(--accent);color:var(--ink)}
 .presets b{font:500 12px var(--mono);color:var(--ink)}
 .link{background:none;border:0;padding:0;color:var(--ink-2);text-decoration:underline;font-size:13px}
+.combo{position:relative}
+.suggest{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:10;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 8px 24px color-mix(in srgb,var(--ink) 14%,transparent);max-height:320px;overflow:auto}
+.suggest button{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:8px 12px;font-size:14px}
+.suggest button:last-child{border-bottom:0}
+.suggest button:hover,.suggest button[aria-selected="true"]{background:var(--accent-soft)}
+.suggest small{display:block;color:var(--ink-2);font-size:12px;line-height:1.3}
+.suggest .hint{padding:8px 12px}
 .mode{margin-bottom:6px}
 
 /* results */
@@ -78,15 +78,20 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;l
 .rhead{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
 .rhead h2{font:800 22px/1.15 var(--display);font-stretch:90%;margin:0}
 .rhead h2 small{display:block;font:400 14px/1.4 var(--body);color:var(--ink-2);margin-top:2px}
-.btn{border:1px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:var(--r);padding:8px 14px;font-weight:600;font-size:14px;min-height:40px}
+.btn{border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);border-radius:var(--r);padding:8px 14px;font-weight:600;font-size:14px;min-height:40px}
+.btn:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
 .btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
-.btn.ghost:hover{border-color:var(--ink)}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
 .banner{display:flex;gap:10px;align-items:flex-start;background:var(--warn-soft);color:var(--ink);border-radius:var(--r);padding:10px 12px;font-size:14px}
 .banner b{color:var(--warn)}
 .banner.example{background:var(--info-soft)}
 .banner.example b{color:var(--info)}
 .banner.error{background:var(--bad-soft)}
 .banner.error b{color:var(--bad)}
+.banner.compet{background:var(--accent-soft)}
+.banner.compet b{color:var(--accent)}
+.banner .link{font-size:inherit}
+.badge.equiv{background:var(--accent-soft);color:var(--accent)}
 
 .card{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
 .card.top1{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
@@ -140,14 +145,53 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   .jump{display:block;position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));margin-top:-4px;width:100%;z-index:5;box-shadow:0 6px 18px color-mix(in srgb,var(--ink) 25%,transparent)}
   .kv{grid-template-columns:110px minmax(0,1fr)}
 }
+@media (max-width: 560px){
+  .logo{height:36px}
+  .titles{padding-left:0;border-left:0}
+}
 @media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* customer sheet (A4), rendered only while printing */
+#print-area{display:none}
+@media print{
+  @page{size:A4;margin:12mm 13mm 13mm}
+  body.printing{background:#fff;border-top:0;height:auto}
+  body.printing > *:not(#print-area){display:none!important}
+  body.printing #print-area{display:block!important}
+  .pr{color:#1e1e1e;font-family:var(--body);font-size:9.5pt;line-height:1.38;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .pr-head{display:flex;align-items:center;gap:18pt;padding-bottom:8pt;border-bottom:3pt solid #e2231a;margin-bottom:10pt}
+  .pr-head img{height:28pt;width:auto}
+  .pr-kicker{font-family:var(--mono);font-weight:600;font-size:8.5pt;letter-spacing:.12em;text-transform:uppercase;color:#5c5c5c}
+  .pr-client{font-family:var(--display);font-weight:800;font-size:16pt;line-height:1.1;font-stretch:88%;margin:2pt 0}
+  .pr-meta{font-size:9pt;color:#5c5c5c}
+  .pr h2{font-family:var(--mono);font-weight:700;font-size:9pt;letter-spacing:.1em;text-transform:uppercase;color:#e2231a;margin:0 0 4pt}
+  .pr-need{background:#f4f4f4;padding:6pt 9pt;margin-bottom:10pt}
+  .pr-need ul{margin:0;padding-left:14pt}
+  .pr-prod{border-left:3pt solid #e2231a;padding:1pt 0 1pt 9pt;margin:0 0 9pt;break-inside:avoid}
+  .pr-rank{font-family:var(--mono);font-weight:600;font-size:8pt;color:#e2231a;letter-spacing:.1em;text-transform:uppercase}
+  .pr-prod h3{font-family:var(--display);font-weight:800;font-size:13pt;line-height:1.2;font-stretch:90%;margin:1pt 0 3pt}
+  .pr-nsf{font-family:var(--mono);font-weight:500;font-size:8.5pt;color:#1d7a4d;margin-left:6pt}
+  .pr-prod p{margin:2pt 0}
+  .pr-ok,.pr-check{list-style:none;margin:3pt 0;padding:0;columns:2;column-gap:14pt}
+  .pr-ok li,.pr-check li{break-inside:avoid;display:flex;gap:5pt}
+  .pr-ok span{color:#1d7a4d;font-weight:700}
+  .pr-check span{color:#9a6a00;font-weight:700}
+  .pr-sub{font-weight:600;font-size:9pt}
+  .pr-specs{font-family:var(--mono);font-size:8.5pt;line-height:1.4;color:#5c5c5c}
+  .pr-alert{color:#a3160e;font-weight:700}
+  .pr-foot{margin-top:10pt;padding-top:5pt;border-top:1px solid #ccc;font-size:7.5pt;color:#5c5c5c}
+}
 </style>
 
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <span class="eyebrow">Interflon · aide au choix</span>
-      <h1>Sélecteur de lubrifiants</h1>
+      <img class="logo" src="img/logo-interflon.png" alt="Interflon" width="304" height="74">
+      <div class="titles">
+        <span class="eyebrow">Aide au choix</span>
+        <h1>Sélecteur de lubrifiants</h1>
+      </div>
     </div>
     <p class="note" id="data-note">Fiches établies à partir des sources publiques Interflon : à valider par le service technique avant tout engagement client.</p>
   </header>
@@ -165,7 +209,10 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     <main class="results" id="results-panel">
       <div class="rhead">
         <h2 id="r-title">Produits recommandés</h2>
-        <button type="button" class="btn ghost" id="copy">Copier la recommandation</button>
+        <div class="actions">
+          <button type="button" class="btn" id="print" hidden>Imprimer / PDF</button>
+          <button type="button" class="btn ghost" id="copy">Copier la recommandation</button>
+        </div>
       </div>
       <div id="banners"></div>
       <div id="results"></div>
@@ -181,6 +228,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   </div>
 </div>
 <div class="toast" id="toast" hidden></div>
+<div id="print-area" hidden></div>
 
 <script src="js/selector-core.js"></script>
 <script>
@@ -200,10 +248,20 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   const FAMILIES = { huile: "Huile", graisse: "Graisse", aerosol: "Aérosol", nettoyant: "Nettoyant", degraissant: "Dégraissant", agent_demoulage: "Démoulant", lubrificateur_automatique: "Graisseur automatique", accessoire: "Accessoire", autre: "Autre" };
   const ENV = [["resistant_eau", "Eau, humidité"], ["lavage_frequent", "Lavages fréquents"], ["environnement_poussiereux", "Poussière, saleté"], ["charges_elevees_chocs", "Charges élevées, chocs"], ["vitesse_elevee", "Vitesse élevée"], ["anti_corrosion", "Corrosion, extérieur"], ["compatible_plastiques_joints", "Plastiques, joints"], ["biodegradable", "Biodégradable exigé"], ["sans_pfas", "Sans PFAS exigé"]];
   const PRESETS = [["Surgélation", -40, -18], ["Froid", -5, 10], ["Ambiant", 5, 40], ["Chaud", 20, 120], ["Four, étuve", 50, 250], ["Très haute", "", 300]];
-  const EXAMPLE = { mode: "besoin", food: "oui", application: "chaines", tmin: "50", tmax: "250", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "" };
-  const blank = () => ({ mode: "besoin", food: "", application: "", tmin: "", tmax: "", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "" });
+  const EXAMPLE = { mode: "besoin", food: "oui", application: "chaines", tmin: "50", tmax: "250", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "", competitor: "" };
+  const blank = () => ({ mode: "besoin", food: "", application: "", tmin: "", tmax: "", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "", competitor: "", client: "" });
+  const LS_AUTHOR = "ifx.selecteur.auteur";
+  let author = "";
+  // Printing works in the installed version only: claude.ai pages cannot open the print dialog
+  const CAN_PRINT = location.protocol === "file:" || /^(127\.0\.0\.1|localhost|\[::1\])$/.test(location.hostname);
 
   let PRODUCTS = [];
+  let EQUIV = [];
+  const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const eqKey = (e) => `${e.marque} | ${e.reference}`;
+  const noEquivalent = (e) => !e.interflon && !e.replace_type && !e.application;
+  const currentEquiv = () => (crit.mode === "remplacement" && crit.competitor ? EQUIV.find((e) => eqKey(e) === crit.competitor) || null : null);
+  const eqSpecs = (e) => [e.type, e.nsf ? `NSF ${e.nsf}${e.nsf_reg_no ? " n° " + e.nsf_reg_no : ""}` : "sans NSF connu", known(e.temp_min_c) || known(e.temp_max_c) ? `${known(e.temp_min_c) ? e.temp_min_c : "?"} → ${known(e.temp_max_c) ? e.temp_max_c : "?"} °C` : "", e.iso_vg ? `ISO VG ${e.iso_vg}` : "", e.nlgi ? `NLGI ${e.nlgi}` : ""].filter(Boolean).join(" · ");
   let isExample = false;
   let crit = blank();
   let ranked = [];
@@ -221,7 +279,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   const doubtTxt = (f) => String(f).replace(/^(nsf_reg_no|nsf|temp_min_c|temp_max_c|viscosity_iso_vg|nlgi|base|formats|applications|properties)\b/, (k) => FIELD_LABEL[k]);
   // ISO VG grade when the source gives one, otherwise the measured viscosity at 40 °C
   const viscTxt = (p) => (p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : known(p.viscosity_cst40) ? `${p.viscosity_cst40} cSt à 40 °C` : "");
-  const isVerified = (p) => p.confidence === "high" && !C.unsure(p, C.NSF_UNSURE) && !C.unsure(p, C.TEMP_UNSURE);
+  const isVerified = C.isVerified;
   function parseTemp(raw) {
     const s = String(raw === undefined || raw === null ? "" : raw).replace(/[−–—]/g, "-").replace(/°\s*c?|\s/gi, "").replace(",", ".");
     if (!s || s === "-") return "";
@@ -238,6 +296,8 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     c.env = (Array.isArray(s.env) ? s.env : []).filter((k) => ENV.some(([e]) => e === k));
     c.formats = (Array.isArray(s.formats) ? s.formats : []).filter((k) => C.FORMATS[k]);
     ["tmin", "tmax", "iso_vg", "nlgi", "query"].forEach((k) => { if (typeof s[k] === "string" || typeof s[k] === "number") c[k] = String(s[k]).slice(0, 60); });
+    if (typeof s.competitor === "string") c.competitor = s.competitor.slice(0, 160);
+    if (typeof s.client === "string") c.client = s.client.slice(0, 120);
     return c;
   }
 
@@ -269,7 +329,11 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const apps = Object.entries(C.APPLICATIONS).filter(([k]) => k === crit.application || (k !== "autre" && PRODUCTS.some((p) => (p.applications || []).includes(k))));
     let n = 0;
     const num = () => String(++n).padStart(2, "0");
+    const eq = currentEquiv();
     $("#questions").innerHTML = `
+      ${crit.mode === "remplacement" && EQUIV.length ? `<section class="q"><h2><span class="n">${num()}</span>Produit concurrent</h2><p class="hint">Marque ou référence du produit en place : les critères se remplissent avec ses caractéristiques.</p>
+        <div class="combo"><label class="field" for="competitor">Recherche<input id="competitor" autocomplete="off" placeholder="ex. Klübersynth UH1, Nevastane, WD-40" value="${esc(eq ? `${eq.marque} ${eq.reference}` : "")}" aria-controls="competitor-list" aria-autocomplete="list"></label>
+        <div class="suggest" id="competitor-list" role="listbox" hidden></div></div></section>` : ""}
       ${crit.mode === "remplacement" ? `<section class="q"><h2><span class="n">${num()}</span>Produit utilisé aujourd'hui</h2><p class="hint">Type de produit du client, toutes marques.</p>
         ${chips("replaceType", Object.entries(C.REPLACE_TYPES).map(([k, v]) => [k, v.label]), crit.replaceType, false)}
         <div class="temps"><label class="field" for="iso_vg">Viscosité ISO VG<input id="iso_vg" inputmode="numeric" placeholder="ex. 220" value="${esc(crit.iso_vg)}"></label>
@@ -283,7 +347,10 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
         <div class="presets">${PRESETS.map(([l, a, b], i) => `<button type="button" data-preset="${i}">${esc(l)} <b>${a === "" ? "" : a + " / "}${b} °C</b></button>`).join("")}</div></section>
       <section class="q"><h2><span class="n">${num()}</span>Conditions</h2>${chips("env", ENV, crit.env, true)}</section>
       <section class="q"><h2><span class="n">${num()}</span>Conditionnement souhaité</h2>${chips("formats", Object.entries(C.FORMATS), crit.formats, true)}</section>
-      <section class="q"><h2><span class="n">${num()}</span>Recherche libre</h2><label class="field" for="query">Nom, mot-clé<input id="query" placeholder="ex. Food Grease" value="${esc(crit.query)}"></label></section>`;
+      <section class="q"><h2><span class="n">${num()}</span>Recherche libre</h2><label class="field" for="query">Nom, mot-clé<input id="query" placeholder="ex. Food Grease" value="${esc(crit.query)}"></label></section>
+      <section class="q"><h2><span class="n">${num()}</span>Pour la fiche client</h2><p class="hint">Repris sur la recommandation copiée ou imprimée.</p>
+        <div class="temps"><label class="field" for="client">Client, site<input id="client" autocomplete="off" placeholder="ex. Fromagerie X, Rodez" value="${esc(crit.client)}"></label>
+        <label class="field" for="author">Établie par<input id="author" autocomplete="name" placeholder="Ton nom" value="${esc(author)}"></label></div></section>`;
     markTemp();
   }
 
@@ -324,7 +391,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if ((p.formats || []).length) specs.push(`<span>${esc(p.formats.join(", "))}</span>`);
     return `<article class="panel card ${r.eligible && i === 0 ? "top1" : ""} ${r.eligible ? "" : "out"}">
       <div class="ch"><div>${r.eligible && i < 3 ? `<span class="rank">CHOIX ${i + 1}</span>` : ""}<div class="pname">${esc(p.name)}</div>
-        <div class="badges">${p.nsf ? `<span class="badge ${h1 ? "h1" : "nsf"}">NSF ${esc(p.nsf)}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}</div></div>
+        <div class="badges">${p.nsf ? `<span class="badge ${h1 ? "h1" : "nsf"}">NSF ${esc(p.nsf)}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${isVerified(p) ? `<span class="badge ok">fiche vérifiée</span>` : `<span class="badge warn">à valider</span>`}${currentEquiv() && currentEquiv().interflon === p.name ? `<span class="badge equiv">équivalence proposée</span>` : ""}</div></div>
         <button type="button" class="btn ghost" data-detail="${esc(p.id)}">Fiche</button></div>
       ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
       <div class="specs">${specs.join("")}</div>
@@ -336,14 +403,29 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   function renderResults() {
     const c = effective();
     ranked = C.rank(PRODUCTS, c);
+    // a documented equivalence (still to validate) goes first when it meets the criteria
+    const proposed = currentEquiv() && currentEquiv().interflon;
+    ranked.sort((a, b) => (b.eligible - a.eligible) || ((b.product.name === proposed) - (a.product.name === proposed)));
     const ok = ranked.filter((r) => r.eligible);
     const out = ranked.filter((r) => !r.eligible);
     const banners = [];
     if (isExample) banners.push(`<div class="banner example"><b>Exemple</b><span>Chaînes de four en usine alimentaire, 50 à 250 °C. Modifie les réponses ou clique sur « Tout effacer » pour ton propre besoin.</span></div>`);
+    const eq = currentEquiv();
+    if (eq) {
+      const direct = eq.interflon ? ` Équivalence proposée (${esc(eq.origine)}) : <strong>${esc(eq.interflon)}</strong>, à valider par le service technique.` : "";
+      const none = noEquivalent(eq) && !/pas d'équivalent/i.test(eq.note || "") ? " Pas d'équivalent Interflon référencé." : "";
+      const temps = eq.besoin_temp && known(eq.temp_max_c)
+        ? ` Produit haute température : sa limite de ${esc(eq.temp_max_c)} °C est reprise comme besoin. Remplace-la par la température réelle de la machine si tu la connais.`
+        : known(eq.temp_min_c) || known(eq.temp_max_c) ? " Indique la température réelle de la machine pour affiner le choix." : "";
+      const prop = eq.interflon ? ranked.find((r) => r.product.name === eq.interflon) : null;
+      const out = prop && !prop.eligible ? ` Avec ces critères, elle est écartée (${esc(prop.blockers.join(" ; "))}) : voir « Produits écartés ».` : "";
+      banners.push(`<div class="banner compet"><b>Remplace</b><span><strong>${esc(eq.marque)} ${esc(eq.reference)}</strong> : ${esc(eqSpecs(eq))}.${direct}${out}${none}${eq.note ? " " + esc(eq.note) : ""}${temps} ${eq.source ? `<a href="${esc(safeUrl(eq.source))}" target="_blank" rel="noopener">Fiche du produit concurrent</a>` : `<span class="quote">Source : ${esc(eq.origine)}</span>`} · <button type="button" class="link" data-clear-competitor>retirer</button></span></div>`);
+    }
     if (c.badTemp) banners.push(`<div class="banner error"><b>Température illisible</b><span>Saisis un nombre, par exemple -20 ou 180. Aucune recommandation tant qu'elle n'est pas comprise.</span></div>`);
     $("#banners").innerHTML = banners.join("");
     $("#jump").textContent = hasCriteria(c) && !c.badTemp ? `Voir les ${ok.length} produit${ok.length > 1 ? "s" : ""} ↓` : "Voir les produits ↓";
     if (!PRODUCTS.length) { $("#results").innerHTML = `<div class="panel empty">Catalogue indisponible.</div>`; return; }
+    if (eq && noEquivalent(eq)) { $("#r-title").innerHTML = "Pas d'équivalent Interflon"; $("#results").innerHTML = `<div class="panel empty">${esc(eq.reference)} (${esc(eq.type)}) n'a pas d'équivalent dans la gamme Interflon.</div>`; return; }
     if (c.badTemp) { $("#r-title").innerHTML = "Produits recommandés"; $("#results").innerHTML = ""; return; }
     if (!hasCriteria(c)) {
       $("#r-title").innerHTML = `Tout le catalogue<small>${PRODUCTS.length} produits · réponds aux questions pour filtrer</small>`;
@@ -375,7 +457,8 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       <h3>Propriétés</h3>${list(p.properties, (a) => esc(C.PROPERTIES[a] || a))}
       ${(p.key_claims || []).length ? `<h3>Arguments (source Interflon)</h3>${list(p.key_claims)}` : ""}
       <h3>Sources</h3>${list(p.source_urls, (u) => `<a href="${esc(safeUrl(u))}" target="_blank" rel="noopener">${esc(String(u).replace(/^https?:\/\//, "").slice(0, 64))}</a>`)}
-      ${(p.evidence || []).length ? `<details><summary class="hint" style="cursor:pointer">Preuves (${p.evidence.length}) : citation exacte derrière chaque valeur</summary>${list(p.evidence, (e) => `<b>${esc(e.field)}</b> <span class="quote">« ${esc(e.quote)} »</span> <a href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener">source</a>`)}</details>` : ""}
+      ${(p.source_docs || []).length ? `<h3>Documents Interflon internes</h3>${list(p.source_docs)}` : ""}
+      ${(p.evidence || []).length ? `<details><summary class="hint" style="cursor:pointer">Preuves (${p.evidence.length}) : citation exacte derrière chaque valeur</summary>${list(p.evidence, (e) => `<b>${esc(e.field)}</b> <span class="quote">« ${esc(e.quote)} »</span> ${e.url ? `<a href="${esc(safeUrl(e.url))}" target="_blank" rel="noopener">source</a>` : `<span class="quote">(${esc(e.doc || "document interne")})</span>`}`)}</details>` : ""}
       ${(p.uncertain_fields || []).length ? `<h3>À confirmer</h3><ul class="hint">${p.uncertain_fields.map((x) => `<li>${esc(doubtTxt(x))}</li>`).join("")}</ul>` : ""}`;
     $("#sheet").hidden = false;
     $("#sheet-close").focus();
@@ -389,12 +472,15 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const c = effective();
     const ok = ranked.filter((r) => r.eligible).slice(0, 3);
     const need = [];
+    const eq = currentEquiv();
+    if (eq) need.push(`Produit en place : ${eq.marque} ${eq.reference} (${eqSpecs(eq)})`);
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
     if (c.food) need.push("Contact alimentaire : " + { oui: "oui (homologation NSF requise)", non: "non", nsp: "à préciser" }[c.food]);
     if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
     if (c.tmin !== "" || c.tmax !== "") need.push(`Température : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
     if (c.env.length) need.push("Conditions : " + c.env.map((e) => C.PROPERTIES[e] || e).join(", "));
-    const lines = ["RECOMMANDATION DE LUBRIFICATION", "", "Besoin :", ...need.map((x) => "  - " + x)];
+    const head = [crit.client, new Date().toLocaleDateString("fr-FR"), author ? "établie par " + author + ", Interflon France" : ""].filter(Boolean).join(" · ");
+    const lines = ["RECOMMANDATION DE LUBRIFICATION", head, "", "Besoin :", ...need.map((x) => "  - " + x)];
     ok.forEach((r, i) => {
       const p = r.product;
       lines.push("", `${i + 1}. ${p.name}${p.nsf ? " (NSF " + p.nsf + ")" : ""}`);
@@ -403,8 +489,60 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       r.reasons.forEach((x) => lines.push(`  ${MARK[x.s] || "?"} ${x.t}`));
       lines.push(`  Température : ${tempTxt(p)} · ${isVerified(p) ? "fiche vérifiée" : "données à confirmer par le service technique"}`);
     });
-    lines.push("", "Proposition indicative établie à partir des fiches produits publiques Interflon, à confirmer avec la fiche technique et la FDS en vigueur.");
+    lines.push("", "Proposition indicative établie à partir des fiches produits Interflon, à confirmer avec la fiche technique et la FDS en vigueur.");
     return lines.join("\n");
+  }
+
+  // ------------------------------------------------------------ print (installed version only)
+  function needList(c) {
+    const need = [];
+    const eq = currentEquiv();
+    if (eq) need.push(`Produit en place : ${eq.marque} ${eq.reference} (${eqSpecs(eq)})`);
+    if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
+    if (c.food) need.push("Contact alimentaire : " + { oui: "oui, homologation NSF requise", non: "non", nsp: "à préciser" }[c.food]);
+    if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
+    if (c.tmin !== "" || c.tmax !== "") need.push(`Température de fonctionnement : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
+    if (c.env.length) need.push("Conditions : " + c.env.map((e) => C.PROPERTIES[e] || e).join(", "));
+    if (c.formats.length) need.push("Conditionnement souhaité : " + c.formats.map((f) => C.FORMATS[f]).join(", "));
+    if (c.iso_vg) need.push("Viscosité actuelle : ISO VG " + c.iso_vg);
+    if (c.nlgi) need.push("Grade actuel : NLGI " + c.nlgi);
+    return need;
+  }
+  async function printReco() {
+    const c = effective();
+    const ok = ranked.filter((r) => r.eligible).slice(0, 3);
+    if (c.badTemp || !hasCriteria(c) || !ok.length) return toast("Décris le besoin et obtiens au moins un produit avant d'imprimer.");
+    const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    const mark = (s) => MARK[s] || "?";
+    const area = $("#print-area");
+    area.innerHTML = `<div class="pr">
+      <header class="pr-head"><img src="img/logo-interflon.png" alt="Interflon">
+        <div class="pr-title"><div class="pr-kicker">Recommandation de lubrification</div><div class="pr-client">${esc(crit.client || "Client")}</div>
+        <div class="pr-meta">${esc(date)}${author ? ` · établie par ${esc(author)}, Interflon France` : ""}</div></div></header>
+      <section class="pr-need"><h2>Besoin</h2><ul>${needList(c).map((x) => `<li>${esc(x)}</li>`).join("")}</ul></section>
+      <h2 class="pr-h2">Produits proposés</h2>
+      ${ok.map((r, i) => {
+        const p = r.product;
+        const good = r.reasons.filter((x) => x.s === "y");
+        const check = r.reasons.filter((x) => x.s !== "y");
+        const specs = [`Température : ${tempTxt(p)}`, p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : "", p.nlgi ? `NLGI ${p.nlgi}` : "", (p.formats || []).length ? `Conditionnements : ${p.formats.join(", ")}` : ""].filter(Boolean);
+        return `<article class="pr-prod">
+          <div class="pr-rank">Choix ${i + 1}</div>
+          <h3>${esc(p.name)}${p.nsf ? ` <span class="pr-nsf">NSF ${esc(p.nsf)}${p.nsf_reg_no ? " · n° " + esc(p.nsf_reg_no) : ""}</span>` : ""}</h3>
+          ${c.food && c.food !== "non" && !C.foodOk(p, c.application) ? `<p class="pr-alert">Attention : produit non homologué pour le contact alimentaire. À n'utiliser que hors des zones de contact avec les denrées.</p>` : ""}
+          ${p.description_fr ? `<p>${esc(p.description_fr)}</p>` : ""}
+          ${good.length ? `<ul class="pr-ok">${good.map((x) => `<li><span>✓</span>${esc(x.t)}</li>`).join("")}</ul>` : ""}
+          ${check.length ? `<p class="pr-sub">À vérifier avant utilisation</p><ul class="pr-check">${check.map((x) => `<li><span>${mark(x.s)}</span>${esc(x.t)}</li>`).join("")}</ul>` : ""}
+          <p class="pr-specs">${esc(specs.join(" · "))} · ${isVerified(p) ? "fiche vérifiée sur document Interflon" : "données à confirmer par le service technique Interflon"}</p>
+        </article>`;
+      }).join("")}
+      <footer class="pr-foot">Proposition indicative établie à partir des fiches produits Interflon. À confirmer avec la fiche technique et la fiche de données de sécurité en vigueur avant utilisation.<br>Interflon® et MicPol® sont des marques déposées d'Interflon BV.</footer>
+    </div>`;
+    area.hidden = false;
+    const img = area.querySelector("img");
+    if (img && !img.complete) await new Promise((res) => { img.onload = img.onerror = res; });
+    document.body.classList.add("printing");
+    window.print();
   }
   function copyReco() {
     const c = effective();
@@ -418,8 +556,58 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     try { navigator.clipboard.writeText(text).then(() => toast("Recommandation copiée : colle-la dans ton e-mail ou ton compte rendu."), fallback); } catch (e) { fallback(); }
   }
 
+  // ------------------------------------------------------------ competitor search
+  let sugItems = [];
+  let sugIdx = -1;
+  function drawSuggestions(words) {
+    const box = $("#competitor-list");
+    if (!box) return;
+    box.innerHTML = sugItems.length
+      ? sugItems.map(([e, i], k) => `<button type="button" role="option" data-eq="${i}" aria-selected="${k === sugIdx}">${esc(e.marque)} <b>${esc(e.reference)}</b><small>${esc(e.type)}</small></button>`).join("")
+      : `<p class="hint">Référence absente de la table : décris le produit avec les questions ci-dessous.</p>`;
+    box.hidden = !words;
+  }
+  function showSuggestions(q) {
+    const words = norm(q).split(/\s+/).filter(Boolean);
+    sugItems = words.length ? EQUIV.map((e, i) => [e, i]).filter(([e]) => words.every((w) => norm(`${e.marque} ${e.reference} ${e.type}`).includes(w))).slice(0, 8) : [];
+    sugIdx = sugItems.length ? 0 : -1;
+    drawSuggestions(words.length);
+  }
+  function applyCompetitor(e) {
+    crit.competitor = eqKey(e);
+    crit.replaceType = C.REPLACE_TYPES[e.replace_type] ? e.replace_type : "";
+    crit.application = e.application && C.APPLICATIONS[e.application] ? e.application : "";
+    crit.food = e.nsf === "H1" ? "oui" : "";
+    // A data-sheet range is a product limit, not the machine's temperature: it only becomes
+    // a criterion (upper limit only) for products whose purpose is heat (oven chain oils…).
+    crit.tmin = "";
+    crit.tmax = e.besoin_temp && known(e.temp_max_c) ? String(e.temp_max_c) : "";
+    crit.iso_vg = e.iso_vg ? String(e.iso_vg) : "";
+    crit.nlgi = e.nlgi ? String(e.nlgi) : "";
+    changed(true);
+  }
+
   // ------------------------------------------------------------ events
   function bind() {
+    $("#questions").addEventListener("mousedown", (e) => {
+      const b = e.target.closest("[data-eq]");
+      if (!b) return;
+      e.preventDefault();
+      applyCompetitor(EQUIV[+b.dataset.eq]);
+    });
+    $("#questions").addEventListener("keydown", (e) => {
+      if (e.target.id !== "competitor" || $("#competitor-list").hidden) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (sugItems.length) sugIdx = (sugIdx + (e.key === "ArrowDown" ? 1 : sugItems.length - 1)) % sugItems.length;
+        drawSuggestions(true);
+      } else if (e.key === "Enter" && sugIdx >= 0) {
+        e.preventDefault();
+        applyCompetitor(sugItems[sugIdx][0]);
+      } else if (e.key === "Escape") $("#competitor-list").hidden = true;
+    });
+    $("#questions").addEventListener("focusout", (e) => { if (e.target.id === "competitor") setTimeout(() => { const box = $("#competitor-list"); if (box) box.hidden = true; }, 150); });
+    $("#banners").addEventListener("click", (e) => { if (e.target.closest("[data-clear-competitor]")) { crit.competitor = ""; changed(true); } });
     document.querySelector(".mode").addEventListener("click", (e) => { const b = e.target.closest("[data-mode]"); if (b) { crit.mode = b.dataset.mode; changed(true); } });
     $("#questions").addEventListener("click", (e) => {
       const pr = e.target.closest("[data-preset]");
@@ -431,10 +619,18 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       else { crit[name] = crit[name] === v ? "" : v; box.querySelectorAll("[data-v]").forEach((x) => x.setAttribute("aria-pressed", x.dataset.v === crit[name])); }
       changed(false);
     });
-    $("#questions").addEventListener("input", (e) => { const k = { tmin: "tmin", tmax: "tmax", query: "query", iso_vg: "iso_vg", nlgi: "nlgi" }[e.target.id]; if (k) { crit[k] = e.target.value.trim(); changed(false); } });
+    $("#questions").addEventListener("input", (e) => {
+      if (e.target.id === "competitor") return showSuggestions(e.target.value);
+      if (e.target.id === "author") { author = e.target.value.trim().slice(0, 60); return store.set(LS_AUTHOR, author); }
+      const k = { tmin: "tmin", tmax: "tmax", query: "query", iso_vg: "iso_vg", nlgi: "nlgi", client: "client" }[e.target.id];
+      if (k) { crit[k] = e.target.value.trim(); changed(false); }
+    });
     $("#reset").addEventListener("click", () => { crit = blank(); changed(true); });
     $("#results").addEventListener("click", (e) => { const d = e.target.closest("[data-detail]"); if (d) openSheet(d.dataset.detail); });
     $("#copy").addEventListener("click", copyReco);
+    $("#print").hidden = !CAN_PRINT;
+    $("#print").addEventListener("click", printReco);
+    window.addEventListener("afterprint", () => { document.body.classList.remove("printing"); $("#print-area").hidden = true; $("#print-area").innerHTML = ""; });
     $("#jump").addEventListener("click", () => $("#results-panel").scrollIntoView({ behavior: "smooth", block: "start" }));
     $("#sheet-close").addEventListener("click", closeSheet);
     $("#sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeSheet(); });
@@ -443,6 +639,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
 
   async function boot() {
     bind();
+    author = String(store.get(LS_AUTHOR, "") || "").slice(0, 60);
     const saved = store.get(LS, null);
     if (saved) crit = sanitize(saved); else { crit = sanitize(EXAMPLE); isExample = true; }
     try {
@@ -452,6 +649,12 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       if (doc._meta && doc._meta.avertissement) $("#data-note").textContent = doc._meta.avertissement + (pending ? ` ${pending} fiche(s) sur ${PRODUCTS.length} restent à confirmer.` : "");
     } catch (e) {
       $("#banners").innerHTML = `<div class="banner error"><b>Catalogue indisponible</b><span>Le fichier des produits n'a pas pu être chargé. Recharge la page.</span></div>`;
+    }
+    try {
+      const eqDoc = await (await fetch("data/equivalences.json")).json();
+      EQUIV = (eqDoc.equivalences || []).filter((e) => e && e.marque && e.reference);
+    } catch (e) {
+      EQUIV = []; // optional: the selector works without the competitor table
     }
     renderQuestions();
     renderResults();

@@ -54,7 +54,7 @@
   // ------------------------------------------------------------------ help
   function renderHelp(meta, segments) {
     $("#aide").innerHTML = `<div class="phead"><span>AIDE</span><span class="phead-r">AIDE / HELP</span></div><div class="fbody">
-      ${IFX.STATIC ? `<h2>${IFX.OFFLINE ? "VERSION HORS LIGNE" : "VERSION EN LIGNE"}</h2><p>${IFX.OFFLINE ? "Ce fichier" : "Cette page en ligne"} contient le sélecteur, le catalogue et le suivi des prospects. La recherche d'usines (PROS) interroge l'API Recherche d'entreprises : elle fonctionne dans la version installée (<code>python3 server.py</code>, voir le README), ${IFX.OFFLINE ? "car elle passe par le petit serveur Python" : "car une page claude.ai ne peut pas appeler de service externe"}.</p>` : ""}
+      ${IFX.STATIC ? `<h2>${IFX.OFFLINE ? "VERSION HORS LIGNE" : "VERSION EN LIGNE"}</h2><p>${IFX.OFFLINE ? "Ce fichier" : "Cette page en ligne"} contient le sélecteur, le catalogue et le suivi des prospects. La recherche d'usines (PROS) interroge l'API Recherche d'entreprises : elle fonctionne dans la version installée sur ton ordinateur (double-clic sur <code>Lancer le terminal.bat</code>)${IFX.OFFLINE ? "" : ", car une page claude.ai ne peut pas appeler de service externe"}.</p>` : ""}
       <h2>COMMANDES</h2>
       <p>Tape dans la barre du haut (touche <code>/</code> pour y aller), puis Entrée.</p>
       <table>
@@ -83,13 +83,17 @@
         <li>« Imprimer / PDF » produit une recommandation d'une page à laisser au client.</li>
       </ul>
 
+      <h2>AUTRES OUTILS</h2>
+      <div class="links">${IFX.TOOLS.map(([label, url]) => `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(label)}</a>`).join("")}</div>
+
       <h2>DONNÉES</h2>
       <ul class="tight">
         <li>Entreprises : <a href="https://recherche-entreprises.api.gouv.fr/docs/" target="_blank" rel="noopener">API Recherche d'entreprises</a> (DINUM, données Insee SIRENE et RNE), libre et gratuite.</li>
-        <li>Produits : <code>public/data/produits.json</code>${meta.genere ? ` (généré le ${esc(IFX.fmtDate(meta.genere))})` : ""}. ${esc(meta.avertissement || "")}</li>
-        <li>Secteurs : <code>public/data/secteurs.json</code> (${segments.length} secteurs, modifiables : codes NAF, priorité, argumentaire).</li>
-        <li>Équivalences concurrents : <code>public/data/equivalences.json</code>, à remplir par le service technique.</li>
-        <li>Tes prospects et ta liste de clients restent dans <b>ce navigateur</b> (stockage local). Fais une « Sauvegarde JSON » régulièrement, et pour changer d'appareil.</li>
+        <li>Produits : <code>data/produits.json</code>${meta.genere ? ` (généré le ${esc(IFX.fmtDate(meta.genere))})` : ""}. ${esc(meta.avertissement || "")}</li>
+        <li>Secteurs : <code>data/secteurs.json</code> (${segments.length} secteurs, modifiables : codes NAF, priorité, argumentaire).</li>
+        <li>Équivalences concurrents : <code>data/equivalences.json</code> (${IFX.sel.equivCount()} références, brouillon à valider par le service technique). En mode « Remplacer un produit », tape la marque ou la référence.</li>
+        <li>Dans le <b>Terminal en ligne</b>, tes prospects et ta liste de clients sont synchronisés entre ton PC et ton téléphone, dans un espace privé que toi seul vois.</li>
+        <li>Dans la <b>version installée</b>, ils restent dans ce navigateur. Pour les envoyer vers la version en ligne : « Sauvegarde JSON » ici, puis « Restaurer JSON » dans PIPE en ligne.</li>
       </ul>
     </div>`;
   }

@@ -1,6 +1,8 @@
 /* PIPE — saved prospects (status, next action, notes) + list of existing
  * customers (SIRET/SIREN) used to hide or flag them in searches.
- * Everything lives in this browser's localStorage: export regularly. */
+ * This browser's localStorage always holds a copy. In the claude.ai page, the
+ * viewer's private db space (data/users/<id>/…) is the reference, so the PC and
+ * the phone share one pipeline; the installed version stays on this browser. */
 (function () {
   "use strict";
   const IFX = window.IFX;
@@ -54,7 +56,142 @@
     clients = { sirets: Array.from(siretSet), sirens: Array.from(sirenSet) };
     groupSet = new Set(clients.sirets.map((s) => s.slice(0, 9)));
     IFX.store.set(LS_CLIENTS, clients);
+    pushClients();
   };
+
+  // ------------------------------------------------------------------ sync (claude.ai db)
+  const cloud = { col: null, clientsDoc: null, ready: false, queue: new Map(), clientsBusy: false, clientsAgain: false };
+
+  function setSyncInfo(state, extra) {
+    const el = $("#sync-info");
+    if (!el) return;
+    const text = {
+      cloud: "Synchronisé : les mêmes prospects sur ton PC et ton téléphone.",
+      local: IFX.STATIC
+        ? "Enregistré dans ce navigateur uniquement (synchronisation indisponible ici)."
+        : "Version installée : prospects enregistrés dans ce navigateur. Pour les retrouver sur ton téléphone, fais « Sauvegarde JSON » ici puis « Restaurer JSON » dans le Terminal en ligne.",
+      error: "Synchronisation interrompue : tes modifications restent dans ce navigateur. Recharge la page pour la relancer.",
+    }[state];
+    el.textContent = text + (extra ? " " + extra : "");
+    el.classList.toggle("sync-on", state === "cloud");
+  }
+
+  function syncFailed(e) {
+    if (e && e.code === "quota_exceeded") return IFX.toast("Espace de synchronisation plein : supprime des prospects perdus ou exporte-les.", true);
+    if (e && (e.code === "revoked" || e.code === "not_granted" || e.code === "capability_disabled")) {
+      cloud.ready = false;
+      setSyncInfo("error");
+    }
+  }
+
+  // one write at a time per prospect; a change made meanwhile is written right after
+  function pushRemote(siret) {
+    if (!cloud.ready) return;
+    const busy = cloud.queue.get(siret);
+    if (busy) return void (busy.again = true);
+    const job = { again: false };
+    cloud.queue.set(siret, job);
+    (async () => {
+      do {
+        job.again = false;
+        const p = prospects[siret];
+        try {
+          if (p) await cloud.col.doc(siret).set(p);
+          else await cloud.col.doc(siret).delete();
+        } catch (e) {
+          syncFailed(e);
+        }
+      } while (job.again && cloud.ready);
+      cloud.queue.delete(siret);
+    })();
+  }
+
+  function pushClients() {
+    if (!cloud.ready) return;
+    if (cloud.clientsBusy) return void (cloud.clientsAgain = true);
+    cloud.clientsBusy = true;
+    (async () => {
+      do {
+        cloud.clientsAgain = false;
+        try {
+          await cloud.clientsDoc.set({ sirets: Array.from(siretSet), sirens: Array.from(sirenSet), updated: new Date().toISOString() });
+        } catch (e) {
+          syncFailed(e);
+        }
+      } while (cloud.clientsAgain && cloud.ready);
+      cloud.clientsBusy = false;
+    })();
+  }
+
+  async function connectCloud() {
+    if (!window.claude || typeof window.claude.use !== "function") return setSyncInfo("local");
+    let db = null;
+    let user = null;
+    try {
+      [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+    } catch (e) {
+      /* treated as unavailable */
+    }
+    const uid = user ? await user.id() : null;
+    if (!db || !uid) return setSyncInfo("local");
+    cloud.col = db.doc(`data/users/${uid}/pipe`).collection("prospects");
+    cloud.clientsDoc = db.doc(`data/users/${uid}/clients`);
+
+    let first = true;
+    cloud.col.onSnapshot(
+      (snap) => {
+        if (first && snap.metadata.fromCache) return; // merge only against the server's view
+        const remote = {};
+        snap.docs.forEach((d) => {
+          const p = sanitize(d.data());
+          if (p) remote[p.siret] = p;
+        });
+        if (first) {
+          first = false;
+          // what this browser has and the synced space lacks (or holds in an older state) goes up
+          const localOnly = Object.values(prospects).filter((p) => !remote[p.siret] || (p.updated || "") > (remote[p.siret].updated || ""));
+          Object.assign(remote, Object.fromEntries(localOnly.map((p) => [p.siret, p])));
+          prospects = remote;
+          cloud.ready = true;
+          localOnly.forEach((p) => pushRemote(p.siret));
+          setSyncInfo("cloud");
+          if (localOnly.length) IFX.toast(`${localOnly.length} prospect(s) de ce navigateur ajouté(s) à ta synchronisation`);
+        } else prospects = remote;
+        IFX.store.set(LS_PROSPECTS, prospects);
+        changed();
+      },
+      (e) => {
+        cloud.ready = false;
+        setSyncInfo("error");
+      }
+    );
+
+    let firstClients = true;
+    cloud.clientsDoc.onSnapshot(
+      (snap) => {
+        if (firstClients && snap.metadata.fromCache) return;
+        const isFirst = firstClients;
+        firstClients = false;
+        if (!snap.exists) {
+          if (isFirst && (siretSet.size || sirenSet.size)) pushClients(); // first device to sync sends its list
+          return;
+        }
+        const d = snap.data() || {};
+        const remoteSirets = (d.sirets || []).filter((s) => /^\d{14}$/.test(s));
+        const remoteSirens = (d.sirens || []).filter((s) => /^\d{9}$/.test(s));
+        // first contact: keep this browser's customers too, then send the union
+        const grows = isFirst && (Array.from(siretSet).some((s) => !remoteSirets.includes(s)) || Array.from(sirenSet).some((s) => !remoteSirens.includes(s)));
+        siretSet = new Set(isFirst ? remoteSirets.concat(Array.from(siretSet)) : remoteSirets);
+        sirenSet = new Set(isFirst ? remoteSirens.concat(Array.from(sirenSet)) : remoteSirens);
+        if (grows) pushClients();
+        clients = { sirets: Array.from(siretSet), sirens: Array.from(sirenSet) };
+        groupSet = new Set(clients.sirets.map((s) => s.slice(0, 9)));
+        IFX.store.set(LS_CLIENTS, clients);
+        changed();
+      },
+      () => {}
+    );
+  }
 
   PIPE.has = (siret) => !!prospects[siret];
   PIPE.get = (siret) => prospects[siret] || null;
@@ -104,14 +241,16 @@
       { updated: now }
     );
     save();
+    pushRemote(et.siret);
     return prospects[et.siret];
   };
 
   PIPE.update = (siret, patch, rerender) => {
     reload();
     if (!prospects[siret]) return;
-    Object.assign(prospects[siret], patch, { updated: new Date().toISOString() });
+    prospects[siret] = Object.assign({}, prospects[siret], patch, { updated: new Date().toISOString() });
     IFX.store.set(LS_PROSPECTS, prospects);
+    pushRemote(siret);
     updateCount();
     if (rerender && viewVisible()) render();
     if (IFX.pros && IFX.pros.refresh) IFX.pros.refresh();
@@ -121,6 +260,7 @@
     reload();
     delete prospects[siret];
     save();
+    pushRemote(siret);
   };
 
   function updateCount() {
@@ -240,14 +380,16 @@
         const incoming = Object.values(data.prospects || {}).map(sanitize).filter(Boolean);
         if (!incoming.length && !data.clients) throw new Error("aucun prospect reconnu");
         reload();
-        let n = 0;
+        const changedSirets = [];
         incoming.forEach((p) => {
           const cur = prospects[p.siret];
           if (!cur || p.updated > (cur.updated || "")) {
             prospects[p.siret] = p;
-            n++;
+            changedSirets.push(p.siret);
           }
         });
+        const n = changedSirets.length;
+        changedSirets.forEach(pushRemote);
         if (data.clients) {
           reloadClients();
           (data.clients.sirets || []).forEach((s) => /^\d{14}$/.test(s) && siretSet.add(s));
@@ -328,6 +470,7 @@
   PIPE.init = () => {
     bind();
     updateCount();
+    connectCloud();
     window.addEventListener("storage", (e) => {
       if (e.key === LS_PROSPECTS) reload();
       else if (e.key === LS_CLIENTS) reloadClients();

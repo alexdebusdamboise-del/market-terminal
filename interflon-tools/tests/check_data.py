@@ -101,9 +101,10 @@ def main():
             if not re.match(r"^https?://", u):
                 err(f"{where} : URL de source invalide '{u}'")
         for e in p.get("evidence") or []:
-            if not re.match(r"^https?://", e.get("url", "")) or not e.get("quote"):
-                err(f"{where} : preuve sans citation ou URL valide")
-        if not p.get("source_urls"):
+            # public source (url) or Interflon internal document (doc)
+            if not e.get("quote") or not (re.match(r"^https?://", e.get("url") or "") or e.get("doc")):
+                err(f"{where} : preuve sans citation, ni URL valide ni document cité")
+        if not p.get("source_urls") and not p.get("source_docs"):
             warn(f"{where} : aucune source")
         if p.get("family") in ("huile", "graisse", "aerosol") and not p.get("applications"):
             warn(f"{where} : applications non renseignées (le sélecteur le signalera « à vérifier »)")
