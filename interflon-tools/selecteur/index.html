@@ -108,6 +108,8 @@ h1{font:800 clamp(28px,4vw,40px)/1.05 var(--display);font-stretch:85%;margin:0;l
 .vmark{font:500 12px/1 var(--mono);margin-left:4px;white-space:nowrap}
 /* what a sheet lacks can be long: let it wrap instead of widening the card */
 .badge.warn{white-space:normal;line-height:1.3;text-align:left}
+/* eligible but a hard criterion could not be checked on the sheet */
+.unchecked{background:var(--warn-soft);color:var(--warn);font-size:13px;line-height:1.35;padding:6px 10px;border-radius:6px;margin:0 0 10px}
 .ch > div{min-width:0}
 .vmark.ok{color:var(--ok)}
 .vmark.warn{color:var(--warn)}
@@ -403,8 +405,9 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     else if (known(p.viscosity_cst40)) specs.push(`<span><b>${esc(p.viscosity_cst40)}</b> cSt à 40 °C</span>`);
     if (p.nlgi) specs.push(`<span>NLGI <b>${esc(p.nlgi)}</b></span>`);
     if ((p.formats || []).length) specs.push(`<span>${esc(p.formats.join(", "))}</span>`);
-    return `<article class="panel card ${r.eligible && i === 0 ? "top1" : ""} ${r.eligible ? "" : "out"}">
-      <div class="ch"><div>${r.eligible && i < 3 ? `<span class="rank">CHOIX ${i + 1}</span>` : ""}<div class="pname">${esc(p.name)}</div>
+    return `<article class="panel card ${r.verified && i === 0 ? "top1" : ""} ${r.eligible ? "" : "out"}">
+      ${r.eligible && r.unchecked.length ? `<p class="unchecked">Non vérifié : ${esc(r.unchecked.join(", "))}, donnée manquante sur la fiche. À confirmer avec le service technique.</p>` : ""}
+      <div class="ch"><div>${r.verified && i < 3 ? `<span class="rank">CHOIX ${i + 1}</span>` : ""}<div class="pname">${esc(p.name)}</div>
         <div class="badges">${p.nsf ? `<span class="badge ${h1 ? "h1" : "nsf"}">NSF ${esc(p.nsf)}</span>` : `<span class="badge">sans NSF</span>`}<span class="badge">${esc(FAMILIES[p.family] || p.family)}</span>${sheetBadge(p)}${currentEquiv() && currentEquiv().interflon === p.name ? `<span class="badge equiv">équivalence proposée</span>` : ""}</div></div>
         <button type="button" class="btn ghost" data-detail="${esc(p.id)}">Fiche</button></div>
       ${p.description_fr ? `<p class="desc">${esc(p.description_fr)}</p>` : ""}
@@ -419,8 +422,11 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     ranked = C.rank(PRODUCTS, c);
     // a documented equivalence (still to validate) goes first when it meets the criteria
     const proposed = currentEquiv() && currentEquiv().interflon;
-    ranked.sort((a, b) => (b.eligible - a.eligible) || ((b.product.name === proposed) - (a.product.name === proposed)));
-    const ok = ranked.filter((r) => r.eligible);
+    ranked.sort((a, b) => (b.eligible - a.eligible) || (b.verified - a.verified) || ((b.product.name === proposed) - (a.product.name === proposed)));
+    // recommended = every hard criterion checked on sourced data; a product whose
+    // sheet lacks a datum on one of them is listed apart, never among the choices
+    const ok = ranked.filter((r) => r.verified);
+    const pending = ranked.filter((r) => r.eligible && !r.verified);
     const out = ranked.filter((r) => !r.eligible);
     const banners = [];
     if (isExample) banners.push(`<div class="banner example"><b>Exemple</b><span>Chaînes de four en usine alimentaire, 50 à 250 °C. Modifie les réponses ou clique sur « Tout effacer » pour ton propre besoin.</span></div>`);
@@ -432,7 +438,8 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
         ? ` Produit haute température : sa limite de ${esc(eq.temp_max_c)} °C est reprise comme besoin. Remplace-la par la température réelle de la machine si tu la connais.`
         : known(eq.temp_min_c) || known(eq.temp_max_c) ? " Indique la température réelle de la machine pour affiner le choix." : "";
       const prop = eq.interflon ? ranked.find((r) => r.product.name === eq.interflon) : null;
-      const out = prop && !prop.eligible ? ` Avec ces critères, elle est écartée (${esc(prop.blockers.join(" ; "))}) : voir « Produits écartés ».` : "";
+      const out = prop && !prop.eligible ? ` Avec ces critères, elle est écartée (${esc(prop.blockers.join(" ; "))}) : voir « Produits écartés ».`
+        : prop && !prop.verified ? ` Sa fiche ne permet pas de vérifier : ${esc(prop.unchecked.join(", "))}. Voir « À vérifier ».` : "";
       banners.push(`<div class="banner compet"><b>Remplace</b><span><strong>${esc(eq.marque)} ${esc(eq.reference)}</strong> : ${esc(eqSpecs(eq))}.${direct}${out}${none}${eq.note ? " " + esc(eq.note) : ""}${temps} ${eq.source ? `<a href="${esc(safeUrl(eq.source))}" target="_blank" rel="noopener">Fiche du produit concurrent</a>` : `<span class="quote">Source : ${esc(eq.origine)}</span>`} · <button type="button" class="link" data-clear-competitor>retirer</button></span></div>`);
     }
     if (c.badTemp) banners.push(`<div class="banner error"><b>Température illisible</b><span>Saisis un nombre, par exemple -20 ou 180. Aucune recommandation tant qu'elle n'est pas comprise.</span></div>`);
@@ -450,8 +457,11 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const legend = ["y", "r", "a", "u", "n"].filter((k) => seen.has(k)).map((k) => LEGEND[k]).join(" · ");
     $("#r-title").innerHTML = `${ok.length} produit${ok.length > 1 ? "s conviennent" : " convient"}<small>sur ${PRODUCTS.length} · classés par pertinence${legend ? " · " + legend : ""}</small>`;
     $("#results").innerHTML =
-      (ok.length ? `<div class="cards">${ok.map((r, i) => card(r, c, i)).join("")}</div>` : `<div class="panel empty">Aucun produit ne remplit toutes les contraintes. Assouplis la température ou l'organe, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</div>`) +
-      (out.length ? `<details class="more" ${ok.length ? "" : "open"}><summary>Produits écartés (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, 99)).join("")}</div></details>` : "");
+      (ok.length ? `<div class="cards">${ok.map((r, i) => card(r, c, i)).join("")}</div>`
+        : pending.length ? `<div class="panel empty">Aucun produit n'est confirmé sur tous les critères. ${pending.length} produit${pending.length > 1 ? "s pourraient" : " pourrait"} convenir mais sa fiche ne permet pas de tout vérifier : voir « À vérifier » ci-dessous et confirmer avec le service technique.</div>`
+        : `<div class="panel empty">Aucun produit ne remplit toutes les contraintes. Assouplis la température ou l'organe, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</div>`) +
+      (pending.length ? `<details class="more" ${ok.length ? "" : "open"}><summary>À vérifier : donnée manquante sur la fiche (${pending.length})</summary><div class="cards">${pending.map((r) => card(r, c, 99)).join("")}</div></details>` : "") +
+      (out.length ? `<details class="more" ${ok.length || pending.length ? "" : "open"}><summary>Produits écartés (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, 99)).join("")}</div></details>` : "");
   }
 
   // ------------------------------------------------------------ product sheet
@@ -484,7 +494,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   function toast(t) { const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => (el.hidden = true), 3200); }
   function recoText() {
     const c = effective();
-    const ok = ranked.filter((r) => r.eligible).slice(0, 3);
+    const ok = ranked.filter((r) => r.verified).slice(0, 3);
     const need = [];
     const eq = currentEquiv();
     if (eq) need.push(`Produit en place : ${eq.marque} ${eq.reference} (${eqSpecs(eq)})`);
@@ -524,8 +534,8 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   }
   async function printReco() {
     const c = effective();
-    const ok = ranked.filter((r) => r.eligible).slice(0, 3);
-    if (c.badTemp || !hasCriteria(c) || !ok.length) return toast("Décris le besoin et obtiens au moins un produit avant d'imprimer.");
+    const ok = ranked.filter((r) => r.verified).slice(0, 3);
+    if (c.badTemp || !hasCriteria(c) || !ok.length) return toast("Décris le besoin et obtiens au moins un produit vérifié sur tous les critères avant d'imprimer.");
     const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
     const mark = (s) => MARK[s] || "?";
     const area = $("#print-area");
@@ -560,7 +570,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   }
   function copyReco() {
     const c = effective();
-    if (c.badTemp || !hasCriteria(c) || !ranked.some((r) => r.eligible)) return toast("Décris le besoin et obtiens au moins un produit avant de copier.");
+    if (c.badTemp || !hasCriteria(c) || !ranked.some((r) => r.verified)) return toast("Décris le besoin et obtiens au moins un produit vérifié sur tous les critères avant de copier.");
     const text = recoText();
     const fallback = () => {
       $("#sheet-title").textContent = "Recommandation";

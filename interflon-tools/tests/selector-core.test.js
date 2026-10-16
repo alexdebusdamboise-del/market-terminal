@@ -205,3 +205,18 @@ test("temperature status is shown on its own; gaps say what a sheet lacks", () =
   assert.equal(C.gapsText(p), "conditionnements, grade NLGI à compléter · sans PFAS à confirmer");
   assert.equal(C.gapsText(P({ uncertain_fields: [] })), "");
 });
+
+test("matches missing a datum on a hard criterion rank after fully checked ones", () => {
+  const ev = [{ field: "temp_min_c" }, { field: "temp_max_c" }];
+  const known = P({ name: "A known", nsf: "H1", temp_min_c: -20, temp_max_c: 270, applications: ["chaines"], evidence: ev });
+  const noMax = P({ name: "B no max", nsf: "H1", temp_min_c: -10, applications: ["chaines"] });
+  const empty = P({ name: "C empty", nsf: "H1" });
+  const c = { food: "oui", application: "chaines", tmin: 50, tmax: 250 };
+  const r = C.rank([empty, noMax, known], c);
+  assert.deepEqual(r.map((x) => [x.product.name, x.eligible, x.verified]), [["A known", true, true], ["B no max", true, false], ["C empty", true, false]]);
+  assert.deepEqual(r[1].unchecked, ["température"]);
+  assert.deepEqual(r[2].unchecked, ["application", "température"]);
+  // soft criteria (packaging, viscosity) never make a match "unchecked"
+  const r2 = C.evaluate(P({ family: "huile", applications: ["chaines"], formats: [] }), { application: "chaines", formats: ["vrac"], iso_vg: "220" });
+  assert.equal(r2.verified, true);
+});

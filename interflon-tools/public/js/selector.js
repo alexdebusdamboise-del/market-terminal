@@ -311,6 +311,7 @@
   function card(r, c, top) {
     const p = r.product;
     return `<div class="card ${top ? "top" : ""} ${r.eligible ? "" : "out"}">
+      ${r.eligible && r.unchecked.length ? `<div class="unchecked">Non vérifié : ${esc(r.unchecked.join(", "))} (donnée manquante sur la fiche)</div>` : ""}
       <div class="card-h"><div><span class="pname">${esc(p.name)}</span>
         ${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">NSF ${esc(p.nsf)}</span>` : ""}
         <span class="badge">${esc(famLabel(p.family))}</span>
@@ -329,7 +330,10 @@
     const SELECTABLE = PRODUCTS.filter((p) => !EQUIP.has(p.family));
     const ranked = C.rank(SELECTABLE, c);
     lastRanked = ranked;
-    const ok = ranked.filter((r) => r.eligible);
+    // recommended = every hard criterion checked on sourced data; a product whose
+    // sheet lacks a datum on one of them is listed apart, never among the choices
+    const ok = ranked.filter((r) => r.verified);
+    const pending = ranked.filter((r) => r.eligible && !r.verified);
     const out = ranked.filter((r) => !r.eligible);
     const low = SELECTABLE.filter((p) => !isVerified(p));
     const noPack = low.filter((p) => C.gaps(p).some((g) => g.label === "conditionnements")).length;
@@ -359,8 +363,11 @@
     $("#sel-results").innerHTML =
       (ok.length
         ? `<div class="cards">${ok.map((r, i) => card(r, c, i < 3)).join("")}</div>`
+        : pending.length
+        ? `<div class="empty"><p>Aucun produit n'est confirmé sur tous les critères.</p><p class="muted">${pending.length} produit${pending.length > 1 ? "s pourraient" : " pourrait"} convenir mais sa fiche ne permet pas de tout vérifier : voir « À vérifier » ci-dessous et confirmer avec le service technique.</p></div>`
         : `<div class="empty"><p>Aucun produit ne remplit toutes les contraintes.</p><p class="muted">Assouplis la température ou l'application, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</p></div>`) +
-      (out.length ? `<details ${ok.length ? "" : "open"}><summary class="section-title">ÉCARTÉS (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, false)).join("")}</div></details>` : "");
+      (pending.length ? `<details ${ok.length ? "" : "open"}><summary class="section-title">À VÉRIFIER : DONNÉE MANQUANTE SUR LA FICHE (${pending.length})</summary><div class="cards">${pending.map((r) => card(r, c, false)).join("")}</div></details>` : "") +
+      (out.length ? `<details ${ok.length || pending.length ? "" : "open"}><summary class="section-title">ÉCARTÉS (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, false)).join("")}</div></details>` : "");
   }
 
   // ------------------------------------------------------------------ product sheet
@@ -408,9 +415,9 @@
   // ------------------------------------------------------------------ print
   function printReco() {
     const c = effective();
-    const ok = lastRanked.filter((r) => r.eligible).slice(0, 3);
+    const ok = lastRanked.filter((r) => r.verified).slice(0, 3);
     if (c.badTemp) return IFX.toast("Température illisible : corrige-la avant d'imprimer.", true);
-    if (!hasCriteria(c) || !ok.length) return IFX.toast("Renseigne le besoin et obtiens au moins une recommandation avant d'imprimer.", true);
+    if (!hasCriteria(c) || !ok.length) return IFX.toast("Renseigne le besoin et obtiens au moins un produit vérifié sur tous les critères avant d'imprimer.", true);
     const need = [];
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push(`Remplacement : ${C.REPLACE_TYPES[crit.replaceType].label}`);
     const foodRule = c.application === "nettoyage_degraissage" ? "NSF H1, A1 ou A7 requis" : c.application === "demoulage" ? "NSF 3H ou H1 requis" : "NSF H1 requis";

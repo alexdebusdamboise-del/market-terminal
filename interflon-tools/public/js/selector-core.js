@@ -213,6 +213,8 @@
     c = c || {};
     const reasons = [];
     const blockers = [];
+    // hard criteria that missing data kept from checking: the product may suit, not proven
+    const unchecked = [];
     let score = 0;
     const apps = p.applications || [];
     const props = p.properties || [];
@@ -223,6 +225,7 @@
       const match = foodMatch(p, c.application);
       const doubt = match && unsure(p, NSF_UNSURE);
       if (match) {
+        if (doubt) unchecked.push("homologation NSF");
         score += doubt ? 10 : c.food === "oui" ? 30 : 15;
         reasons.push(doubt ? { s: "u", t: `${FOOD_REASON[match]} : homologation à confirmer (NSF White Book)` } : { s: "y", t: FOOD_REASON[match] });
       } else {
@@ -237,6 +240,7 @@
     if (c.application) {
       const label = APPLICATIONS[c.application] || c.application;
       if (!apps.length) {
+        unchecked.push("application");
         reasons.push({ s: "u", t: `Applications non renseignées : vérifier pour « ${label} »` });
       } else if (apps.includes(c.application)) {
         score += 40;
@@ -253,7 +257,10 @@
 
     // 3. Product family (replacement mode: oil vs grease…)
     if (c.families && c.families.length) {
-      if (!p.family) reasons.push({ s: "u", t: "Famille non renseignée" });
+      if (!p.family) {
+        unchecked.push("famille");
+        reasons.push({ s: "u", t: "Famille non renseignée" });
+      }
       else if (c.families.includes(p.family)) score += 10;
       else blockers.push(`Famille « ${p.family} » ≠ ${c.families.join(" / ")}`);
     }
@@ -279,8 +286,11 @@
       }
       const failed = blockers.some((b) => b.startsWith("Mini produit") || b.startsWith("Maxi produit"));
       if (!failed) {
-        if (unknown) reasons.push({ s: "u", t: `Plage de température à vérifier (besoin ${need})` });
-        else if (unsure(p, TEMP_UNSURE)) {
+        if (unknown) {
+          unchecked.push("température");
+          reasons.push({ s: "u", t: `Plage de température à vérifier (besoin ${need})` });
+        } else if (unsure(p, TEMP_UNSURE)) {
+          unchecked.push("température");
           score += 8;
           reasons.push({ s: "u", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvrirait ${need} : donnée à confirmer` });
         } else {
@@ -296,10 +306,13 @@
       if (REQUIRED_ENV[e]) {
         if (REQUIRED_ENV[e](props)) {
           const doubt = e === "sans_pfas" && unsure(p, PFAS_UNSURE);
+          if (doubt) unchecked.push(label);
           score += doubt ? 3 : 8;
           reasons.push(doubt ? { s: "u", t: `${label} : à confirmer (absent du bilan PFAS Interflon d'avril 2025)` } : { s: "y", t: label });
-        } else if (!props.length) reasons.push({ s: "u", t: `${label} : non renseigné, à vérifier` });
-        else blockers.push(`${label} : exigé, non revendiqué`);
+        } else if (!props.length) {
+          unchecked.push(label);
+          reasons.push({ s: "u", t: `${label} : non renseigné, à vérifier` });
+        } else blockers.push(`${label} : exigé, non revendiqué`);
         return;
       }
       const ok = (ENV_MATCH[e] || [e]).some((x) => props.includes(x));
@@ -353,7 +366,7 @@
     score += p.confidence === "high" ? 4 : p.confidence === "medium" ? 2 : 0;
 
     blockers.forEach((b) => reasons.unshift({ s: "n", t: b }));
-    return { eligible: blockers.length === 0, score, reasons, blockers };
+    return { eligible: blockers.length === 0, unchecked, verified: blockers.length === 0 && unchecked.length === 0, score, reasons, blockers };
   }
 
   function matchesQuery(p, q) {
@@ -370,7 +383,8 @@
     return (products || [])
       .filter((p) => matchesQuery(p, criteria && criteria.query))
       .map((p) => Object.assign({ product: p }, evaluate(p, criteria)))
-      .sort((a, b) => (b.eligible - a.eligible) || (b.score - a.score) || String(a.product.name).localeCompare(String(b.product.name)));
+      // fully checked matches first, then matches missing a datum, then the excluded
+      .sort((a, b) => (b.eligible - a.eligible) || (b.verified - a.verified) || (b.score - a.score) || String(a.product.name).localeCompare(String(b.product.name)));
   }
 
   // "Replace the customer's current product" presets -> criteria
