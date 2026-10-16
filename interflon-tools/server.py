@@ -613,6 +613,17 @@ class Handler(BaseHTTPRequestHandler):
 
         if path in ("", "/"):
             path = "/index.html"
+        # the white-and-red selector page, sharing the terminal's js/, data/ and img/
+        if path == "/selecteur":
+            self.send_response(301)
+            self.send_header("Location", "/selecteur/")
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if path in ("/selecteur/", "/selecteur/index.html"):
+            return self._send_file(os.path.join(ROOT, "selecteur", "index.html"))
+        if path.startswith("/selecteur/"):
+            path = path[len("/selecteur"):]
         try:
             full = os.path.realpath(os.path.join(PUBLIC, urllib.parse.unquote(path).lstrip("/")))
             inside = os.path.commonpath([full, os.path.realpath(PUBLIC)]) == os.path.realpath(PUBLIC)

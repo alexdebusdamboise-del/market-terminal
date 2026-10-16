@@ -17,7 +17,7 @@
     ["Relevé technique", "https://claude.ai/artifact/2zu93hewvkyqpHjZYwaNpD"],
     ["Calculateur ROI lubrification", "https://claude.ai/artifact/NpWuPsDVKqCXGw4fprEW1T"],
     ["Calculateur ROI express", "https://claude.ai/artifact/MPXTksVpZrpnCqE4VxQ2Df"],
-    ["Sélecteur (version client)", IFX.STATIC ? "https://claude.ai/artifact/8eEKcabg9CgnSv3ftaxSWU" : "/selecteur/"],
+    ["Sélecteur (version client)", IFX.STATIC ? "https://claude.ai/artifact/XVxdNfaBbYwUvJvf7orC1S" : "/selecteur/"],
   ];
 
   // Only http(s) links from data files may become hrefs (no javascript: URLs)

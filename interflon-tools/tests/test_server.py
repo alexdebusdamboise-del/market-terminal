@@ -235,6 +235,21 @@ class ServerTest(unittest.TestCase):
                 except urllib.error.HTTPError as e:
                     self.assertIn(e.code, (403, 404))
 
+    def test_selector_page(self):
+        # the white-and-red selector, its files shared with the terminal
+        with urllib.request.urlopen(self.base + "/selecteur", timeout=10) as r:  # redirected
+            self.assertIn("Sélecteur de lubrifiants".encode(), r.read())
+        for p, kind in (("/selecteur/js/selector-core.js", "javascript"), ("/selecteur/data/produits.json", "json"), ("/selecteur/img/logo-interflon.png", "image/png")):
+            with self.subTest(path=p), urllib.request.urlopen(self.base + p, timeout=10) as r:
+                self.assertIn(kind, r.headers["Content-Type"])
+        for p in ["/selecteur/../server.py", "/selecteur/%2e%2e/server.py", "/selecteur/..%2f..%2fserver.py"]:
+            with self.subTest(path=p):
+                try:
+                    with urllib.request.urlopen(self.base + p, timeout=10) as r:
+                        self.assertNotIn(b"import argparse", r.read())
+                except urllib.error.HTTPError as e:
+                    self.assertIn(e.code, (403, 404))
+
     def test_optional_password(self):
         import base64
         server.APP_PASSWORD = "s3cret"

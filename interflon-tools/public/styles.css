@@ -226,6 +226,9 @@ ul.tight li{margin:2px 0;}
 .reasons .a{color:var(--warn);}
 .reasons .r{color:var(--blue);}
 .vmark{font-size:10.5px;margin-left:4px;white-space:nowrap;}
+/* what a sheet lacks can be long: let it wrap instead of widening the card */
+.badge.warn{white-space:normal;}
+.card-h > div{min-width:0;}
 .vmark.ok{color:var(--ok);}
 .vmark.warn{color:var(--warn);}
 .tbar{position:relative;height:8px;background:#1d1d1d;margin:6px 0 2px;}
