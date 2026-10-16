@@ -185,3 +185,10 @@ test("viscosity: ISO grade, measured cSt within ±10 %, irrelevant families", ()
   assert.ok(!C.evaluate(P({ family: "huile" }), { nlgi: "2" }).reasons.some((x) => x.s === "u"));
   assert.ok(C.evaluate(P({ family: "graisse" }), { nlgi: "2" }).reasons.some((x) => x.s === "u"));
 });
+
+test("gearbox minimum applies only to closed gears", () => {
+  const p = P({ family: "graisse", temp_min_c: -25, temp_min_gearbox_c: 0, temp_max_c: 145, applications: ["engrenages_fermes", "roulements"] });
+  assert.equal(C.evaluate(p, { application: "engrenages_fermes", tmin: -10 }).eligible, false);
+  assert.equal(C.evaluate(p, { application: "roulements", tmin: -10 }).eligible, true);
+  assert.ok(C.evaluate(p, { application: "engrenages_fermes", tmin: 5 }).reasons.some((x) => x.s === "y" && /en réducteur/.test(x.t)));
+});

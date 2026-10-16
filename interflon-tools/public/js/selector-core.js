@@ -222,7 +222,9 @@
     // 4. Temperature — hard constraint on known limits
     const tmin = num(c.tmin);
     const tmax = num(c.tmax);
-    const pmin = num(p.temp_min_c);
+    // some semi-fluid greases have a higher minimum in gearboxes (data sheet: "for gearboxes: 0 °C")
+    const gearMin = c.application === "engrenages_fermes" ? num(p.temp_min_gearbox_c) : null;
+    const pmin = gearMin !== null ? gearMin : num(p.temp_min_c);
     const pmax = num(p.temp_max_c);
     // temp_na: no service-temperature spec for this kind of product (cleaner, additive…)
     if ((tmin !== null || tmax !== null) && !p.temp_na) {
@@ -230,7 +232,7 @@
       let unknown = false;
       if (tmin !== null) {
         if (pmin === null) unknown = true;
-        else if (pmin > tmin) blockers.push(`Mini produit ${fmtT(pmin)} > besoin ${fmtT(tmin)}`);
+        else if (pmin > tmin) blockers.push(`Mini produit${gearMin !== null ? " en réducteur" : ""} ${fmtT(pmin)} > besoin ${fmtT(tmin)}`);
       }
       if (tmax !== null) {
         if (pmax === null) unknown = true;
@@ -244,7 +246,7 @@
           reasons.push({ s: "u", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvrirait ${need} : donnée à confirmer` });
         } else {
           score += 20;
-          reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvre ${need}` });
+          reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)}${gearMin !== null ? " (en réducteur)" : ""} couvre ${need}` });
         }
       }
     }

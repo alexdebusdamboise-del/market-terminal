@@ -83,6 +83,9 @@ def main():
             err(f"{where} : nsf_none incompatible avec une catégorie NSF")
         if p.get("temp_na") and (tmin is not None or tmax is not None):
             err(f"{where} : temp_na alors qu'une température est renseignée")
+        g = p.get("temp_min_gearbox_c")
+        if g is not None and (not isinstance(g, (int, float)) or (isinstance(tmin, (int, float)) and g < tmin)):
+            err(f"{where} : temp_min_gearbox_c doit être un nombre >= temp_min_c")
         cst = p.get("viscosity_cst40")
         if cst is not None and (not isinstance(cst, (int, float)) or not 1 <= cst <= 5000):
             err(f"{where} : viscosity_cst40 doit être un nombre de cSt plausible")

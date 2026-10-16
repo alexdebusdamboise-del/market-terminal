@@ -128,8 +128,10 @@ apparaît avec le badge « GROUPE CLIENT ».
 
 Une valeur n'est renseignée que si une source citée l'affirme ; sinon le champ reste vide.
 
-État au 12/10/2026 :
-- 78 produits : 51 avec une catégorie NSF sourcée, 37 avec une plage de température, 20 fiches « vérifiées » ;
+État au 16/10/2026 :
+- 78 produits, dont 42 fiches « vérifiées » (chaque donnée appuyée par une source citée) ;
+- 52 catégories NSF sourcées ; température renseignée (ou sans objet : nettoyants, additifs) pour 67 des 71 lubrifiants et nettoyants ;
+- conditionnements non publiés en ligne pour 32 produits (à compléter depuis le tarif Interflon) ;
 - 27 secteurs, dont 22 appuyés par des cas clients publiés par Interflon (chiffres annoncés par Interflon).
 
 Chaque valeur critique (NSF, températures, viscosité, NLGI, conditionnements, applications) est

@@ -53,12 +53,13 @@
   const MARK = { y: "✔", n: "✖", u: "?", a: "!", r: "≈" };
   // equipment (automatic lubricators, accessories) is listed in CAT, not ranked by the selector
   const EQUIP = new Set(["lubrificateur_automatique", "accessoire"]);
-  const tempTxt = (p) =>
+  const tempRange = (p) =>
     p.temp_na
       ? "sans objet"
       : !known(p.temp_min_c) && !known(p.temp_max_c)
       ? "n.c."
       : `${known(p.temp_min_c) ? p.temp_min_c : "?"} → ${known(p.temp_max_c) ? p.temp_max_c : "?"} °C`;
+  const tempTxt = (p) => tempRange(p) + (known(p.temp_min_gearbox_c) && !p.temp_na ? ` (réducteur : ${p.temp_min_gearbox_c} °C mini)` : "");
   // "temp_max_c (source unique)" -> "Température maxi (source unique)"
   const FIELD_LABEL = { nsf_reg_no: "N° d'enregistrement NSF", nsf: "Homologation NSF", temp_min_c: "Température mini", temp_max_c: "Température maxi",
     viscosity_iso_vg: "Viscosité", nlgi: "Grade NLGI", base: "Huile de base", formats: "Conditionnements", applications: "Applications", properties: "Propriétés" };
