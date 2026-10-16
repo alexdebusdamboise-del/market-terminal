@@ -34,6 +34,8 @@ python3 build_artifact.py             # dist/claude-ai/ : page publiée sur clau
 Les deux fichiers `dist/*.html` s'ouvrent par double-clic, sans serveur ni connexion.
 La prospection (PROS) y est remplacée par un message : elle passe par `server.py`.
 Le logo officiel est dans `public/img/logo-interflon.png`.
+La page claude.ai charge en plus `js/sources.js` (recherche d'entreprises directe depuis le navigateur)
+et synchronise les prospects entre appareils quand la page en a la capacité.
 
 ### Mettre en ligne (Render)
 
@@ -129,9 +131,11 @@ apparaît avec le badge « GROUPE CLIENT ».
 Une valeur n'est renseignée que si une source citée l'affirme ; sinon le champ reste vide.
 
 État au 16/10/2026 :
-- 78 produits, dont 42 fiches « vérifiées » (chaque donnée appuyée par une source citée) ;
-- 52 catégories NSF sourcées ; température renseignée (ou sans objet : nettoyants, additifs) pour 67 des 71 lubrifiants et nettoyants ;
-- conditionnements non publiés en ligne pour 32 produits (à compléter depuis le tarif Interflon) ;
+- 79 produits, dont 40 fiches « vérifiées » (chaque donnée appuyée par une source citée : page ou fiche
+  Interflon publique, certificat NSF, distributeur, ou document interne Interflon France) ;
+- conditionnements non trouvés pour 31 produits, à compléter depuis le tarif Interflon
+  (`dist/donnees-a-completer.csv` liste tout ce qui manque) ;
+- 5 mentions « sans PFAS » à confirmer : produits absents du bilan PFAS interne d'avril 2025 ;
 - 27 secteurs, dont 22 appuyés par des cas clients publiés par Interflon (chiffres annoncés par Interflon).
 
 Chaque valeur critique (NSF, températures, viscosité, NLGI, conditionnements, applications) est
