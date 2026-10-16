@@ -343,6 +343,7 @@
         <span class="badge">${esc(famLabel(p.family))}</span><span class="badge">${esc(p.range || "")}</span>
         ${isVerified(p) ? '<span class="badge ok">fiche vérifiée</span>' : '<span class="badge warn">à valider</span>'}</div>
       <p>${esc(p.description_fr || "")}</p>
+      ${p.nsf_note ? `<p class="muted small">${esc(p.nsf_note)}</p>` : ""}
       <dl class="kv">
         <dt>Température</dt><dd>${esc(tempTxt(p))}${p.temp_note ? `<div class="muted small">${esc(p.temp_note)}</div>` : ""}</dd>
         <dt>Viscosité</dt><dd>${esc(viscTxt(p) || "—")}</dd>
