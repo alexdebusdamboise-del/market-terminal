@@ -345,14 +345,30 @@ test("a single temperature bound is the machine's temperature; reversed bounds a
   assert.equal(C.rank([std, cold], { application: "roulements", tmax: -25 })[0].product.name, "B cold");
 });
 
-test("a range that only just covers the need ranks lower; spare range beyond that does not", () => {
+test("a covered range does not rank products by its spare range; a thin margin is said", () => {
   const tight = P({ name: "A tight", temp_min_c: -10, temp_max_c: 45, applications: ["chaines"] });
   const wide = P({ name: "B wide", temp_min_c: -40, temp_max_c: 180, applications: ["chaines"] });
-  const ok = P({ name: "C ok", temp_min_c: -10, temp_max_c: 100, applications: ["chaines"] });
-  const r = C.rank([tight, wide, ok], { application: "chaines", tmin: 5, tmax: 40 });
-  assert.equal(r[2].product.name, "A tight");
-  assert.ok(r[2].reasons.some((x) => /peu de marge/.test(x.t)));
-  assert.equal(C.compare(r[0], r[1]), 0, "-40..180 and -10..100 both cover 5..40 comfortably: ex aequo");
+  const r = C.rank([tight, wide], { application: "chaines", tmin: 5, tmax: 40 });
+  assert.equal(C.compare(r[0], r[1]), 0, "both cover 5..40 per their sheets: ex aequo");
+  assert.ok(r.find((x) => x.product === tight).reasons.some((x) => /peu de marge/.test(x.t)));
+  // texts use the need as understood
+  assert.deepEqual(C.needRange({ tmin: 250, tmax: 50 }), { lo: 50, hi: 250 });
+  assert.equal(C.needText(C.needRange({ tmin: "180", tmax: "" })), "+180 °C");
+  assert.ok(C.evaluate(wide, { tmin: 100, tmax: 20 }).reasons.some((x) => /couvre \+20 °C → \+100 °C/.test(x.t)));
+});
+
+test("a hot or cold claim never outweighs a stated condition the other product claims", () => {
+  const grease = P({ name: "A grease", family: "graisse", temp_min_c: -30, temp_max_c: 145, applications: ["roulements"], properties: ["lavage_frequent"] });
+  const spray = P({ name: "B spray", family: "aerosol", temp_min_c: -43, temp_max_c: 170, applications: ["roulements"], properties: ["basse_temperature", "resistant_eau"] });
+  assert.equal(C.rank([spray, grease], { application: "roulements", tmax: -30, env: ["lavage_frequent"] })[0].product.name, "A grease");
+});
+
+test("ISO VG: the product's own grade is the class, and the text names it", () => {
+  const g220 = P({ family: "huile", viscosity_iso_vg: "220" });
+  const r = C.evaluate(g220, { iso_vg: "210" });
+  assert.ok(r.reasons.some((x) => x.s === "y" && x.t === "Même classe ISO VG 220 (actuel : 210)"));
+  const g320 = (want) => C.evaluate(P({ family: "huile", viscosity_iso_vg: "320" }), { iso_vg: want }).score;
+  assert.equal(g320("290"), g320("352"), "290 and 352 are both inside the VG 320 class");
 });
 
 test("a cleaner is never 'verified' for a stated temperature outside a cleaning job", () => {

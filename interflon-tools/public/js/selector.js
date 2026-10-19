@@ -43,7 +43,8 @@
   let EQUIV = [];
   let segHint = null;
 
-  const blank = () => ({ mode: "besoin", food: "", application: "", tmin: "", tmax: "", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "", client: "" });
+  // fromEquiv: the answers the last competitor reference changed ({was, set}), undone by the next one
+  const blank = () => ({ mode: "besoin", food: "", application: "", tmin: "", tmax: "", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "", client: "", fromEquiv: {} });
   let crit = blank();
   // answers restored from the last visit: said so until the first change
   let restored = false;
@@ -291,7 +292,8 @@
             const p = x.interflon ? findProduct(x.interflon) : null;
             const direct = x.interflon ? ` → ${p ? `<a href="#" data-detail="${esc(p.id)}">${esc(x.interflon)}</a>` : `${esc(x.interflon)} <span class="badge bad">introuvable dans le catalogue</span>`}` : "";
             const canApply = x.replace_type || x.application;
-            return `<li><b>${esc(x.marque)} ${esc(x.reference)}</b>${direct}
+            const xname = norm(x.reference).startsWith(norm(x.marque)) ? x.reference : `${x.marque} ${x.reference}`;
+            return `<li><b>${esc(xname)}</b>${direct}
               ${x.valide_par ? `<span class="badge ok">validé ${esc(x.valide_par)}</span>` : `<span class="badge warn">à valider</span>`}
               <div class="muted small">${esc(specs(x))}${x.note ? ` · ${esc(x.note)}` : ""}${x.source ? ` · <a href="${esc(IFX.safeUrl(x.source))}" target="_blank" rel="noopener">fiche</a>` : x.origine ? ` · ${esc(x.origine)}` : ""}</div>
               ${canApply ? `<button type="button" class="btn small" data-equiv-apply="${i}">Appliquer ses critères</button>` : `<div class="muted small">Pas d'équivalent Interflon.</div>`}</li>`;
@@ -301,9 +303,19 @@
   }
 
   // Competitor -> criteria (type, food contact, its published range, viscosity / grade)
-  // Competitor -> criteria it really provides; the rep's own answers are kept
+  // Competitor -> criteria it really provides; the rep's own answers are kept, and what a
+  // previous reference filled in is put back first
+  const FROM_EQUIV = ["replaceType", "application", "food", "tmin", "tmax", "iso_vg", "nlgi"];
   function applyEquiv(x) {
-    if (C.REPLACE_TYPES[x.replace_type]) pickReplaceType(x.replace_type);
+    Object.entries(crit.fromEquiv || {}).forEach(([k, v]) => {
+      if (crit[k] === v.set) crit[k] = v.was;
+    });
+    const was = {};
+    FROM_EQUIV.forEach((k) => {
+      was[k] = crit[k];
+    });
+    // the reference is the product in place: its type (or none) replaces the one picked before
+    pickReplaceType(C.REPLACE_TYPES[x.replace_type] ? x.replace_type : "");
     if (x.application && C.APPLICATIONS[x.application]) crit.application = x.application;
     // a food-grade product in place means food contact; any other never lowers the rep's answer
     if (x.nsf === "H1") crit.food = "oui";
@@ -312,9 +324,18 @@
     if (x.besoin_temp && known(x.temp_max_c) && crit.tmin === "" && crit.tmax === "") crit.tmax = String(x.temp_max_c);
     if (x.iso_vg) crit.iso_vg = String(x.iso_vg);
     if (x.nlgi) crit.nlgi = String(x.nlgi);
+    crit.fromEquiv = {};
+    FROM_EQUIV.forEach((k) => {
+      if (crit[k] !== was[k]) crit.fromEquiv[k] = { was: was[k], set: crit[k] };
+    });
     changed(true);
     const name = norm(x.reference).startsWith(norm(x.marque)) ? x.reference : `${x.marque} ${x.reference}`;
-    IFX.toast(`Critères de ${name} appliqués${crit.tmin === "" && crit.tmax === "" ? " : indique la température réelle de la machine pour affiner" : ""}.`);
+    const fromTmax = crit.fromEquiv.tmax;
+    IFX.toast(
+      `Critères de ${name} appliqués${
+        fromTmax ? ` : sa limite de ${fromTmax.set} °C est reprise comme besoin, remplace-la par la température réelle de la machine` : crit.tmin === "" && crit.tmax === "" && (known(x.temp_min_c) || known(x.temp_max_c)) ? " : indique la température réelle de la machine pour affiner" : ""
+      }.`
+    );
   }
 
   // ------------------------------------------------------------------ results
@@ -384,10 +405,12 @@
   // what could still tell equal products apart (never a criterion already given)
   function tieHint(c, ok) {
     const tied = ok.filter((r) => !C.compare(ok[0], r));
+    // only criteria not given yet that some of them meet and others not
+    const sp = C.splitters(tied.map((r) => r.product), c, ENV_CHOICES.map(([k]) => k));
     const hints = [];
-    if (c.tmin === "" && c.tmax === "" && tied.some((r) => !r.product.temp_na)) hints.push("la température");
-    if (!c.env.length) hints.push("l'environnement (eau, poussière, charges…)");
-    if (!c.formats.length) hints.push("le conditionnement");
+    if (sp.temp) hints.push("la température");
+    if (sp.env.length) hints.push(`l'environnement (${sp.env.map((e) => (ENV_CHOICES.find(([k]) => k === e) || [e, e])[1].toLowerCase()).join(" ; ")})`);
+    if (sp.formats.length) hints.push(`le conditionnement (${sp.formats.map((f) => C.FORMATS[f].toLowerCase()).join(" ; ")})`);
     return hints.length ? `précise ${hints.join(", ")} pour les départager` : "à départager avec le service technique";
   }
 
@@ -398,7 +421,9 @@
     if (repl && C.REPLACE_TYPES[crit.replaceType]) t.push([C.REPLACE_TYPES[crit.replaceType].label, "replaceType"]);
     if (crit.food) t.push([`Contact alimentaire : ${{ oui: "oui (NSF H1)", non: "non", nsp: "à préciser" }[crit.food]}`, "food"]);
     if (crit.application) t.push([appLabel(crit.application), "application"]);
-    if (crit.tmin !== "" || crit.tmax !== "") t.push([`${crit.tmin === "" ? "?" : crit.tmin} → ${crit.tmax === "" ? "?" : crit.tmax} °C`, "temp"]);
+    const tr = C.needRange(crit);
+    if (tr) t.push([C.needText(tr), "temp"]);
+    else if (crit.tmin !== "" || crit.tmax !== "") t.push([`${crit.tmin || "?"} → ${crit.tmax || "?"} °C`, "temp"]);
     crit.env.forEach((e) => t.push([(ENV_CHOICES.find(([k]) => k === e) || [e, e])[1], "env:" + e]));
     crit.formats.forEach((f) => t.push([C.FORMATS[f] || f, "formats:" + f]));
     if (repl && crit.iso_vg) t.push([`ISO VG ${crit.iso_vg}`, "iso_vg"]);
@@ -539,7 +564,7 @@
     const foodRule = c.application === "nettoyage_degraissage" ? "NSF H1, A1 ou A7 requis" : c.application === "demoulage" ? "NSF 3H ou H1 requis" : "NSF H1 requis";
     if (c.food) need.push(`Contact alimentaire : ${{ oui: `oui (${foodRule})`, non: "non", nsp: "à préciser" }[c.food]}`);
     if (c.application) need.push(`Application : ${appLabel(c.application)}`);
-    if (c.tmin !== "" || c.tmax !== "") need.push(`Température : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
+    if (C.needRange(c)) need.push(`Température : ${C.needText(C.needRange(c))}`);
     if (c.env.length) need.push(`Environnement : ${c.env.map((e) => C.PROPERTIES[e] || e).join(", ")}`);
     if (c.formats.length) need.push(`Conditionnement : ${c.formats.map((f) => C.FORMATS[f]).join(", ")}`);
     // the printed proposal carries the logo of the build when it has one
@@ -638,6 +663,12 @@
     ["tmin", "tmax", "iso_vg", "nlgi", "query", "client"].forEach((k) => {
       if (typeof s[k] === "string" || typeof s[k] === "number") c[k] = String(s[k]).slice(0, 80);
     });
+    if (s.fromEquiv && typeof s.fromEquiv === "object") {
+      ["replaceType", "application", "food", "tmin", "tmax", "iso_vg", "nlgi"].forEach((k) => {
+        const v = s.fromEquiv[k];
+        if (v && typeof v === "object" && typeof v.was === "string" && typeof v.set === "string") c.fromEquiv[k] = { was: v.was.slice(0, 80), set: v.set.slice(0, 80) };
+      });
+    }
     return c;
   }
 

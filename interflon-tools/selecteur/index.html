@@ -369,7 +369,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const eq = currentEquiv();
     $("#questions").innerHTML = `
       ${crit.mode === "remplacement" && EQUIV.length ? `<section class="q"><h2><span class="n">${num()}</span>Produit concurrent</h2><p class="hint">Marque ou référence du produit en place : les critères se remplissent avec ses caractéristiques.</p>
-        <div class="combo"><label class="field" for="competitor">Recherche<input id="competitor" autocomplete="off" placeholder="ex. Klübersynth UH1, Nevastane, WD-40" value="${esc(eq ? `${eq.marque} ${eq.reference}` : "")}" aria-controls="competitor-list" aria-autocomplete="list"></label>
+        <div class="combo"><label class="field" for="competitor">Recherche<input id="competitor" autocomplete="off" placeholder="ex. Klübersynth UH1, Nevastane, WD-40" value="${esc(eq ? eqName(eq) : "")}" aria-controls="competitor-list" aria-autocomplete="list"></label>
         <div class="suggest" id="competitor-list" role="listbox" hidden></div></div></section>` : ""}
       ${crit.mode === "remplacement" ? `<section class="q"><h2><span class="n">${num()}</span>Produit utilisé aujourd'hui</h2><p class="hint">Type de produit du client, toutes marques.</p>
         ${chips("replaceType", Object.entries(C.REPLACE_TYPES).map(([k, v]) => [k, v.label]), crit.replaceType, false)}
@@ -451,10 +451,12 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   function tiedTop(ok, organ, c) {
     const tied = ok.filter((r) => !C.compare(ok[0], r));
     if (!organ || tied.length < 3) return "";
+    // only criteria not given yet that some of them meet and others not
+    const sp = C.splitters(tied.map((r) => r.product), c, ENV.map(([k]) => k));
     const hints = [];
-    if (c.tmin === "" && c.tmax === "" && tied.some((r) => !r.product.temp_na)) hints.push("la température");
-    if (!c.env.length) hints.push("les conditions (eau, poussière, charges…)");
-    if (!c.formats.length) hints.push("le conditionnement");
+    if (sp.temp) hints.push("la température");
+    if (sp.env.length) hints.push(`une condition (${sp.env.map((e) => (ENV.find(([k]) => k === e) || [e, e])[1].toLowerCase()).join(" ; ")})`);
+    if (sp.formats.length) hints.push(`le conditionnement (${sp.formats.map((f) => C.FORMATS[f].toLowerCase()).join(" ; ")})`);
     return `<p class="group-note">${tied.length} produits à égalité sur ces critères : ${hints.length ? `précise ${hints.join(", ")} pour les départager` : "à départager avec le service technique"}.</p>`;
   }
   // groups shown apart from the recommendation: made for the requested organ ("main"),
@@ -479,7 +481,9 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (repl && C.REPLACE_TYPES[crit.replaceType]) t.push([C.REPLACE_TYPES[crit.replaceType].label, "replaceType"]);
     if (crit.food) t.push([`Contact alimentaire : ${FOOD_TXT[crit.food]}`, "food"]);
     if (crit.application) t.push([C.APPLICATIONS[crit.application] || crit.application, "application"]);
-    if (crit.tmin !== "" || crit.tmax !== "") t.push([`${crit.tmin === "" ? "?" : crit.tmin} → ${crit.tmax === "" ? "?" : crit.tmax} °C`, "temp"]);
+    const tr = C.needRange(crit);
+    if (tr) t.push([C.needText(tr), "temp"]);
+    else if (crit.tmin !== "" || crit.tmax !== "") t.push([`${crit.tmin || "?"} → ${crit.tmax || "?"} °C`, "temp"]);
     crit.env.forEach((e) => t.push([(ENV.find(([k]) => k === e) || [e, e])[1], "env:" + e]));
     crit.formats.forEach((f) => t.push([C.FORMATS[f] || f, "formats:" + f]));
     if (repl && crit.iso_vg) t.push([`ISO VG ${crit.iso_vg}`, "iso_vg"]);
@@ -512,9 +516,10 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (eq) {
       const direct = eq.interflon ? ` Équivalence proposée (${esc(eq.origine)}) : <strong>${esc(eq.interflon)}</strong>, à valider par le service technique.` : "";
       const none = noEquivalent(eq) && !/pas d'équivalent/i.test(eq.note || "") ? " Pas d'équivalent Interflon référencé." : "";
-      const temps = eq.besoin_temp && known(eq.temp_max_c)
-        ? ` Produit haute température : sa limite de ${esc(eq.temp_max_c)} °C est reprise comme besoin. Remplace-la par la température réelle de la machine si tu la connais.`
-        : known(eq.temp_min_c) || known(eq.temp_max_c) ? " Indique la température réelle de la machine pour affiner le choix." : "";
+      const fromEq = crit.fromCompetitor && crit.fromCompetitor.tmax;
+      const temps = fromEq && crit.tmax === fromEq.set
+        ? ` Produit haute température : sa limite de ${esc(fromEq.set)} °C est reprise comme besoin. Remplace-la par la température réelle de la machine si tu la connais.`
+        : (known(eq.temp_min_c) || known(eq.temp_max_c)) && crit.tmin === "" && crit.tmax === "" ? " Indique la température réelle de la machine pour affiner le choix." : "";
       const prop = eq.interflon ? ranked.find((r) => r.product.name === eq.interflon) : null;
       const where = !prop ? "" : !prop.eligible ? ` Avec ces critères, elle est écartée (${esc(prop.blockers.join(" ; "))}) : voir « Produits écartés ».`
         : !prop.verified ? ` Sa fiche ne permet pas de vérifier : ${esc(prop.unchecked.join(", "))}. Voir « À vérifier ».`
@@ -614,7 +619,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
     if (c.food) need.push("Contact alimentaire : " + { oui: "oui (homologation NSF requise)", non: "non", nsp: "à préciser" }[c.food]);
     if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
-    if (c.tmin !== "" || c.tmax !== "") need.push(`Température : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
+    if (C.needRange(c)) need.push(`Température : ${C.needText(C.needRange(c))}`);
     if (c.env.length) need.push("Conditions : " + c.env.map((e) => C.PROPERTIES[e] || e).join(", "));
     const head = [crit.client, new Date().toLocaleDateString("fr-FR"), author ? "établie par " + author + ", Interflon France" : ""].filter(Boolean).join(" · ");
     const lines = ["RECOMMANDATION DE LUBRIFICATION", head, "", "Besoin :", ...need.map((x) => "  - " + x)];
@@ -639,7 +644,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
     if (c.food) need.push("Contact alimentaire : " + { oui: "oui, homologation NSF requise", non: "non", nsp: "à préciser" }[c.food]);
     if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
-    if (c.tmin !== "" || c.tmax !== "") need.push(`Température de fonctionnement : ${c.tmin === "" ? "?" : c.tmin} → ${c.tmax === "" ? "?" : c.tmax} °C`);
+    if (C.needRange(c)) need.push(`Température de fonctionnement : ${C.needText(C.needRange(c))}`);
     if (c.env.length) need.push("Conditions : " + c.env.map((e) => C.PROPERTIES[e] || e).join(", "));
     if (c.formats.length) need.push("Conditionnement souhaité : " + c.formats.map((f) => C.FORMATS[f]).join(", "));
     if (c.iso_vg) need.push("Viscosité actuelle : ISO VG " + c.iso_vg);
@@ -702,7 +707,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const box = $("#competitor-list");
     if (!box) return;
     box.innerHTML = sugItems.length
-      ? sugItems.map(([e, i], k) => `<button type="button" role="option" data-eq="${i}" aria-selected="${k === sugIdx}">${esc(e.marque)} <b>${esc(e.reference)}</b><small>${esc(e.type)}</small></button>`).join("")
+      ? sugItems.map(([e, i], k) => `<button type="button" role="option" data-eq="${i}" aria-selected="${k === sugIdx}">${eqName(e) === e.reference ? `<b>${esc(e.reference)}</b>` : `${esc(e.marque)} <b>${esc(e.reference)}</b>`}<small>${esc(e.type)}</small></button>`).join("")
       : `<p class="hint">Référence absente de la table : décris le produit avec les questions ci-dessous.</p>`;
     box.hidden = !words;
   }
@@ -719,7 +724,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const was = {};
     FROM_COMPETITOR.forEach((k) => { was[k] = crit[k]; });
     crit.competitor = eqKey(e);
-    if (C.REPLACE_TYPES[e.replace_type]) pickReplaceType(e.replace_type);
+    pickReplaceType(C.REPLACE_TYPES[e.replace_type] ? e.replace_type : "");
     if (e.application && C.APPLICATIONS[e.application]) crit.application = e.application;
     // a food-grade product in place means food contact; any other never lowers the rep's answer
     if (e.nsf === "H1") crit.food = "oui";

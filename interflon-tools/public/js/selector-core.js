@@ -249,6 +249,19 @@
   const HOT_NEED_C = 150;
   const COLD_NEED_C = -15;
 
+  // The temperature need as a range: a single bound is the machine's temperature (only a
+  // Mini of 180 °C: the product must hold 180 °C); reversed bounds are swapped. null if none.
+  function needRange(c) {
+    let lo = num(c && c.tmin);
+    let hi = num(c && c.tmax);
+    if (lo === null && hi === null) return null;
+    if (lo === null) lo = hi;
+    if (hi === null) hi = lo;
+    return lo <= hi ? { lo, hi } : { lo: hi, hi: lo };
+  }
+  // "+50 °C → +250 °C", or "+180 °C" for a single temperature
+  const needText = (r) => (r.lo === r.hi ? fmtT(r.lo) : `${fmtT(r.lo)} → ${fmtT(r.hi)}`);
+
   function evaluate(p, c) {
     c = c || {};
     const reasons = [];
@@ -319,12 +332,10 @@
 
     // 4. Temperature — hard constraint on known limits. A single bound is the machine's
     // temperature (only a Mini of 180 °C: the product must hold 180 °C); reversed bounds are swapped.
-    let tmin = num(c.tmin);
-    let tmax = num(c.tmax);
-    const needTxt = `${fmtT(tmin)} → ${fmtT(tmax)}`;
-    if (tmin === null && tmax !== null) tmin = tmax;
-    if (tmax === null && tmin !== null) tmax = tmin;
-    if (tmin !== null && tmin > tmax) [tmin, tmax] = [tmax, tmin];
+    const range = needRange(c);
+    const tmin = range ? range.lo : null;
+    const tmax = range ? range.hi : null;
+    const needTxt = range ? needText(range) : "";
     // some semi-fluid greases have a higher minimum in gearboxes (data sheet: "for gearboxes: 0 °C")
     const gearMin = c.application === "engrenages_fermes" ? num(p.temp_min_gearbox_c) : null;
     const pmin = gearMin !== null ? gearMin : num(p.temp_min_c);
@@ -354,20 +365,20 @@
           score += 8;
           reasons.push({ s: "u", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvrirait ${need} : donnée à confirmer` });
         } else {
-          // a range that only just covers the need (under 10 °C to spare) is a weaker fit;
-          // spare range beyond that does not rank products
+          // covered per the sheet: spare range does not rank products, a thin margin is only said
           const thin = Math.min(tmin - pmin, pmax - tmax) < 10;
-          score += thin ? 17 : 20;
+          score += 20;
           reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)}${gearMin !== null ? " (en réducteur)" : ""} couvre ${need}${thin ? ", avec peu de marge" : ""}` });
         }
-        // a hot or cold need favours the products made for it (their own claim)
+        // a hot or cold need favours the products made for it (their own claim), less than a
+        // stated condition does over a neighbouring property (12 - 5)
         const env = c.env || [];
         if (tmax >= HOT_NEED_C && props.includes("haute_temperature") && !env.includes("haute_temperature")) {
-          score += 8;
+          score += 6;
           reasons.push({ s: "y", t: PROPERTIES.haute_temperature });
         }
         if (tmin <= COLD_NEED_C && props.includes("basse_temperature") && !env.includes("basse_temperature")) {
-          score += 8;
+          score += 6;
           reasons.push({ s: "y", t: PROPERTIES.basse_temperature });
         }
       }
@@ -426,9 +437,10 @@
         // ISO 3448: a grade spans ±10 % around its value; the nearest grade, then the next one
         // up or down (grades are ~50 % apart), still count, less
         const d = vgStep(have) !== null && vgStep(want) !== null ? Math.abs(vgStep(have) - vgStep(want)) : 99;
-        if (Math.abs(have - want) <= want * 0.1) {
+        // the class is the product's own grade when it has one, the rep's grade otherwise
+        if (p.viscosity_iso_vg ? Math.abs(want - have) <= have * 0.1 : Math.abs(have - want) <= want * 0.1) {
           score += 15;
-          reasons.push({ s: "y", t: p.viscosity_iso_vg ? `Même viscosité ISO VG ${want}` : `${what} : dans la classe ISO VG ${want}` });
+          reasons.push({ s: "y", t: p.viscosity_iso_vg ? (want === have ? `Même viscosité ISO VG ${have}` : `Même classe ISO VG ${have} (actuel : ${want})`) : `${what} : dans la classe ISO VG ${want}` });
         } else if (d === 0) {
           score += 10;
           reasons.push({ s: "y", t: `${what}, proche de l'ISO VG ${want} actuel` });
@@ -467,6 +479,19 @@
         (p.industries || []).join(" "), (p.key_claims || []).join(" ")].join(" ")
     );
     return n(q).split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
+  }
+
+  // Which criteria not given yet could still tell these equal products apart: the
+  // temperature (their ranges differ), a condition or a packaging some claim and others not
+  function splitters(products, c, envKeys) {
+    c = c || {};
+    const differ = (f) => new Set(products.map(f)).size > 1;
+    const claim = (p, e) => ((p.properties || []).includes(e) ? 2 : (ENV_MATCH[e] || []).some((x) => (p.properties || []).includes(x)) ? 1 : 0);
+    return {
+      temp: !needRange(c) && products.some((p) => !p.temp_na) && differ((p) => `${p.temp_min_c}|${p.temp_max_c}|${!!p.temp_na}`),
+      env: (envKeys || Object.keys(ENV_MATCH)).filter((e) => !(c.env || []).includes(e) && differ((p) => claim(p, e))),
+      formats: (c.formats || []).length ? [] : Object.keys(FORMATS).filter((f) => differ((p) => formatKinds(p.formats).has(f))),
+    };
   }
 
   const GROUP_ORDER = { main: 0, related: 1, additive: 2 };
@@ -513,5 +538,5 @@
     demoulant: { label: "Agent de démoulage", application: "demoulage" },
   };
 
-  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, isAdditive, compare: order, tempStatus, gaps, gapsText, nsfList, nsfParse, nlgiIndex, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
+  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, isAdditive, compare: order, needRange, needText, splitters, tempStatus, gaps, gapsText, nsfList, nsfParse, nlgiIndex, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
 });
