@@ -4,7 +4,12 @@
  *   eligible  — false when a HARD constraint fails (food contact without the
  *               required NSF category, temperature range not covered, wrong
  *               application or product family)
+ *   verified  — eligible and every hard criterion checked on sourced data
+ *   group     — "main" (made for the requested organ, or no organ asked),
+ *               "related" (made for a neighbouring organ), "additive" (MicPol
+ *               additive added to the oil in place, not a lubricant on its own)
  *   score     — soft relevance used to order eligible products
+ *   tie       — same rank as a neighbour on every criterion (only the name differs)
  *   reasons   — [{s: "y"|"n"|"u", t: text}]  y = OK, n = not OK, u = unknown / to check
  *
  * Unknown data never disqualifies a product: it is kept and flagged "à vérifier",
@@ -209,6 +214,37 @@
   const num = (x) => (x === null || x === undefined || x === "" || isNaN(+x) ? null : +x);
   const fmtT = (x) => (x === null ? "?" : `${x > 0 ? "+" : ""}${x} °C`);
 
+  // MicPol additives (Finnoly Additive, Fin Gear Additive…): dosed into the customer's
+  // own oil, so they complement a lubricant and never stand in for one
+  const isAdditive = (p) => p.family === "autre" && /\badditive\b/i.test(String(p.name || ""));
+
+  // ISO 3448 viscosity grades and NLGI consistency classes, in order, to score "close" grades
+  const VG_GRADES = [2, 3, 5, 7, 10, 15, 22, 32, 46, 68, 100, 150, 220, 320, 460, 680, 1000, 1500];
+  const vgStep = (v) => {
+    if (!(v > 0)) return null;
+    let best = 0;
+    VG_GRADES.forEach((g, i) => { if (Math.abs(Math.log(g / v)) < Math.abs(Math.log(VG_GRADES[best] / v))) best = i; });
+    return best;
+  };
+  const NLGI_CLASSES = ["000", "00", "0", "1", "2", "3", "4", "5", "6"];
+  // "2", "NLGI 1/2", "2-3" -> class index (half classes for "1/2"), null when unreadable
+  function nlgiIndex(x) {
+    const parts = String(x || "").toUpperCase().replace(/NLGI|\s/g, "").split(/[/-]/).filter(Boolean);
+    const idx = parts.map((t) => NLGI_CLASSES.indexOf(t));
+    return idx.length && idx.every((i) => i >= 0) ? idx.reduce((a, b) => a + b, 0) / idx.length : null;
+  }
+
+  // Usual product family per organ, at equal suitability: an oil for chains and
+  // conveyors, a grease for bearings, electric motors and open gears (sprays in between).
+  // A soft preference: stated conditions and the temperature still decide.
+  const CHAIN_FIT = { huile: 6, aerosol: 3 };
+  const GREASE_FIT = { graisse: 6, aerosol: 3 };
+  const FAMILY_FIT = { chaines: CHAIN_FIT, convoyeurs: CHAIN_FIT, roulements: GREASE_FIT, moteurs_electriques: GREASE_FIT, engrenages_ouverts: GREASE_FIT };
+
+  // Temperature needs that call for a product claiming the matching property
+  const HOT_NEED_C = 150;
+  const COLD_NEED_C = -15;
+
   function evaluate(p, c) {
     c = c || {};
     const reasons = [];
@@ -218,8 +254,12 @@
     let score = 0;
     const apps = p.applications || [];
     const props = p.properties || [];
+    const additive = isAdditive(p);
+    let group = additive ? "additive" : "main";
+    let primary = false;
 
     // 1. Food contact — hard constraint when contact is possible (fails closed)
+    if (c.food === "non" && nsfList(p).includes("H1")) score -= 5; // no food contact: the industrial equivalent first
     if (c.food === "oui" || c.food === "nsp") {
       const parsed = nsfParse(p);
       const match = foodMatch(p, c.application);
@@ -243,19 +283,25 @@
         unchecked.push("application");
         reasons.push({ s: "u", t: `Applications non renseignées : vérifier pour « ${label} »` });
       } else if (apps.includes(c.application)) {
-        score += 40;
-        reasons.push({ s: "y", t: `Prévu pour : ${label}` });
+        // main use named by the product's own source ("developed for…") beats a use it merely lists
+        primary = (p.primary_applications || []).includes(c.application);
+        score += primary ? 52 : 40;
+        reasons.push({ s: "y", t: primary ? `Conçu pour : ${label}` : `Prévu pour : ${label}` });
       } else {
         const near = (RELATED[c.application] || []).filter((a) => apps.includes(a));
         if (near.length) {
           score += 15;
+          if (!additive) group = "related";
           // "r" = related application: eligible, close to the requested use
           reasons.push({ s: "r", t: `Application voisine : ${near.map((a) => APPLICATIONS[a] || a).join(", ")}` });
         } else blockers.push(`Non prévu pour : ${label}`);
       }
-    }
+    } else if (apps.length && apps.every((a) => a === "autre")) score -= 10; // niche product (rail buffers, welding): not a generic answer
+    if (additive) reasons.push({ s: "a", t: "Additif : s'ajoute à l'huile en place, ne la remplace pas" });
 
-    // 3. Product family (replacement mode: oil vs grease…)
+    // 3. Product family: usual family for the organ (soft); in replacement mode, the
+    // family of the product in place (oil vs grease…, hard)
+    if (c.application && FAMILY_FIT[c.application] && group === "main") score += FAMILY_FIT[c.application][p.family] || 0;
     if (c.families && c.families.length) {
       if (!p.family) {
         unchecked.push("famille");
@@ -272,7 +318,14 @@
     const gearMin = c.application === "engrenages_fermes" ? num(p.temp_min_gearbox_c) : null;
     const pmin = gearMin !== null ? gearMin : num(p.temp_min_c);
     const pmax = num(p.temp_max_c);
-    // temp_na: no service-temperature spec for this kind of product (cleaner, additive…)
+    // temp_na: no service-temperature spec for this kind of product. An additive runs at
+    // the temperature of its base oil; a cleaner used as a cleaner needs none. A cleaner
+    // used for another job (protection…) at a stated temperature cannot be checked.
+    const cleaningJob = !c.application || c.application === "nettoyage_degraissage";
+    if ((tmin !== null || tmax !== null) && p.temp_na && !additive && !(CLEANERS.includes(p.family) && cleaningJob)) {
+      unchecked.push("température");
+      reasons.push({ s: "u", t: `Pas de plage d'utilisation sur la fiche (besoin ${fmtT(tmin)} → ${fmtT(tmax)})` });
+    }
     if ((tmin !== null || tmax !== null) && !p.temp_na) {
       const need = `${fmtT(tmin)} → ${fmtT(tmax)}`;
       let unknown = false;
@@ -294,11 +347,26 @@
           score += 8;
           reasons.push({ s: "u", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvrirait ${need} : donnée à confirmer` });
         } else {
-          score += 20;
+          // a comfortable margin counts a little: a range that just covers the need is a weaker fit
+          const margin = Math.min(tmin !== null ? tmin - pmin : Infinity, tmax !== null ? pmax - tmax : Infinity);
+          score += 20 + Math.min(4, Math.floor(margin / 10));
           reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)}${gearMin !== null ? " (en réducteur)" : ""} couvre ${need}` });
+        }
+        // a hot or cold need favours the products made for it (their own claim)
+        const env = c.env || [];
+        if (tmax !== null && tmax >= HOT_NEED_C && props.includes("haute_temperature") && !env.includes("haute_temperature")) {
+          score += 8;
+          reasons.push({ s: "y", t: PROPERTIES.haute_temperature });
+        }
+        if (tmin !== null && tmin <= COLD_NEED_C && props.includes("basse_temperature") && !env.includes("basse_temperature")) {
+          score += 8;
+          reasons.push({ s: "y", t: PROPERTIES.basse_temperature });
         }
       }
     }
+    // a high-temperature speciality is proposed first for a hot need only: for an ordinary
+    // or unstated temperature, the standard product comes first
+    if (props.includes("haute_temperature") && !(tmax !== null && tmax >= HOT_NEED_C) && !(c.env || []).includes("haute_temperature")) score -= 4;
 
     // 5. Environment — soft, except explicit requirements (biodegradable, PFAS-free)
     (c.env || []).forEach((e) => {
@@ -315,10 +383,14 @@
         } else blockers.push(`${label} : exigé, non revendiqué`);
         return;
       }
-      const ok = (ENV_MATCH[e] || [e]).some((x) => props.includes(x));
-      if (ok) {
-        score += 8;
+      // the condition itself counts more than a neighbouring property (dry film for dust…)
+      const near = (ENV_MATCH[e] || []).find((x) => x !== e && props.includes(x));
+      if (props.includes(e)) {
+        score += 12;
         reasons.push({ s: "y", t: label });
+      } else if (near) {
+        score += 5;
+        reasons.push({ s: "y", t: `${label} (${(PROPERTIES[near] || near).toLowerCase()})` });
       } else reasons.push({ s: "n", t: `${label} : non revendiqué` });
     });
 
@@ -340,33 +412,46 @@
     if (c.iso_vg) {
       const want = +vg(c.iso_vg);
       const cst = num(p.viscosity_cst40);
+      // the next grade up or down still counts a little (ISO grades are ~50 % apart)
+      const near = (a, b) => (vgStep(a) !== null && vgStep(b) !== null ? Math.abs(vgStep(a) - vgStep(b)) : 99);
       if (p.viscosity_iso_vg) {
+        const d = near(+vg(p.viscosity_iso_vg), want);
         if (vg(p.viscosity_iso_vg) === vg(c.iso_vg)) {
           score += 15;
           reasons.push({ s: "y", t: `Même viscosité ISO VG ${vg(c.iso_vg)}` });
-        } else reasons.push({ s: "n", t: `ISO VG ${p.viscosity_iso_vg} (actuel : ${c.iso_vg})` });
+        } else {
+          if (d === 1) score += 6;
+          reasons.push({ s: "n", t: `ISO VG ${p.viscosity_iso_vg} (actuel : ${c.iso_vg})${d === 1 ? ", grade voisin" : ""}` });
+        }
       } else if (cst !== null && want) {
         // measured viscosity outside the ISO grades: ISO 3448 classes span ±10 % around the grade
         if (Math.abs(cst - want) <= want * 0.1) {
           score += 15;
           reasons.push({ s: "y", t: `${cst} cSt à 40 °C : dans la classe ISO VG ${want}` });
-        } else reasons.push({ s: "n", t: `${cst} cSt à 40 °C (actuel : ISO VG ${want})` });
+        } else {
+          const d = near(cst, want);
+          if (d === 1) score += 6;
+          reasons.push({ s: "n", t: `${cst} cSt à 40 °C (actuel : ISO VG ${want})${d === 1 ? ", grade voisin" : ""}` });
+        }
       } else if (p.family === "huile") reasons.push({ s: "u", t: "Viscosité ISO VG non renseignée" });
     }
     if (c.nlgi) {
+      const a = nlgiIndex(p.nlgi);
+      const b = nlgiIndex(c.nlgi);
       if (!p.nlgi) {
         if (p.family === "graisse") reasons.push({ s: "u", t: "Grade NLGI non renseigné" });
-      } else if (String(p.nlgi).replace(/\s/g, "") === String(c.nlgi).replace(/\s/g, "")) {
+      } else if (a !== null && a === b) {
         score += 10;
         reasons.push({ s: "y", t: `Même grade NLGI ${c.nlgi}` });
+      } else if (a !== null && b !== null && Math.abs(a - b) <= 0.5) {
+        // "1/2" sits between NLGI 1 and 2
+        score += 6;
+        reasons.push({ s: "y", t: `NLGI ${p.nlgi}, proche du grade actuel ${c.nlgi}` });
       } else reasons.push({ s: "n", t: `NLGI ${p.nlgi} (actuel : ${c.nlgi})` });
     }
 
-    // 8. Data quality nudges ordering only
-    score += p.confidence === "high" ? 4 : p.confidence === "medium" ? 2 : 0;
-
     blockers.forEach((b) => reasons.unshift({ s: "n", t: b }));
-    return { eligible: blockers.length === 0, unchecked, verified: blockers.length === 0 && unchecked.length === 0, score, reasons, blockers };
+    return { eligible: blockers.length === 0, unchecked, verified: blockers.length === 0 && unchecked.length === 0, group, primary, score, reasons, blockers };
   }
 
   function matchesQuery(p, q) {
@@ -379,12 +464,27 @@
     return n(q).split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
   }
 
+  const GROUP_ORDER = { main: 0, related: 1, additive: 2 };
+  const CONFIDENCE = { high: 2, medium: 1, low: 0 };
+  // fully checked matches first, then matches missing a datum, then the excluded; inside
+  // each: the requested organ before a neighbouring one and additives, then the score
+  const order = (a, b) =>
+    (b.eligible - a.eligible) || (b.verified - a.verified) || (GROUP_ORDER[a.group] - GROUP_ORDER[b.group]) || (b.score - a.score);
+  // equal products are listed specialist first (fewer uses on its sheet), then the
+  // better-documented sheet, then by name: an order of display, not a ranking
+  const display = (a, b) =>
+    (((a.product.applications || []).length || 99) - ((b.product.applications || []).length || 99)) ||
+    ((CONFIDENCE[b.product.confidence] || 0) - (CONFIDENCE[a.product.confidence] || 0)) ||
+    String(a.product.name).localeCompare(String(b.product.name));
+
   function rank(products, criteria) {
-    return (products || [])
+    const out = (products || [])
       .filter((p) => matchesQuery(p, criteria && criteria.query))
       .map((p) => Object.assign({ product: p }, evaluate(p, criteria)))
-      // fully checked matches first, then matches missing a datum, then the excluded
-      .sort((a, b) => (b.eligible - a.eligible) || (b.verified - a.verified) || (b.score - a.score) || String(a.product.name).localeCompare(String(b.product.name)));
+      .sort((a, b) => order(a, b) || display(a, b));
+    // same score on every criterion: shown "ex æquo", never as a ranking
+    out.forEach((r, i) => { r.tie = (i > 0 && !order(out[i - 1], r)) || (i < out.length - 1 && !order(r, out[i + 1])); });
+    return out;
   }
 
   // "Replace the customer's current product" presets -> criteria
@@ -401,5 +501,5 @@
     demoulant: { label: "Agent de démoulage", application: "demoulage" },
   };
 
-  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, tempStatus, gaps, gapsText, nsfList, nsfParse, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
+  return { APPLICATIONS, PROPERTIES, FORMATS, ENV_MATCH, RELATED, REPLACE_TYPES, REQUIRED_ENV, NSF_UNSURE, TEMP_UNSURE, PFAS_UNSURE, isVerified, isAdditive, compare: order, tempStatus, gaps, gapsText, nsfList, nsfParse, nlgiIndex, formatKinds, foodOk, foodMatch, unsure, evaluate, rank, matchesQuery };
 });

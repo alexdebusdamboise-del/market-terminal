@@ -45,6 +45,8 @@
 
   const blank = () => ({ mode: "besoin", food: "", application: "", tmin: "", tmax: "", env: [], formats: [], replaceType: "", iso_vg: "", nlgi: "", query: "", client: "" });
   let crit = blank();
+  // answers restored from the last visit: said so until the first change
+  let restored = false;
 
   const famLabel = (f) => FAMILIES[f] || f || "—";
   const appLabel = (a) => C.APPLICATIONS[a] || a;
@@ -207,6 +209,10 @@
       const box = tile.parentElement;
       const name = box.dataset.name;
       const v = tile.dataset.v;
+      if (name === "replaceType") {
+        pickReplaceType(crit.replaceType === v ? "" : v);
+        return changed(true);
+      }
       if (box.dataset.multi === "1") {
         crit[name] = crit[name].includes(v) ? crit[name].filter((x) => x !== v) : crit[name].concat(v);
         tile.classList.toggle("on");
@@ -234,11 +240,39 @@
       const d = e.target.closest("[data-detail]");
       if (d) openProduct(d.dataset.detail);
     });
+    $("#sel-needbar").addEventListener("click", (e) => {
+      if (e.target.closest("[data-reset]")) {
+        crit = blank();
+        segHint = null;
+        return changed(true);
+      }
+      const d = e.target.closest("[data-drop]");
+      if (d) drop(d.dataset.drop);
+    });
     $("#sel-print").addEventListener("click", printReco);
     $("#sel-jump").addEventListener("click", () => $("#sel-results-panel").scrollIntoView({ behavior: "smooth", block: "start" }));
   }
 
+  // the product type in place decides the organ (a leftover organ would override it)
+  function pickReplaceType(v) {
+    const before = C.REPLACE_TYPES[crit.replaceType];
+    crit.replaceType = v;
+    const t = C.REPLACE_TYPES[v];
+    if (t && t.application) crit.application = t.application;
+    else if (before && before.application === crit.application) crit.application = "";
+  }
+  // × on an active criterion
+  function drop(key) {
+    const [name, v] = key.split(":");
+    if (v !== undefined) crit[name] = crit[name].filter((x) => x !== v);
+    else if (name === "temp") crit.tmin = crit.tmax = "";
+    else if (name === "replaceType") pickReplaceType("");
+    else crit[name] = "";
+    changed(true);
+  }
+
   function changed(rerenderForm) {
+    restored = false;
     IFX.store.set(LS_CRIT, crit);
     if (rerenderForm) renderForm();
     renderResults();
@@ -308,9 +342,11 @@
     return `<div class="tbar" title="Plage produit (orange, hachuré = limite inconnue) vs besoin (bleu), échelle -60 → 400 °C"><span class="p" style="left:${pos(solidA)}%;width:${Math.max(0.6, pos(solidB) - pos(solidA))}%"></span>${unk}${need}</div>`;
   }
 
-  function card(r, c, top) {
+  // rank: {n, tie} for the first choices (CHOIX n, shared when only the name differs), null otherwise
+  function card(r, c, rank) {
     const p = r.product;
-    return `<div class="card ${top ? "top" : ""} ${r.eligible ? "" : "out"}">
+    return `<div class="card ${rank && rank.n === 1 ? "top" : ""} ${r.eligible ? "" : "out"}">
+      ${rank ? `<div class="rank">CHOIX ${rank.n}${rank.tie ? ' <span class="tie">· EX ÆQUO</span>' : ""}</div>` : ""}
       ${r.eligible && r.unchecked.length ? `<div class="unchecked">Non vérifié : ${esc(r.unchecked.join(", "))} (donnée manquante sur la fiche)</div>` : ""}
       <div class="card-h"><div><span class="pname">${esc(p.name)}</span>
         ${p.nsf ? `<span class="badge ${C.nsfList(p).includes("H1") ? "ok" : "blue"}">NSF ${esc(p.nsf)}</span>` : ""}
@@ -324,24 +360,71 @@
     </div>`;
   }
 
+  // CHOIX 1..3 among the products made for the requested organ; equal products share the number
+  function choiceRanks(list) {
+    const n = [];
+    list.forEach((r, i) => {
+      n[i] = i > 0 && !C.compare(list[i - 1], r) ? n[i - 1] : i + 1;
+    });
+    return list.map((r, i) => (n[i] <= 3 ? { n: n[i], tie: n[i - 1] === n[i] || n[i + 1] === n[i] } : null));
+  }
+  // made for the requested organ ("main"), for a neighbouring organ, additives for the oil
+  // in place, data missing, excluded
+  function groups(list) {
+    return {
+      ok: list.filter((r) => r.verified && r.group === "main"),
+      near: list.filter((r) => r.verified && r.group === "related"),
+      adds: list.filter((r) => r.verified && r.group === "additive"),
+      pending: list.filter((r) => r.eligible && !r.verified),
+      out: list.filter((r) => !r.eligible),
+    };
+  }
+
+  // answers in force, each with its ×, so none stays active unseen
+  function renderNeedbar() {
+    const t = [];
+    const repl = crit.mode === "remplacement";
+    if (repl && C.REPLACE_TYPES[crit.replaceType]) t.push([C.REPLACE_TYPES[crit.replaceType].label, "replaceType"]);
+    if (crit.food) t.push([`Contact alimentaire : ${{ oui: "oui, NSF", non: "non", nsp: "à préciser" }[crit.food]}`, "food"]);
+    if (crit.application) t.push([appLabel(crit.application), "application"]);
+    if (crit.tmin !== "" || crit.tmax !== "") t.push([`${crit.tmin === "" ? "?" : crit.tmin} → ${crit.tmax === "" ? "?" : crit.tmax} °C`, "temp"]);
+    crit.env.forEach((e) => t.push([(ENV_CHOICES.find(([k]) => k === e) || [e, e])[1], "env:" + e]));
+    crit.formats.forEach((f) => t.push([C.FORMATS[f] || f, "formats:" + f]));
+    if (repl && crit.iso_vg) t.push([`ISO VG ${crit.iso_vg}`, "iso_vg"]);
+    if (repl && crit.nlgi) t.push([`NLGI ${crit.nlgi}`, "nlgi"]);
+    if (crit.query) t.push([`« ${crit.query} »`, "query"]);
+    const bar = $("#sel-needbar");
+    bar.hidden = !t.length;
+    bar.innerHTML = t.length
+      ? `<span class="lbl">${restored ? "REPRIS DE TA DERNIÈRE VISITE :" : "CRITÈRES ACTIFS :"}</span>${t
+          .map(([l, k]) => `<span class="tag">${esc(l)}<button type="button" data-drop="${esc(k)}" aria-label="Retirer : ${esc(l)}" title="Retirer">×</button></span>`)
+          .join("")}<button type="button" class="linkbtn" data-reset>tout effacer</button>`
+      : "";
+  }
+
   let lastRanked = [];
   function renderResults() {
     const c = effective();
     const SELECTABLE = PRODUCTS.filter((p) => !EQUIP.has(p.family));
     const ranked = C.rank(SELECTABLE, c);
     lastRanked = ranked;
-    // recommended = every hard criterion checked on sourced data; a product whose
-    // sheet lacks a datum on one of them is listed apart, never among the choices
-    const ok = ranked.filter((r) => r.verified);
-    const pending = ranked.filter((r) => r.eligible && !r.verified);
-    const out = ranked.filter((r) => !r.eligible);
+    // recommended = made for the requested organ and every hard criterion checked on
+    // sourced data; everything else is listed apart, never among the choices
+    const { ok, near, adds, pending, out } = groups(ranked);
+    renderNeedbar();
     const low = SELECTABLE.filter((p) => !isVerified(p));
     const noPack = low.filter((p) => C.gaps(p).some((g) => g.label === "conditionnements")).length;
     $("#sel-warning").textContent =
       (META.avertissement || "Données issues des sources publiques Interflon : à valider par le service technique.") +
       (low.length ? ` ${low.length} fiche(s) sur ${SELECTABLE.length} incomplète(s)${noPack ? `, dont ${noPack} sans conditionnements renseignés` : ""} : le badge de chaque fiche dit ce qui manque.` : "");
-    $("#sel-title").textContent = hasCriteria(c) ? `PRODUITS RECOMMANDÉS · ${ok.length} / ${SELECTABLE.length}` : `TOUS LES LUBRIFIANTS ET NETTOYANTS · ${SELECTABLE.length}`;
-    $("#sel-jump").textContent = hasCriteria(c) && !c.badTemp ? `Voir les ${ok.length} produit${ok.length > 1 ? "s" : ""} ↓` : "Voir les produits ↓";
+    const organ = c.application ? appLabel(c.application) : "";
+    $("#sel-title").textContent = !hasCriteria(c)
+      ? `TOUS LES LUBRIFIANTS ET NETTOYANTS · ${SELECTABLE.length}`
+      : organ
+      ? `PRODUITS RECOMMANDÉS · ${ok.length} / ${SELECTABLE.length}`
+      : `PRODUITS COMPATIBLES · ${ok.length} / ${SELECTABLE.length} · CHOISIS L'APPLICATION POUR LES CLASSER`;
+    $("#sel-jump").textContent =
+      !hasCriteria(c) || c.badTemp ? "Voir les produits ↓" : ok.length === 0 ? "Aucun produit : voir pourquoi ↓" : ok.length === 1 ? "Voir le produit ↓" : `Voir les ${ok.length} produits ↓`;
     if (!PRODUCTS.length) {
       $("#sel-results").innerHTML = `<div class="empty"><p>Catalogue produits vide.</p><p class="muted">Vérifie le fichier public/data/produits.json.</p></div>`;
       return;
@@ -356,18 +439,32 @@
         `<div class="cards">${ranked
           .slice()
           .sort((a, b) => String(a.product.name).localeCompare(String(b.product.name)))
-          .map((r) => card(r, c, false))
+          .map((r) => card(r, c, null))
           .join("")}</div>`;
       return;
     }
+    // a ranking needs the application: without it, the products are only compatible
+    const ranks = organ ? choiceRanks(ok) : [];
+    const tied = ok.length ? ok.filter((r) => !C.compare(ok[0], r)).length : 0;
+    const others = near.length || pending.length || adds.length;
+    const group = (list, title, note, open) =>
+      list.length
+        ? `<details ${open ? "open" : ""}><summary class="section-title">${title} (${list.length})</summary>${note ? `<p class="group-note">${note}</p>` : ""}<div class="cards">${list
+            .map((r) => card(r, c, null))
+            .join("")}</div></details>`
+        : "";
     $("#sel-results").innerHTML =
       (ok.length
-        ? `<div class="cards">${ok.map((r, i) => card(r, c, i < 3)).join("")}</div>`
-        : pending.length
-        ? `<div class="empty"><p>Aucun produit n'est confirmé sur tous les critères.</p><p class="muted">${pending.length} produit${pending.length > 1 ? "s pourraient" : " pourrait"} convenir mais sa fiche ne permet pas de tout vérifier : voir « À vérifier » ci-dessous et confirmer avec le service technique.</p></div>`
+        ? `${organ && tied > 2 ? `<p class="group-note">${tied} produits à égalité sur ces critères : ajoute la température, l'environnement ou le conditionnement pour les départager.</p>` : ""}<div class="cards">${ok
+            .map((r, i) => card(r, c, ranks[i] || null))
+            .join("")}</div>`
+        : others
+        ? `<div class="empty"><p>Aucun produit n'est confirmé ${organ ? `pour « ${esc(organ)} » ` : ""}sur tous les critères.</p><p class="muted">Pistes ci-dessous, à confirmer avec le service technique.</p></div>`
         : `<div class="empty"><p>Aucun produit ne remplit toutes les contraintes.</p><p class="muted">Assouplis la température ou l'application, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</p></div>`) +
-      (pending.length ? `<details ${ok.length ? "" : "open"}><summary class="section-title">À VÉRIFIER : DONNÉE MANQUANTE SUR LA FICHE (${pending.length})</summary><div class="cards">${pending.map((r) => card(r, c, false)).join("")}</div></details>` : "") +
-      (out.length ? `<details ${ok.length || pending.length ? "" : "open"}><summary class="section-title">ÉCARTÉS (${out.length})</summary><div class="cards">${out.map((r) => card(r, c, false)).join("")}</div></details>` : "");
+      group(near, "PRÉVUS POUR UNE APPLICATION VOISINE", `Leur fiche ne les annonce pas pour « ${esc(organ)} » mais pour une application proche : à confirmer avec le service technique.`, !ok.length) +
+      group(adds, "ADDITIFS À AJOUTER À L'HUILE EN PLACE", "Ils améliorent l'huile du client (technologie MicPol®), ils ne la remplacent pas.", !ok.length && !near.length) +
+      group(pending, "À VÉRIFIER : DONNÉE MANQUANTE SUR LA FICHE", "", !ok.length && !near.length && !adds.length) +
+      group(out, "ÉCARTÉS", "", !ok.length && !others);
   }
 
   // ------------------------------------------------------------------ product sheet
@@ -415,7 +512,9 @@
   // ------------------------------------------------------------------ print
   function printReco() {
     const c = effective();
-    const ok = lastRanked.filter((r) => r.verified).slice(0, 3);
+    const main = groups(lastRanked).ok;
+    const rk = c.application ? choiceRanks(main) : [];
+    const ok = main.slice(0, 3);
     if (c.badTemp) return IFX.toast("Température illisible : corrige-la avant d'imprimer.", true);
     if (!hasCriteria(c) || !ok.length) return IFX.toast("Renseigne le besoin et obtiens au moins un produit vérifié sur tous les critères avant d'imprimer.", true);
     const need = [];
@@ -439,7 +538,8 @@
             const p = r.product;
             const check = r.reasons.filter((x) => x.s !== "y");
             const notFood = c.food && c.food !== "non" && !C.foodOk(p, c.application);
-            return `<h2>${i + 1}. ${esc(p.name)}${p.nsf ? ` — NSF ${esc(p.nsf)}` : ""}</h2>
+            const label = rk[i] ? `Choix ${rk[i].n}${rk[i].tie ? " (ex æquo)" : ""}` : "Produit compatible";
+            return `<h2>${label} : ${esc(p.name)}${p.nsf ? ` — NSF ${esc(p.nsf)}` : ""}</h2>
         ${notFood ? `<p><b>ATTENTION : produit NON homologué pour le contact alimentaire. À n'utiliser que hors de toute zone de contact avec les denrées.</b></p>` : ""}
         <p>${esc(p.description_fr || "")}</p>
         <ul>${r.reasons.filter((x) => x.s === "y").map((x) => `<li>✔ ${esc(x.t)}</li>`).join("")}</ul>
@@ -529,6 +629,7 @@
     META = (productsDoc && productsDoc._meta) || {};
     EQUIV = ((equivDoc && equivDoc.equivalences) || []).filter((x) => x && x.marque && x.reference);
     crit = sanitizeCrit(IFX.store.get(LS_CRIT, null));
+    restored = hasCriteria(effective());
     if (IFX.STATIC && !IFX.OFFLINE) $("#sel-print").textContent = "Copier la recommandation";
     window.addEventListener("afterprint", () => {
       document.body.classList.remove("printing-reco");

@@ -108,8 +108,26 @@ apparaît avec le badge « GROUPE CLIENT ».
   Les autres repères : ✔ conforme, ≈ application voisine, ! à vérifier chez le client
   (contact alimentaire non précisé), ✖ non conforme. Une donnée sans objet (température
   d'un nettoyant ou d'un additif, NLGI d'une huile, viscosité d'une graisse) n'est pas signalée.
-- **Critères souples**, qui servent au classement : environnement, conditionnement,
-  viscosité ISO VG ou grade NLGI identiques au produit remplacé.
+- **Critères souples**, qui servent au classement (`evaluate()` dans `public/js/selector-core.js`) :
+  - condition revendiquée par la fiche (+12), ou seulement une propriété voisine,
+    par exemple un film sec pour la poussière (+5) ;
+  - famille habituelle de l'organe à critères égaux : huile pour chaînes et convoyeurs,
+    graisse pour roulements, moteurs électriques et engrenages ouverts (+6, aérosol +3) ;
+  - température : marge au-delà du besoin (jusqu'à +4). Un produit revendiquant la haute
+    (ou basse) température passe devant pour un besoin chaud, au moins 150 °C (ou froid,
+    -15 °C et moins). Hors besoin chaud, il passe derrière le produit standard ;
+  - contact alimentaire « non » : à égalité, le produit industriel passe devant le H1 ;
+  - conditionnement, viscosité ISO VG ou grade NLGI du produit remplacé (le grade voisin compte moins).
+
+  Ces pondérations sont des règles de classement, pas des données produit : à faire valider
+  par le service technique.
+- **Ce qui est recommandé** : les produits prévus pour l'organe choisi et vérifiés sur tous les
+  critères durs. Le reste est listé à part : organe voisin, additifs MicPol® (ils s'ajoutent à
+  l'huile en place), « à vérifier » (donnée manquante), écartés. « Choix 1, 2, 3 » n'apparaît
+  qu'une fois l'organe choisi. Des produits que rien ne départage sont marqués « ex æquo »
+  au lieu d'être classés par ordre alphabétique.
+- Les critères actifs restent affichés au-dessus des résultats, chacun avec sa croix. Les réponses
+  reprises de la visite précédente sont signalées. L'exemple ne se charge que sur demande.
 - « Imprimer / PDF » produit une recommandation d'une page à laisser au client.
 
 ## Données

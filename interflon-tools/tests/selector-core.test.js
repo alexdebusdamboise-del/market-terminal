@@ -220,3 +220,108 @@ test("matches missing a datum on a hard criterion rank after fully checked ones"
   const r2 = C.evaluate(P({ family: "huile", applications: ["chaines"], formats: [] }), { application: "chaines", formats: ["vrac"], iso_vg: "220" });
   assert.equal(r2.verified, true);
 });
+
+// ---------------------------------------------------------------- ranking that follows the criteria
+test("additives go apart: never a lubricant choice, temperature left to the base oil", () => {
+  const add = P({ name: "Interflon Fin Gear Additive", family: "autre", temp_na: true, applications: ["engrenages_fermes"] });
+  const oil = P({ name: "Gear Oil", family: "huile", temp_min_c: -10, temp_max_c: 100, applications: ["engrenages_fermes"] });
+  const r = C.rank([add, oil], { application: "engrenages_fermes", tmin: 20, tmax: 80 });
+  assert.equal(r[0].product.name, "Gear Oil");
+  const a = r.find((x) => x.product === add);
+  assert.equal(a.group, "additive");
+  assert.equal(a.verified, true, "an additive runs at its oil's temperature: nothing to check on its sheet");
+  assert.ok(a.reasons.some((x) => x.s === "a" && /Additif/.test(x.t)));
+  assert.equal(C.isAdditive(P({ family: "autre", name: "Interflon Film WB" })), false);
+});
+
+test("a neighbouring organ is listed apart from the products made for the organ", () => {
+  const near = C.evaluate(P({ applications: ["convoyeurs"] }), { application: "chaines" });
+  assert.equal(near.group, "related");
+  assert.equal(C.evaluate(P({ applications: ["chaines"] }), { application: "chaines" }).group, "main");
+  assert.equal(C.evaluate(P({ applications: ["chaines"] }), {}).group, "main");
+});
+
+test("a cleaner is not checked on temperature for cleaning, but is for another job", () => {
+  const dry = P({ family: "nettoyant", temp_na: true, applications: ["nettoyage_degraissage", "protection_anticorrosion"] });
+  assert.equal(C.evaluate(dry, { application: "nettoyage_degraissage", tmax: 60 }).verified, true);
+  const prot = C.evaluate(dry, { application: "protection_anticorrosion", tmin: 50, tmax: 250 });
+  assert.equal(prot.eligible, true);
+  assert.deepEqual(prot.unchecked, ["température"]);
+});
+
+test("each criterion moves the ranking: food contact 'non', conditions, organ family, heat", () => {
+  const h1 = P({ name: "A Food", nsf: "H1", applications: ["chaines"] });
+  const ind = P({ name: "B Indus", nsf: "H2", applications: ["chaines"] });
+  assert.equal(C.rank([h1, ind], { application: "chaines", food: "non" })[0].product.name, "B Indus", "no food contact: industrial equivalent first");
+  assert.equal(C.rank([h1, ind], { application: "chaines" })[0].tie, true, "nothing to tell them apart: ex aequo");
+  // the stated condition counts more than a neighbouring property
+  const direct = P({ name: "B direct", applications: ["chaines"], properties: ["environnement_poussiereux"] });
+  const film = P({ name: "A film", applications: ["chaines"], properties: ["film_sec"] });
+  assert.equal(C.rank([film, direct], { application: "chaines", env: ["environnement_poussiereux"] })[0].product.name, "B direct");
+  // usual family for the organ at equal suitability
+  const oil = P({ name: "B oil", family: "huile", applications: ["chaines", "roulements"] });
+  const grease = P({ name: "A grease", family: "graisse", applications: ["chaines", "roulements"] });
+  assert.equal(C.rank([grease, oil], { application: "chaines" })[0].product.name, "B oil");
+  assert.equal(C.rank([oil, grease], { application: "roulements" })[0].product.name, "A grease");
+  // heat specialities first only for a hot need
+  const std = P({ name: "B std", temp_min_c: -20, temp_max_c: 180, applications: ["chaines"] });
+  const hot = P({ name: "A hot", temp_min_c: -20, temp_max_c: 270, applications: ["chaines"], properties: ["haute_temperature"] });
+  assert.equal(C.rank([hot, std], { application: "chaines" })[0].product.name, "B std");
+  assert.equal(C.rank([hot, std], { application: "chaines", tmin: 20, tmax: 80 })[0].product.name, "B std");
+  assert.equal(C.rank([std, hot], { application: "chaines", tmin: 20, tmax: 170 })[0].product.name, "A hot");
+  // a cold need favours the product made for the cold, a wide margin a little
+  const cold = P({ name: "B cold", temp_min_c: -45, temp_max_c: 120, applications: ["roulements"], properties: ["basse_temperature"] });
+  const just = P({ name: "A just", temp_min_c: -30, temp_max_c: 120, applications: ["roulements"] });
+  assert.equal(C.rank([just, cold], { application: "roulements", tmin: -28, tmax: 0 })[0].product.name, "B cold");
+});
+
+test("ties are said, not hidden behind the alphabet", () => {
+  const a = P({ name: "Alpha", applications: ["chaines"] });
+  const b = P({ name: "Beta", applications: ["chaines"] });
+  const c = P({ name: "Gamma", applications: ["chaines"], properties: ["resistant_eau"] });
+  const r = C.rank([b, a, c], { application: "chaines", env: ["resistant_eau"] });
+  assert.equal(r[0].product.name, "Gamma");
+  assert.equal(r[0].tie, false);
+  assert.deepEqual(r.slice(1).map((x) => x.tie), [true, true]);
+  assert.equal(C.compare(r[1], r[2]), 0);
+  assert.ok(C.compare(r[0], r[1]) < 0);
+});
+
+test("NLGI and ISO VG: a neighbouring grade counts, less than the same grade", () => {
+  assert.equal(C.nlgiIndex("1/2"), 3.5);
+  assert.equal(C.nlgiIndex("NLGI 000"), 0);
+  assert.equal(C.nlgiIndex("x"), null);
+  const g = (nlgi) => C.evaluate(P({ family: "graisse", nlgi }), { nlgi: "1" }).score;
+  assert.ok(g("1") > g("1/2") && g("1/2") > g("2") && g("2") === g("3"));
+  const v = (iso) => C.evaluate(P({ family: "huile", viscosity_iso_vg: iso }), { iso_vg: "220" }).score;
+  assert.ok(v("220") > v("150") && v("150") === v("320") && v("320") > v("68"));
+});
+
+test("real catalogue: the first choice follows the organ and the conditions", () => {
+  const prods = require("../public/data/produits.json").products.filter((p) => !["lubrificateur_automatique", "accessoire"].includes(p.family));
+  const first = (c) => C.rank(prods, c).filter((r) => r.verified && r.group === "main").map((r) => r.product);
+  const LUBE = ["chaines", "convoyeurs", "glissieres_guides", "engrenages_fermes", "engrenages_ouverts", "roulements", "cables", "verins_pneumatique", "hydraulique", "compresseurs", "mecanismes_articulations", "moteurs_electriques"];
+  const tops = new Set();
+  for (const application of LUBE) {
+    for (const food of ["", "oui", "non"]) {
+      for (const [tmin, tmax] of [["", ""], [5, 40], [20, 120], [50, 250], [-40, -18]]) {
+        const ok = first({ application, food, tmin, tmax });
+        ok.forEach((p) => {
+          assert.ok(!C.isAdditive(p), `${p.name} recommended as a lubricant for ${application}`);
+          assert.ok(!["nettoyant", "degraissant"].includes(p.family), `${p.name} recommended for ${application}`);
+        });
+        if (ok.length && food === "non") tops.add(application + ":" + ok[0].name);
+      }
+    }
+  }
+  // different organs give different first choices (the original complaint)
+  const byOrgan = (a) => first({ application: a, food: "non" })[0].name;
+  assert.equal(new Set(["chaines", "roulements", "glissieres_guides", "hydraulique", "engrenages_fermes", "verins_pneumatique"].map(byOrgan)).size, 6);
+  // an oven chain in a food plant: the one H1 chain oil whose sheet covers 250 °C
+  assert.equal(first({ application: "chaines", food: "oui", tmin: 50, tmax: 250 })[0].name, "Interflon Food Lube HT");
+  // adding a condition changes the answer for chains
+  const plain = first({ application: "chaines", food: "non" });
+  const dusty = first({ application: "chaines", food: "non", env: ["environnement_poussiereux"] });
+  assert.ok(dusty[0].properties.includes("environnement_poussiereux"));
+  assert.notDeepEqual(plain.slice(0, 3).map((p) => p.name), dusty.slice(0, 3).map((p) => p.name));
+});
