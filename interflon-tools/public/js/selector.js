@@ -51,7 +51,7 @@
   const famLabel = (f) => FAMILIES[f] || f || "—";
   const appLabel = (a) => C.APPLICATIONS[a] || a;
   const known = (x) => x !== null && x !== undefined && x !== "";
-  // y conforme · n non conforme · u donnée manquante · a à vérifier chez le client · r application voisine
+  // y conforme · n non conforme · u donnée manquante · a à vérifier chez le client · r voisin (organe ou propriété)
   const MARK = { y: "✔", n: "✖", u: "?", a: "!", r: "≈" };
   // equipment (automatic lubricators, accessories) is listed in CAT, not ranked by the selector
   const EQUIP = new Set(["lubrificateur_automatique", "accessoire"]);
@@ -107,7 +107,6 @@
       c.nlgi = crit.nlgi;
       const t = C.REPLACE_TYPES[crit.replaceType];
       if (t) {
-        if (!c.application && t.application) c.application = t.application;
         if (t.families) c.families = t.families;
         (t.env || []).forEach((e) => c.env.includes(e) || c.env.push(e));
       }
@@ -232,7 +231,7 @@
       if (e.target.id === "sel-equiv") renderEquiv(e.target.value);
     });
     $("#sel-reset").addEventListener("click", () => {
-      crit = blank();
+      crit = Object.assign(blank(), { mode: crit.mode });
       segHint = null;
       changed(true);
     });
@@ -242,7 +241,7 @@
     });
     $("#sel-needbar").addEventListener("click", (e) => {
       if (e.target.closest("[data-reset]")) {
-        crit = blank();
+        crit = Object.assign(blank(), { mode: crit.mode });
         segHint = null;
         return changed(true);
       }
@@ -302,18 +301,20 @@
   }
 
   // Competitor -> criteria (type, food contact, its published range, viscosity / grade)
+  // Competitor -> criteria it really provides; the rep's own answers are kept
   function applyEquiv(x) {
-    crit.replaceType = C.REPLACE_TYPES[x.replace_type] ? x.replace_type : "";
-    crit.application = x.application && C.APPLICATIONS[x.application] ? x.application : "";
-    crit.food = x.nsf === "H1" ? "oui" : "";
-    // a data-sheet range is a product limit, not the machine's temperature:
-    // only heat-purpose products (oven chain oils…) pass their upper limit on
-    crit.tmin = "";
-    crit.tmax = x.besoin_temp && known(x.temp_max_c) ? String(x.temp_max_c) : "";
-    crit.iso_vg = x.iso_vg ? String(x.iso_vg) : "";
-    crit.nlgi = x.nlgi ? String(x.nlgi) : "";
+    if (C.REPLACE_TYPES[x.replace_type]) pickReplaceType(x.replace_type);
+    if (x.application && C.APPLICATIONS[x.application]) crit.application = x.application;
+    // a food-grade product in place means food contact; any other never lowers the rep's answer
+    if (x.nsf === "H1") crit.food = "oui";
+    // a data-sheet range is a product limit, not the machine's temperature: only
+    // heat-purpose products (oven chain oils…) pass their upper limit on, when none is given
+    if (x.besoin_temp && known(x.temp_max_c) && crit.tmin === "" && crit.tmax === "") crit.tmax = String(x.temp_max_c);
+    if (x.iso_vg) crit.iso_vg = String(x.iso_vg);
+    if (x.nlgi) crit.nlgi = String(x.nlgi);
     changed(true);
-    IFX.toast(`Critères de ${x.marque} ${x.reference} appliqués : indique la température réelle de la machine pour affiner.`);
+    const name = norm(x.reference).startsWith(norm(x.marque)) ? x.reference : `${x.marque} ${x.reference}`;
+    IFX.toast(`Critères de ${name} appliqués${crit.tmin === "" && crit.tmax === "" ? " : indique la température réelle de la machine pour affiner" : ""}.`);
   }
 
   // ------------------------------------------------------------------ results
@@ -380,12 +381,22 @@
     };
   }
 
+  // what could still tell equal products apart (never a criterion already given)
+  function tieHint(c, ok) {
+    const tied = ok.filter((r) => !C.compare(ok[0], r));
+    const hints = [];
+    if (c.tmin === "" && c.tmax === "" && tied.some((r) => !r.product.temp_na)) hints.push("la température");
+    if (!c.env.length) hints.push("l'environnement (eau, poussière, charges…)");
+    if (!c.formats.length) hints.push("le conditionnement");
+    return hints.length ? `précise ${hints.join(", ")} pour les départager` : "à départager avec le service technique";
+  }
+
   // answers in force, each with its ×, so none stays active unseen
   function renderNeedbar() {
     const t = [];
     const repl = crit.mode === "remplacement";
     if (repl && C.REPLACE_TYPES[crit.replaceType]) t.push([C.REPLACE_TYPES[crit.replaceType].label, "replaceType"]);
-    if (crit.food) t.push([`Contact alimentaire : ${{ oui: "oui, NSF", non: "non", nsp: "à préciser" }[crit.food]}`, "food"]);
+    if (crit.food) t.push([`Contact alimentaire : ${{ oui: "oui (NSF H1)", non: "non", nsp: "à préciser" }[crit.food]}`, "food"]);
     if (crit.application) t.push([appLabel(crit.application), "application"]);
     if (crit.tmin !== "" || crit.tmax !== "") t.push([`${crit.tmin === "" ? "?" : crit.tmin} → ${crit.tmax === "" ? "?" : crit.tmax} °C`, "temp"]);
     crit.env.forEach((e) => t.push([(ENV_CHOICES.find(([k]) => k === e) || [e, e])[1], "env:" + e]));
@@ -420,6 +431,8 @@
     const organ = c.application ? appLabel(c.application) : "";
     $("#sel-title").textContent = !hasCriteria(c)
       ? `TOUS LES LUBRIFIANTS ET NETTOYANTS · ${SELECTABLE.length}`
+      : c.badTemp
+      ? "PRODUITS RECOMMANDÉS"
       : organ
       ? `PRODUITS RECOMMANDÉS · ${ok.length} / ${SELECTABLE.length}`
       : `PRODUITS COMPATIBLES · ${ok.length} / ${SELECTABLE.length} · CHOISIS L'APPLICATION POUR LES CLASSER`;
@@ -455,7 +468,7 @@
         : "";
     $("#sel-results").innerHTML =
       (ok.length
-        ? `${organ && tied > 2 ? `<p class="group-note">${tied} produits à égalité sur ces critères : ajoute la température, l'environnement ou le conditionnement pour les départager.</p>` : ""}<div class="cards">${ok
+        ? `${organ && tied > 2 ? `<p class="group-note">${tied} produits à égalité sur ces critères : ${tieHint(c, ok)}.</p>` : ""}<div class="cards">${ok
             .map((r, i) => card(r, c, ranks[i] || null))
             .join("")}</div>`
         : others
@@ -513,10 +526,14 @@
   function printReco() {
     const c = effective();
     const main = groups(lastRanked).ok;
-    const rk = c.application ? choiceRanks(main) : [];
+    const rk = choiceRanks(main);
     const ok = main.slice(0, 3);
     if (c.badTemp) return IFX.toast("Température illisible : corrige-la avant d'imprimer.", true);
-    if (!hasCriteria(c) || !ok.length) return IFX.toast("Renseigne le besoin et obtiens au moins un produit vérifié sur tous les critères avant d'imprimer.", true);
+    if (!hasCriteria(c)) return IFX.toast("Renseigne le besoin avant d'imprimer.", true);
+    if (!c.application) return IFX.toast("Choisis l'application : la recommandation classe les produits pour cet organe.", true);
+    if (!ok.length) return IFX.toast("Aucun produit n'est vérifié sur tous les critères : rien à recommander pour l'instant.", true);
+    // products sharing the last printed rank but left out: named, never dropped silently
+    const rest = rk[2] ? main.slice(3).filter((r, i) => rk[i + 3] && rk[i + 3].n === rk[2].n) : [];
     const need = [];
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push(`Remplacement : ${C.REPLACE_TYPES[crit.replaceType].label}`);
     const foodRule = c.application === "nettoyage_degraissage" ? "NSF H1, A1 ou A7 requis" : c.application === "demoulage" ? "NSF 3H ou H1 requis" : "NSF H1 requis";
@@ -538,7 +555,7 @@
             const p = r.product;
             const check = r.reasons.filter((x) => x.s !== "y");
             const notFood = c.food && c.food !== "non" && !C.foodOk(p, c.application);
-            const label = rk[i] ? `Choix ${rk[i].n}${rk[i].tie ? " (ex æquo)" : ""}` : "Produit compatible";
+            const label = `Choix ${rk[i].n}${rk[i].tie ? " (ex æquo)" : ""}`;
             return `<h2>${label} : ${esc(p.name)}${p.nsf ? ` — NSF ${esc(p.nsf)}` : ""}</h2>
         ${notFood ? `<p><b>ATTENTION : produit NON homologué pour le contact alimentaire. À n'utiliser que hors de toute zone de contact avec les denrées.</b></p>` : ""}
         <p>${esc(p.description_fr || "")}</p>
@@ -549,6 +566,7 @@
           }
         )
         .join("")}
+      ${rest.length ? `<p>Également à égalité avec le choix ${rk[2].n} : ${esc(rest.map((r) => r.product.name).join(", "))}.</p>` : ""}
       <p class="muted" style="margin-top:18pt">Proposition indicative établie à partir des fiches produits publiques. À confirmer avec la fiche technique et la fiche de données de sécurité en vigueur.</p>`;
     if (IFX.STATIC && !IFX.OFFLINE) return copyReco();
     // only this recommendation is printed; other prints (Ctrl+P elsewhere) are left alone

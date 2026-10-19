@@ -76,8 +76,9 @@ test("environment and formats are soft and add score", () => {
   assert.equal(b.eligible, true);
   assert.ok(a.score > b.score);
   assert.ok(b.reasons.some((x) => x.s === "n" && /poussiéreux/i.test(x.t)));
-  // dusty environment is satisfied by a dry film
-  assert.ok(C.evaluate(foodChain, { env: ["environnement_poussiereux"] }).reasons.some((x) => x.s === "y"));
+  // a dry film is close to a dusty-environment claim: counted, marked ≈ not ✓
+  const dust = C.evaluate(foodChain, { env: ["environnement_poussiereux"] });
+  assert.ok(dust.score > 0 && dust.reasons.some((x) => x.s === "r" && /voisine/.test(x.t)));
 });
 
 test("replacement: family filter and viscosity / NLGI matching", () => {
@@ -178,7 +179,9 @@ test("viscosity: ISO grade, measured cSt within ±10 %, irrelevant families", ()
   assert.ok(C.evaluate(P({ family: "huile", viscosity_iso_vg: "220" }), c).reasons.some((x) => x.s === "y"));
   // 24 cSt at 40 °C falls in ISO VG 22 (19.8 to 24.2), 120 cSt in no grade
   assert.ok(C.evaluate(P({ family: "huile", viscosity_cst40: 24 }), { iso_vg: "22" }).reasons.some((x) => x.s === "y" && /classe ISO VG 22/.test(x.t)));
-  assert.ok(C.evaluate(P({ family: "huile", viscosity_cst40: 120 }), { iso_vg: "100" }).reasons.some((x) => x.s === "n"));
+  // 120 cSt is in no grade but nearest to VG 100: close, not a mismatch
+  assert.ok(C.evaluate(P({ family: "huile", viscosity_cst40: 120 }), { iso_vg: "100" }).reasons.some((x) => x.s === "y" && /proche/.test(x.t)));
+  assert.ok(C.evaluate(P({ family: "huile", viscosity_cst40: 120 }), { iso_vg: "320" }).reasons.some((x) => x.s === "n"));
   assert.ok(C.evaluate(P({ family: "huile" }), c).reasons.some((x) => x.s === "u"));
   // a cleaner or a grease has no ISO VG: nothing to flag
   assert.ok(!C.evaluate(P({ family: "nettoyant" }), c).reasons.some((x) => x.s === "u"));
@@ -314,9 +317,11 @@ test("real catalogue: the first choice follows the organ and the conditions", ()
       }
     }
   }
-  // different organs give different first choices (the original complaint)
-  const byOrgan = (a) => first({ application: a, food: "non" })[0].name;
-  assert.equal(new Set(["chaines", "roulements", "glissieres_guides", "hydraulique", "engrenages_fermes", "verins_pneumatique"].map(byOrgan)).size, 6);
+  // different organs give different first choices (the original complaint): the products
+  // sharing CHOIX 1 are not the same set from one organ to the next
+  const choice1 = (a) => { const ok = C.rank(prods, { application: a, food: "non" }).filter((r) => r.verified && r.group === "main"); return ok.filter((r) => !C.compare(ok[0], r)).map((r) => r.product.name).sort().join("|"); };
+  const organs = ["chaines", "roulements", "glissieres_guides", "hydraulique", "engrenages_fermes", "verins_pneumatique", "cables", "engrenages_ouverts"];
+  assert.equal(new Set(organs.map(choice1)).size, organs.length);
   // an oven chain in a food plant: the one H1 chain oil whose sheet covers 250 °C
   assert.equal(first({ application: "chaines", food: "oui", tmin: 50, tmax: 250 })[0].name, "Interflon Food Lube HT");
   // adding a condition changes the answer for chains
@@ -324,4 +329,62 @@ test("real catalogue: the first choice follows the organ and the conditions", ()
   const dusty = first({ application: "chaines", food: "non", env: ["environnement_poussiereux"] });
   assert.ok(dusty[0].properties.includes("environnement_poussiereux"));
   assert.notDeepEqual(plain.slice(0, 3).map((p) => p.name), dusty.slice(0, 3).map((p) => p.name));
+});
+
+test("a single temperature bound is the machine's temperature; reversed bounds are swapped", () => {
+  const p = P({ temp_min_c: -35, temp_max_c: 120, applications: ["roulements"] });
+  assert.equal(C.evaluate(p, { application: "roulements", tmin: 180 }).eligible, false, "Mini 180 alone: the product must hold 180 °C");
+  assert.equal(C.evaluate(p, { application: "roulements", tmax: -40 }).eligible, false, "Maxi -40 alone: the product must work at -40 °C");
+  assert.equal(C.evaluate(p, { application: "roulements", tmin: 100, tmax: 20 }).eligible, true, "20..100 typed the wrong way round");
+  assert.equal(C.evaluate(p, { application: "roulements", tmin: 250, tmax: 50 }).eligible, false);
+  const unk = C.evaluate(P({ temp_min_c: -10, applications: ["chaines"] }), { application: "chaines", tmin: 180 });
+  assert.deepEqual(unk.unchecked, ["température"], "an unknown maximum cannot be checked against a Mini-only need");
+  // a cold need given as a Maxi alone still favours the cold product
+  const cold = P({ name: "B cold", temp_min_c: -45, temp_max_c: 120, applications: ["roulements"], properties: ["basse_temperature"] });
+  const std = P({ name: "A std", temp_min_c: -30, temp_max_c: 120, applications: ["roulements"] });
+  assert.equal(C.rank([std, cold], { application: "roulements", tmax: -25 })[0].product.name, "B cold");
+});
+
+test("a range that only just covers the need ranks lower; spare range beyond that does not", () => {
+  const tight = P({ name: "A tight", temp_min_c: -10, temp_max_c: 45, applications: ["chaines"] });
+  const wide = P({ name: "B wide", temp_min_c: -40, temp_max_c: 180, applications: ["chaines"] });
+  const ok = P({ name: "C ok", temp_min_c: -10, temp_max_c: 100, applications: ["chaines"] });
+  const r = C.rank([tight, wide, ok], { application: "chaines", tmin: 5, tmax: 40 });
+  assert.equal(r[2].product.name, "A tight");
+  assert.ok(r[2].reasons.some((x) => /peu de marge/.test(x.t)));
+  assert.equal(C.compare(r[0], r[1]), 0, "-40..180 and -10..100 both cover 5..40 comfortably: ex aequo");
+});
+
+test("a cleaner is never 'verified' for a stated temperature outside a cleaning job", () => {
+  const clean = P({ family: "degraissant", nsf: "H1", temp_na: true, applications: ["nettoyage_degraissage"] });
+  const r = C.evaluate(clean, { food: "oui", tmin: -40, tmax: 300 });
+  assert.equal(r.verified, false);
+  assert.deepEqual(r.unchecked, ["température"]);
+  assert.equal(C.evaluate(clean, { food: "oui", application: "nettoyage_degraissage", tmin: 5, tmax: 40 }).verified, true);
+});
+
+test("what the rep stated beats the usual choices the rep did not state", () => {
+  // a stated packaging the grease has beats the oil-for-chains preference
+  const oil = P({ name: "A oil", family: "huile", applications: ["chaines"], formats: ["1 L"] });
+  const grease = P({ name: "B grease", family: "graisse", applications: ["chaines"], formats: ["cartouche 400 g"] });
+  assert.equal(C.rank([oil, grease], { application: "chaines", formats: ["graisse"] })[0].product.name, "B grease");
+  assert.equal(C.rank([grease, oil], { application: "chaines" })[0].product.name, "A oil");
+  // food contact 'non' prefers the industrial product of the same family, never another family
+  const h1grease = P({ name: "A H1 grease", family: "graisse", nsf: "H1", applications: ["roulements"] });
+  const spray = P({ name: "B spray", family: "aerosol", applications: ["roulements"] });
+  const indGrease = P({ name: "C grease", family: "graisse", nsf: "H2", applications: ["roulements"] });
+  assert.equal(C.rank([spray, h1grease], { application: "roulements", food: "non" })[0].product.name, "A H1 grease");
+  assert.equal(C.rank([h1grease, indGrease, spray], { application: "roulements", food: "non" })[0].product.name, "C grease");
+});
+
+test("NLGI as competitors write it: '1.5', '1,5', 'EP 2', '2 EP'; unreadable input is flagged, not a mismatch", () => {
+  assert.equal(C.nlgiIndex("1.5"), 3.5);
+  assert.equal(C.nlgiIndex("1,5"), 3.5);
+  assert.equal(C.nlgiIndex("EP 2"), 4);
+  assert.equal(C.nlgiIndex("2 EP"), 4);
+  assert.equal(C.nlgiIndex(0), 2);
+  const g = P({ family: "graisse", nlgi: "2" });
+  assert.ok(C.evaluate(g, { nlgi: "EP 2" }).reasons.some((x) => x.s === "y" && /Même grade/.test(x.t)));
+  const bad = C.evaluate(g, { nlgi: "épais" });
+  assert.ok(bad.reasons.some((x) => x.s === "u" && /non reconnu/.test(x.t)) && !bad.reasons.some((x) => x.s === "n"));
 });

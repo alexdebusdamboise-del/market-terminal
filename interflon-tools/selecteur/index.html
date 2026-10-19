@@ -147,6 +147,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
 /* product sheet */
 .sheet{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 45%,transparent);display:flex;justify-content:flex-end;z-index:20}
 .sheet[hidden]{display:none!important}
+.sheet a{overflow-wrap:anywhere}
 .sheet .inner{width:min(560px,100%);height:100%;overflow:auto;background:var(--surface);padding:20px 22px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .sheet h3{font:700 13px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:8px 0 0}
 .kv{display:grid;grid-template-columns:130px minmax(0,1fr);gap:6px 12px;margin:0;font-size:15px}
@@ -281,6 +282,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   const eqKey = (e) => `${e.marque} | ${e.reference}`;
   const noEquivalent = (e) => !e.interflon && !e.replace_type && !e.application;
   const currentEquiv = () => (crit.mode === "remplacement" && crit.competitor ? EQUIV.find((e) => eqKey(e) === crit.competitor) || null : null);
+  const eqName = (e) => (norm(e.reference).startsWith(norm(e.marque)) ? e.reference : `${e.marque} ${e.reference}`);
   const eqSpecs = (e) => [e.type, e.nsf ? `NSF ${e.nsf}${e.nsf_reg_no ? " n° " + e.nsf_reg_no : ""}` : "sans NSF connu", known(e.temp_min_c) || known(e.temp_max_c) ? `${known(e.temp_min_c) ? e.temp_min_c : "?"} → ${known(e.temp_max_c) ? e.temp_max_c : "?"} °C` : "", e.iso_vg ? `ISO VG ${e.iso_vg}` : "", e.nlgi ? `NLGI ${e.nlgi}` : ""].filter(Boolean).join(" · ");
   let isExample = false;
   // answers restored from the last visit: said so until the first change
@@ -289,9 +291,9 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   let ranked = [];
 
   const known = (x) => x !== null && x !== undefined && x !== "";
-  // y conforme · n non conforme · u donnée manquante · a à vérifier chez le client · r application voisine
+  // y conforme · n non conforme · u donnée manquante · a à vérifier chez le client · r voisin (organe ou propriété)
   const MARK = { y: "✓", n: "✕", u: "?", a: "!", r: "≈" };
-  const LEGEND = { y: "✓ conforme", r: "≈ application voisine", a: "! à vérifier chez le client", u: "? donnée manquante", n: "✕ non conforme" };
+  const LEGEND = { y: "✓ conforme", r: "≈ voisin, à confirmer", a: "! à vérifier chez le client", u: "? donnée manquante", n: "✕ non conforme" };
   const EQUIP = new Set(["lubrificateur_automatique", "accessoire"]);
   const tempRange = (p) => (p.temp_na ? "sans objet" : !known(p.temp_min_c) && !known(p.temp_max_c) ? "non renseignée" : `${known(p.temp_min_c) ? p.temp_min_c : "?"} → ${known(p.temp_max_c) ? p.temp_max_c : "?"} °C`);
   const tempTxt = (p) => tempRange(p) + (known(p.temp_min_gearbox_c) && !p.temp_na ? ` (réducteur : ${p.temp_min_gearbox_c} °C mini)` : "");
@@ -329,7 +331,10 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (typeof s.competitor === "string") c.competitor = s.competitor.slice(0, 160);
     if (typeof s.client === "string") c.client = s.client.slice(0, 120);
     if (s.fromCompetitor && typeof s.fromCompetitor === "object") {
-      ["replaceType", "application", "food", "tmin", "tmax", "iso_vg", "nlgi"].forEach((k) => { if (typeof s.fromCompetitor[k] === "string" && s.fromCompetitor[k]) c.fromCompetitor[k] = s.fromCompetitor[k].slice(0, 60); });
+      ["replaceType", "application", "food", "tmin", "tmax", "iso_vg", "nlgi"].forEach((k) => {
+        const v = s.fromCompetitor[k];
+        if (v && typeof v === "object" && typeof v.was === "string" && typeof v.set === "string") c.fromCompetitor[k] = { was: v.was.slice(0, 60), set: v.set.slice(0, 60) };
+      });
     }
     return c;
   }
@@ -340,7 +345,6 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       c.iso_vg = crit.iso_vg; c.nlgi = crit.nlgi;
       const t = C.REPLACE_TYPES[crit.replaceType];
       if (t) {
-        if (!c.application && t.application) c.application = t.application;
         if (t.families) c.families = t.families;
         (t.env || []).forEach((e) => c.env.includes(e) || c.env.push(e));
       }
@@ -444,9 +448,14 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     return list.map((r, i) => (n[i] <= 3 ? { n: n[i], tie: n[i - 1] === n[i] || n[i + 1] === n[i] } : null));
   }
   // several products equal on every criterion: say what would tell them apart
-  function tiedTop(ok, organ) {
-    const n = ok.filter((r) => !C.compare(ok[0], r)).length;
-    return organ && n > 2 ? `<p class="group-note">${n} produits à égalité sur ces critères : ajoute la température, les conditions ou le conditionnement pour les départager.</p>` : "";
+  function tiedTop(ok, organ, c) {
+    const tied = ok.filter((r) => !C.compare(ok[0], r));
+    if (!organ || tied.length < 3) return "";
+    const hints = [];
+    if (c.tmin === "" && c.tmax === "" && tied.some((r) => !r.product.temp_na)) hints.push("la température");
+    if (!c.env.length) hints.push("les conditions (eau, poussière, charges…)");
+    if (!c.formats.length) hints.push("le conditionnement");
+    return `<p class="group-note">${tied.length} produits à égalité sur ces critères : ${hints.length ? `précise ${hints.join(", ")} pour les départager` : "à départager avec le service technique"}.</p>`;
   }
   // groups shown apart from the recommendation: made for the requested organ ("main"),
   // for a neighbouring organ, additives for the oil in place, data missing, excluded
@@ -461,12 +470,12 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   }
 
   // ------------------------------------------------------------ active criteria
-  const FOOD_TXT = { oui: "oui, NSF", non: "non", nsp: "à préciser" };
+  const FOOD_TXT = { oui: "oui (NSF H1)", non: "non", nsp: "à préciser" };
   function needTags() {
     const t = [];
     const eq = currentEquiv();
     const repl = crit.mode === "remplacement";
-    if (eq) t.push([`Remplace ${eq.marque} ${eq.reference}`, "competitor"]);
+    if (eq) t.push([`Remplace ${eqName(eq)}`, "competitor"]);
     if (repl && C.REPLACE_TYPES[crit.replaceType]) t.push([C.REPLACE_TYPES[crit.replaceType].label, "replaceType"]);
     if (crit.food) t.push([`Contact alimentaire : ${FOOD_TXT[crit.food]}`, "food"]);
     if (crit.application) t.push([C.APPLICATIONS[crit.application] || crit.application, "application"]);
@@ -489,10 +498,10 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
 
   function renderResults() {
     const c = effective();
-    ranked = C.rank(PRODUCTS, c);
-    // a documented equivalence (still to validate) goes first when it meets the criteria
-    const proposed = currentEquiv() && currentEquiv().interflon;
-    ranked.sort((a, b) => (b.eligible - a.eligible) || (b.verified - a.verified) || ((b.product.name === proposed) - (a.product.name === proposed)));
+    // the documented equivalence (still to validate) keeps its rank: badged on its card
+    // and named in the banner, never pinned above better-suited products
+    const eq = currentEquiv();
+    ranked = eq && noEquivalent(eq) ? [] : C.rank(PRODUCTS, c);
     // recommended = made for the requested organ and every hard criterion checked on
     // sourced data; everything else is listed apart, never among the choices
     const { ok, near, adds, pending, out } = groups(ranked);
@@ -500,7 +509,6 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     const banners = [];
     if (isExample) banners.push(`<div class="banner example"><b>Exemple</b><span>Chaînes de four en usine alimentaire, 50 à 250 °C. Retire un critère avec × ou clique sur « Tout effacer » pour décrire ton besoin.</span></div>`);
     else if (restored) banners.push(`<div class="banner example"><b>Reprise</b><span>Réponses de ta dernière visite, rappelées ci-dessus. <button type="button" class="link" data-reset>Tout effacer</button> pour un nouveau besoin.</span></div>`);
-    const eq = currentEquiv();
     if (eq) {
       const direct = eq.interflon ? ` Équivalence proposée (${esc(eq.origine)}) : <strong>${esc(eq.interflon)}</strong>, à valider par le service technique.` : "";
       const none = noEquivalent(eq) && !/pas d'équivalent/i.test(eq.note || "") ? " Pas d'équivalent Interflon référencé." : "";
@@ -512,11 +520,11 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
         : !prop.verified ? ` Sa fiche ne permet pas de vérifier : ${esc(prop.unchecked.join(", "))}. Voir « À vérifier ».`
         : prop.group === "related" ? " Elle est prévue pour un organe voisin : voir plus bas."
         : prop.group === "additive" ? " C'est un additif à ajouter à l'huile en place : voir plus bas." : "";
-      banners.push(`<div class="banner compet"><b>Remplace</b><span><strong>${esc(eq.marque)} ${esc(eq.reference)}</strong> : ${esc(eqSpecs(eq))}.${direct}${where}${none}${eq.note ? " " + esc(eq.note) : ""}${temps} ${eq.source ? `<a href="${esc(safeUrl(eq.source))}" target="_blank" rel="noopener">Fiche du produit concurrent</a>` : `<span class="quote">Source : ${esc(eq.origine)}</span>`} · <button type="button" class="link" data-clear-competitor>retirer</button></span></div>`);
+      banners.push(`<div class="banner compet"><b>Remplace</b><span><strong>${esc(eqName(eq))}</strong> : ${esc(eqSpecs(eq))}.${direct}${where}${none}${eq.note ? " " + esc(eq.note) : ""}${temps} ${eq.source ? `<a href="${esc(safeUrl(eq.source))}" target="_blank" rel="noopener">Fiche du produit concurrent</a>` : `<span class="quote">Source : ${esc(eq.origine)}</span>`} · <button type="button" class="link" data-clear-competitor>retirer</button></span></div>`);
     }
     if (c.badTemp) banners.push(`<div class="banner error"><b>Température illisible</b><span>Saisis un nombre, par exemple -20 ou 180. Aucune recommandation tant qu'elle n'est pas comprise.</span></div>`);
     $("#banners").innerHTML = banners.join("");
-    $("#jump").textContent = !hasCriteria(c) || c.badTemp ? "Voir les produits ↓" : ok.length === 0 ? "Aucun produit : voir pourquoi ↓" : ok.length === 1 ? "Voir le produit ↓" : `Voir les ${ok.length} produits ↓`;
+    $("#jump").textContent = !hasCriteria(c) || c.badTemp || (eq && noEquivalent(eq)) ? "Voir les produits ↓" : ok.length === 0 ? "Aucun produit : voir pourquoi ↓" : ok.length === 1 ? "Voir le produit ↓" : `Voir les ${ok.length} produits ↓`;
     if (!PRODUCTS.length) { $("#results").innerHTML = `<div class="panel empty">Catalogue indisponible.</div>`; return; }
     if (eq && noEquivalent(eq)) { $("#r-title").innerHTML = "Pas d'équivalent Interflon"; $("#results").innerHTML = `<div class="panel empty">${esc(eq.reference)} (${esc(eq.type)}) n'a pas d'équivalent dans la gamme Interflon.</div>`; return; }
     if (c.badTemp) { $("#r-title").innerHTML = "Produits recommandés"; $("#results").innerHTML = ""; return; }
@@ -531,12 +539,13 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     // a ranking needs the organ: without it, the products are only compatible
     const ranks = organ ? choiceRanks(ok) : [];
     $("#r-title").innerHTML = organ
-      ? `${ok.length} produit${ok.length > 1 ? "s conviennent" : " convient"}<small>sur ${PRODUCTS.length} · classés par pertinence pour « ${esc(organ)} »${legend ? " · " + legend : ""}</small>`
+      ? `${ok.length} produit${ok.length > 1 ? "s conviennent" : " convient"}<small>sur ${PRODUCTS.length} · ${ok.length > 1 ? "classés par pertinence pour" : "pour"} « ${esc(organ)} »${legend ? " · " + legend : ""}</small>`
       : `${ok.length} produit${ok.length > 1 ? "s compatibles" : " compatible"}<small>sur ${PRODUCTS.length} · choisis l'organe à lubrifier pour les classer${legend ? " · " + legend : ""}</small>`;
     const others = near.length || pending.length || adds.length;
     const group = (list, title, note, open) => (list.length ? `<details class="more" ${open ? "open" : ""}><summary>${title} (${list.length})</summary>${note ? `<p class="group-note">${note}</p>` : ""}<div class="cards">${list.map((r) => card(r, c, null)).join("")}</div></details>` : "");
     $("#results").innerHTML =
-      (ok.length ? `${tiedTop(ok, organ)}<div class="cards">${ok.map((r, i) => card(r, c, ranks[i] || null)).join("")}</div>`
+      (ok.length ? `${tiedTop(ok, organ, c)}<div class="cards">${ok.map((r, i) => card(r, c, ranks[i] || null)).join("")}</div>`
+        : !ranked.length && c.query ? `<div class="panel empty">Aucun produit ne correspond à la recherche « ${esc(c.query)} » : retire-la ou change de mot-clé.</div>`
         : others ? `<div class="panel empty">Aucun produit n'est confirmé ${organ ? `pour « ${esc(organ)} » ` : ""}sur tous les critères. Pistes ci-dessous, à confirmer avec le service technique.</div>`
         : `<div class="panel empty">Aucun produit ne remplit toutes les contraintes. Assouplis la température ou l'organe, ou consulte le service technique. Les produits écartés sont listés ci-dessous avec la raison.</div>`) +
       group(near, "Prévus pour un organe voisin", `Leur fiche ne les annonce pas pour « ${esc(organ)} » mais pour un organe proche : à confirmer avec le service technique.`, !ok.length) +
@@ -576,15 +585,32 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   // the first choices as shown on screen: "Choix 1", "Choix 1 (ex æquo)"…
   function choices(c) {
     const ok = groups(ranked).ok;
-    const rk = c.application ? choiceRanks(ok) : [];
-    return ok.slice(0, 3).map((r, i) => Object.assign({ label: rk[i] ? `Choix ${rk[i].n}${rk[i].tie ? " (ex æquo)" : ""}` : "Produit compatible" }, r));
+    const rk = choiceRanks(ok);
+    return ok.slice(0, 3).map((r, i) => Object.assign({ label: `Choix ${rk[i].n}${rk[i].tie ? " (ex æquo)" : ""}` }, r));
+  }
+  // products sharing the last printed rank but left out of the three printed: named, never dropped silently
+  function tiedLeftOut() {
+    const ok = groups(ranked).ok;
+    const rk = choiceRanks(ok);
+    if (ok.length <= 3 || !rk[2]) return "";
+    const rest = ok.slice(3).filter((r, i) => rk[i + 3] && rk[i + 3].n === rk[2].n);
+    return rest.length ? `Également à égalité avec le choix ${rk[2].n} : ${rest.map((r) => r.product.name).join(", ")}.` : "";
+  }
+  // why there is nothing to copy or print yet ("" when there is)
+  function recoBlocked(c) {
+    const eq = currentEquiv();
+    if (eq && noEquivalent(eq)) return "Ce produit n'a pas d'équivalent Interflon : rien à recommander.";
+    if (c.badTemp || !hasCriteria(c)) return "Décris le besoin avant de copier ou d'imprimer.";
+    if (!c.application) return "Choisis l'organe à lubrifier : la recommandation classe les produits pour cet organe.";
+    if (!groups(ranked).ok.length) return "Aucun produit n'est vérifié sur tous les critères : rien à recommander pour l'instant.";
+    return "";
   }
   function recoText() {
     const c = effective();
     const ok = choices(c);
     const need = [];
     const eq = currentEquiv();
-    if (eq) need.push(`Produit en place : ${eq.marque} ${eq.reference} (${eqSpecs(eq)})`);
+    if (eq) need.push(`Produit en place : ${eqName(eq)} (${eqSpecs(eq)})`);
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
     if (c.food) need.push("Contact alimentaire : " + { oui: "oui (homologation NSF requise)", non: "non", nsp: "à préciser" }[c.food]);
     if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
@@ -600,6 +626,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       r.reasons.forEach((x) => lines.push(`  ${MARK[x.s] || "?"} ${x.t}`));
       lines.push(`  Température : ${tempTxt(p)}${C.tempStatus(p) === "ok" ? " (vérifiée)" : ""} · ${isVerified(p) ? "fiche vérifiée" : `${C.gapsText(p) || "données à confirmer"} (service technique)`}`);
     });
+    if (tiedLeftOut()) lines.push("", tiedLeftOut());
     lines.push("", "Proposition indicative établie à partir des fiches produits Interflon, à confirmer avec la fiche technique et la FDS en vigueur.");
     return lines.join("\n");
   }
@@ -608,7 +635,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   function needList(c) {
     const need = [];
     const eq = currentEquiv();
-    if (eq) need.push(`Produit en place : ${eq.marque} ${eq.reference} (${eqSpecs(eq)})`);
+    if (eq) need.push(`Produit en place : ${eqName(eq)} (${eqSpecs(eq)})`);
     if (crit.mode === "remplacement" && C.REPLACE_TYPES[crit.replaceType]) need.push("Remplacement : " + C.REPLACE_TYPES[crit.replaceType].label);
     if (c.food) need.push("Contact alimentaire : " + { oui: "oui, homologation NSF requise", non: "non", nsp: "à préciser" }[c.food]);
     if (c.application) need.push("Organe : " + C.APPLICATIONS[c.application]);
@@ -621,8 +648,8 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   }
   async function printReco() {
     const c = effective();
+    if (recoBlocked(c)) return toast(recoBlocked(c));
     const ok = choices(c);
-    if (c.badTemp || !hasCriteria(c) || !ok.length) return toast("Décris le besoin et obtiens au moins un produit vérifié sur tous les critères avant d'imprimer.");
     const date = new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
     const mark = (s) => MARK[s] || "?";
     const area = $("#print-area");
@@ -647,6 +674,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
           <p class="pr-specs">${esc(specs.join(" · "))} · ${isVerified(p) ? "fiche vérifiée sur document Interflon" : `${C.tempStatus(p) === "ok" ? "température vérifiée · " : ""}${esc(C.gapsText(p) || "données à confirmer")} (service technique Interflon)`}</p>
         </article>`;
       }).join("")}
+      ${tiedLeftOut() ? `<p class="pr-sub">${esc(tiedLeftOut())}</p>` : ""}
       <footer class="pr-foot">Proposition indicative établie à partir des fiches produits Interflon. À confirmer avec la fiche technique et la fiche de données de sécurité en vigueur avant utilisation.<br>Interflon® et MicPol® sont des marques déposées d'Interflon BV.</footer>
     </div>`;
     area.hidden = false;
@@ -657,7 +685,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
   }
   function copyReco() {
     const c = effective();
-    if (c.badTemp || !hasCriteria(c) || !groups(ranked).ok.length) return toast("Décris le besoin et obtiens au moins un produit vérifié sur tous les critères avant de copier.");
+    if (recoBlocked(c)) return toast(recoBlocked(c));
     const text = recoText();
     const fallback = () => {
       $("#sheet-title").textContent = "Recommandation";
@@ -684,26 +712,34 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     sugIdx = sugItems.length ? 0 : -1;
     drawSuggestions(words.length);
   }
+  // answers a competitor product can fill in; "retirer" puts back what was there before
+  const FROM_COMPETITOR = ["replaceType", "application", "food", "tmin", "tmax", "iso_vg", "nlgi"];
   function applyCompetitor(e) {
+    if (crit.competitor) undoCompetitor();
+    const was = {};
+    FROM_COMPETITOR.forEach((k) => { was[k] = crit[k]; });
     crit.competitor = eqKey(e);
-    crit.replaceType = C.REPLACE_TYPES[e.replace_type] ? e.replace_type : "";
-    crit.application = e.application && C.APPLICATIONS[e.application] ? e.application : "";
-    crit.food = e.nsf === "H1" ? "oui" : "";
+    if (C.REPLACE_TYPES[e.replace_type]) pickReplaceType(e.replace_type);
+    if (e.application && C.APPLICATIONS[e.application]) crit.application = e.application;
+    // a food-grade product in place means food contact; any other never lowers the rep's answer
+    if (e.nsf === "H1") crit.food = "oui";
     // A data-sheet range is a product limit, not the machine's temperature: it only becomes
-    // a criterion (upper limit only) for products whose purpose is heat (oven chain oils…).
-    crit.tmin = "";
-    crit.tmax = e.besoin_temp && known(e.temp_max_c) ? String(e.temp_max_c) : "";
-    crit.iso_vg = e.iso_vg ? String(e.iso_vg) : "";
-    crit.nlgi = e.nlgi ? String(e.nlgi) : "";
+    // a criterion (upper limit only, when the rep gave none) for products whose purpose is heat.
+    if (e.besoin_temp && known(e.temp_max_c) && crit.tmin === "" && crit.tmax === "") crit.tmax = String(e.temp_max_c);
+    if (e.iso_vg) crit.iso_vg = String(e.iso_vg);
+    if (e.nlgi) crit.nlgi = String(e.nlgi);
     crit.fromCompetitor = {};
-    ["replaceType", "application", "food", "tmin", "tmax", "iso_vg", "nlgi"].forEach((k) => { if (crit[k]) crit.fromCompetitor[k] = crit[k]; });
+    FROM_COMPETITOR.forEach((k) => { if (crit[k] !== was[k]) crit.fromCompetitor[k] = { was: was[k], set: crit[k] }; });
     changed(true);
   }
-  // undo what the competitor filled in, except the answers changed since
-  function clearCompetitor() {
-    Object.entries(crit.fromCompetitor || {}).forEach(([k, v]) => { if (crit[k] === v) crit[k] = ""; });
+  // put back the answers the competitor changed, unless the rep changed them since
+  function undoCompetitor() {
+    Object.entries(crit.fromCompetitor || {}).forEach(([k, v]) => { if (crit[k] === v.set) crit[k] = v.was; });
     crit.fromCompetitor = {};
     crit.competitor = "";
+  }
+  function clearCompetitor() {
+    undoCompetitor();
     changed(true);
   }
   // × on an active criterion
@@ -724,9 +760,15 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     if (t && t.application) crit.application = t.application;
     else if (before && before.application === crit.application) crit.application = "";
   }
+  // clear every answer, keep the starting point (besoin / remplacement)
+  function reset() {
+    crit = Object.assign(blank(), { mode: crit.mode });
+    changed(true);
+  }
   function showExample() {
-    crit = sanitize(EXAMPLE);
-    store.set(LS, crit);
+    const client = crit.client;
+    store.set(LS, Object.assign(blank(), { client }));
+    crit = Object.assign(sanitize(EXAMPLE), { client });
     restored = false;
     isExample = true;
     renderQuestions();
@@ -755,7 +797,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
     $("#questions").addEventListener("focusout", (e) => { if (e.target.id === "competitor") setTimeout(() => { const box = $("#competitor-list"); if (box) box.hidden = true; }, 150); });
     $("#results-panel").addEventListener("click", (e) => {
       if (e.target.closest("[data-clear-competitor]")) return clearCompetitor();
-      if (e.target.closest("[data-reset]")) { crit = blank(); return changed(true); }
+      if (e.target.closest("[data-reset]")) return reset();
       if (e.target.closest("[data-example]")) return showExample();
       const d = e.target.closest("[data-drop]");
       if (d) drop(d.dataset.drop);
@@ -778,7 +820,7 @@ details.more summary{cursor:pointer;font:700 15px var(--display);padding:6px 0;c
       const k = { tmin: "tmin", tmax: "tmax", query: "query", iso_vg: "iso_vg", nlgi: "nlgi", client: "client" }[e.target.id];
       if (k) { crit[k] = e.target.value.trim(); changed(false); }
     });
-    $("#reset").addEventListener("click", () => { crit = blank(); changed(true); });
+    $("#reset").addEventListener("click", reset);
     $("#results").addEventListener("click", (e) => { const d = e.target.closest("[data-detail]"); if (d) openSheet(d.dataset.detail); });
     $("#copy").addEventListener("click", copyReco);
     $("#print").hidden = !CAN_PRINT;

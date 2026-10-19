@@ -8,8 +8,10 @@
  *   group     — "main" (made for the requested organ, or no organ asked),
  *               "related" (made for a neighbouring organ), "additive" (MicPol
  *               additive added to the oil in place, not a lubricant on its own)
- *   score     — soft relevance used to order eligible products
- *   tie       — same rank as a neighbour on every criterion (only the name differs)
+ *   score     — how well the product meets what the rep stated (orders eligible products)
+ *   pref      — usual choices the rep did not state (family per organ, industrial
+ *               product when there is no food contact…): only orders equal scores
+ *   tie       — same score and preference as a neighbour: shown "ex æquo"
  *   reasons   — [{s: "y"|"n"|"u", t: text}]  y = OK, n = not OK, u = unknown / to check
  *
  * Unknown data never disqualifies a product: it is kept and flagged "à vérifier",
@@ -227,19 +229,21 @@
     return best;
   };
   const NLGI_CLASSES = ["000", "00", "0", "1", "2", "3", "4", "5", "6"];
-  // "2", "NLGI 1/2", "2-3" -> class index (half classes for "1/2"), null when unreadable
+  // "2", "NLGI 1/2", "2-3", "EP 2", "1,5" -> class index (half classes for "1/2"), null when unreadable
   function nlgiIndex(x) {
-    const parts = String(x || "").toUpperCase().replace(/NLGI|\s/g, "").split(/[/-]/).filter(Boolean);
+    const s = (x === null || x === undefined ? "" : String(x)).toUpperCase().replace(/NLGI|EP|\s/g, "").replace(",", ".");
+    if (/^\d\.5$/.test(s)) return NLGI_CLASSES.indexOf(s[0]) >= 0 ? NLGI_CLASSES.indexOf(s[0]) + 0.5 : null;
+    const parts = s.split(/[/-]/).filter(Boolean);
     const idx = parts.map((t) => NLGI_CLASSES.indexOf(t));
     return idx.length && idx.every((i) => i >= 0) ? idx.reduce((a, b) => a + b, 0) / idx.length : null;
   }
 
-  // Usual product family per organ, at equal suitability: an oil for chains and
-  // conveyors, a grease for bearings, electric motors and open gears (sprays in between).
-  // A soft preference: stated conditions and the temperature still decide.
+  // Usual product family per organ, used only between products that meet the stated
+  // criteria equally: an oil for chains, conveyors and closed gearboxes, a grease for
+  // bearings, electric motors and open gears (sprays in between).
   const CHAIN_FIT = { huile: 6, aerosol: 3 };
   const GREASE_FIT = { graisse: 6, aerosol: 3 };
-  const FAMILY_FIT = { chaines: CHAIN_FIT, convoyeurs: CHAIN_FIT, roulements: GREASE_FIT, moteurs_electriques: GREASE_FIT, engrenages_ouverts: GREASE_FIT };
+  const FAMILY_FIT = { chaines: CHAIN_FIT, convoyeurs: CHAIN_FIT, engrenages_fermes: { huile: 6 }, roulements: GREASE_FIT, moteurs_electriques: GREASE_FIT, engrenages_ouverts: GREASE_FIT };
 
   // Temperature needs that call for a product claiming the matching property
   const HOT_NEED_C = 150;
@@ -252,6 +256,8 @@
     // hard criteria that missing data kept from checking: the product may suit, not proven
     const unchecked = [];
     let score = 0;
+    // preferences the rep did not state: they only order products with equal scores
+    let pref = 0;
     const apps = p.applications || [];
     const props = p.properties || [];
     const additive = isAdditive(p);
@@ -259,7 +265,7 @@
     let primary = false;
 
     // 1. Food contact — hard constraint when contact is possible (fails closed)
-    if (c.food === "non" && nsfList(p).includes("H1")) score -= 5; // no food contact: the industrial equivalent first
+    if (c.food === "non" && nsfList(p).includes("H1")) pref -= 2; // no food contact: the industrial equivalent first
     if (c.food === "oui" || c.food === "nsp") {
       const parsed = nsfParse(p);
       const match = foodMatch(p, c.application);
@@ -296,12 +302,12 @@
           reasons.push({ s: "r", t: `Application voisine : ${near.map((a) => APPLICATIONS[a] || a).join(", ")}` });
         } else blockers.push(`Non prévu pour : ${label}`);
       }
-    } else if (apps.length && apps.every((a) => a === "autre")) score -= 10; // niche product (rail buffers, welding): not a generic answer
+    } else if (apps.length && apps.every((a) => a === "autre")) pref -= 10; // niche product (rail buffers, welding): not a generic answer
     if (additive) reasons.push({ s: "a", t: "Additif : s'ajoute à l'huile en place, ne la remplace pas" });
 
     // 3. Product family: usual family for the organ (soft); in replacement mode, the
     // family of the product in place (oil vs grease…, hard)
-    if (c.application && FAMILY_FIT[c.application] && group === "main") score += FAMILY_FIT[c.application][p.family] || 0;
+    if (c.application && FAMILY_FIT[c.application] && group === "main") pref += FAMILY_FIT[c.application][p.family] || 0;
     if (c.families && c.families.length) {
       if (!p.family) {
         unchecked.push("famille");
@@ -311,9 +317,14 @@
       else blockers.push(`Famille « ${p.family} » ≠ ${c.families.join(" / ")}`);
     }
 
-    // 4. Temperature — hard constraint on known limits
-    const tmin = num(c.tmin);
-    const tmax = num(c.tmax);
+    // 4. Temperature — hard constraint on known limits. A single bound is the machine's
+    // temperature (only a Mini of 180 °C: the product must hold 180 °C); reversed bounds are swapped.
+    let tmin = num(c.tmin);
+    let tmax = num(c.tmax);
+    const needTxt = `${fmtT(tmin)} → ${fmtT(tmax)}`;
+    if (tmin === null && tmax !== null) tmin = tmax;
+    if (tmax === null && tmin !== null) tmax = tmin;
+    if (tmin !== null && tmin > tmax) [tmin, tmax] = [tmax, tmin];
     // some semi-fluid greases have a higher minimum in gearboxes (data sheet: "for gearboxes: 0 °C")
     const gearMin = c.application === "engrenages_fermes" ? num(p.temp_min_gearbox_c) : null;
     const pmin = gearMin !== null ? gearMin : num(p.temp_min_c);
@@ -321,22 +332,18 @@
     // temp_na: no service-temperature spec for this kind of product. An additive runs at
     // the temperature of its base oil; a cleaner used as a cleaner needs none. A cleaner
     // used for another job (protection…) at a stated temperature cannot be checked.
-    const cleaningJob = !c.application || c.application === "nettoyage_degraissage";
-    if ((tmin !== null || tmax !== null) && p.temp_na && !additive && !(CLEANERS.includes(p.family) && cleaningJob)) {
+    const cleaningJob = c.application === "nettoyage_degraissage";
+    if (tmin !== null && p.temp_na && !additive && !(CLEANERS.includes(p.family) && cleaningJob)) {
       unchecked.push("température");
-      reasons.push({ s: "u", t: `Pas de plage d'utilisation sur la fiche (besoin ${fmtT(tmin)} → ${fmtT(tmax)})` });
+      reasons.push({ s: "u", t: `Pas de plage d'utilisation sur la fiche (besoin ${needTxt})` });
     }
-    if ((tmin !== null || tmax !== null) && !p.temp_na) {
-      const need = `${fmtT(tmin)} → ${fmtT(tmax)}`;
+    if (tmin !== null && !p.temp_na) {
+      const need = needTxt;
       let unknown = false;
-      if (tmin !== null) {
-        if (pmin === null) unknown = true;
-        else if (pmin > tmin) blockers.push(`Mini produit${gearMin !== null ? " en réducteur" : ""} ${fmtT(pmin)} > besoin ${fmtT(tmin)}`);
-      }
-      if (tmax !== null) {
-        if (pmax === null) unknown = true;
-        else if (pmax < tmax) blockers.push(`Maxi produit ${fmtT(pmax)} < besoin ${fmtT(tmax)}`);
-      }
+      if (pmin === null) unknown = true;
+      else if (pmin > tmin) blockers.push(`Mini produit${gearMin !== null ? " en réducteur" : ""} ${fmtT(pmin)} > besoin ${fmtT(tmin)}`);
+      if (pmax === null) unknown = true;
+      else if (pmax < tmax) blockers.push(`Maxi produit ${fmtT(pmax)} < besoin ${fmtT(tmax)}`);
       const failed = blockers.some((b) => b.startsWith("Mini produit") || b.startsWith("Maxi produit"));
       if (!failed) {
         if (unknown) {
@@ -347,26 +354,26 @@
           score += 8;
           reasons.push({ s: "u", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)} couvrirait ${need} : donnée à confirmer` });
         } else {
-          // a comfortable margin counts a little: a range that just covers the need is a weaker fit
-          const margin = Math.min(tmin !== null ? tmin - pmin : Infinity, tmax !== null ? pmax - tmax : Infinity);
-          score += 20 + Math.min(4, Math.floor(margin / 10));
-          reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)}${gearMin !== null ? " (en réducteur)" : ""} couvre ${need}` });
+          // a range that only just covers the need (under 10 °C to spare) is a weaker fit;
+          // spare range beyond that does not rank products
+          const thin = Math.min(tmin - pmin, pmax - tmax) < 10;
+          score += thin ? 17 : 20;
+          reasons.push({ s: "y", t: `Plage ${fmtT(pmin)} → ${fmtT(pmax)}${gearMin !== null ? " (en réducteur)" : ""} couvre ${need}${thin ? ", avec peu de marge" : ""}` });
         }
         // a hot or cold need favours the products made for it (their own claim)
         const env = c.env || [];
-        if (tmax !== null && tmax >= HOT_NEED_C && props.includes("haute_temperature") && !env.includes("haute_temperature")) {
+        if (tmax >= HOT_NEED_C && props.includes("haute_temperature") && !env.includes("haute_temperature")) {
           score += 8;
           reasons.push({ s: "y", t: PROPERTIES.haute_temperature });
         }
-        if (tmin !== null && tmin <= COLD_NEED_C && props.includes("basse_temperature") && !env.includes("basse_temperature")) {
+        if (tmin <= COLD_NEED_C && props.includes("basse_temperature") && !env.includes("basse_temperature")) {
           score += 8;
           reasons.push({ s: "y", t: PROPERTIES.basse_temperature });
         }
       }
     }
-    // a high-temperature speciality is proposed first for a hot need only: for an ordinary
-    // or unstated temperature, the standard product comes first
-    if (props.includes("haute_temperature") && !(tmax !== null && tmax >= HOT_NEED_C) && !(c.env || []).includes("haute_temperature")) score -= 4;
+    // a high-temperature speciality comes after the standard product unless the need is hot
+    if (props.includes("haute_temperature") && !(tmax !== null && tmax >= HOT_NEED_C) && !(c.env || []).includes("haute_temperature")) pref -= 2;
 
     // 5. Environment — soft, except explicit requirements (biodegradable, PFAS-free)
     (c.env || []).forEach((e) => {
@@ -389,8 +396,9 @@
         score += 12;
         reasons.push({ s: "y", t: label });
       } else if (near) {
+        // "r": close, not claimed as such (water resistance is not washdown resistance)
         score += 5;
-        reasons.push({ s: "y", t: `${label} (${(PROPERTIES[near] || near).toLowerCase()})` });
+        reasons.push({ s: "r", t: `${label} : propriété voisine revendiquée (${(PROPERTIES[near] || near).toLowerCase()})` });
       } else reasons.push({ s: "n", t: `${label} : non revendiqué` });
     });
 
@@ -409,41 +417,38 @@
     // 7. Viscosity / consistency of the product being replaced — soft
     // first number only: "ISO VG 220" -> "220" (never glue several numbers together)
     const vg = (x) => (String(x || "").match(/\d+/) || [""])[0];
-    if (c.iso_vg) {
+    if (c.iso_vg && +vg(c.iso_vg) > 0) {
       const want = +vg(c.iso_vg);
-      const cst = num(p.viscosity_cst40);
-      // the next grade up or down still counts a little (ISO grades are ~50 % apart)
-      const near = (a, b) => (vgStep(a) !== null && vgStep(b) !== null ? Math.abs(vgStep(a) - vgStep(b)) : 99);
-      if (p.viscosity_iso_vg) {
-        const d = near(+vg(p.viscosity_iso_vg), want);
-        if (vg(p.viscosity_iso_vg) === vg(c.iso_vg)) {
+      // the product's viscosity: its ISO grade, or the value measured at 40 °C
+      const have = p.viscosity_iso_vg ? +vg(p.viscosity_iso_vg) : num(p.viscosity_cst40);
+      const what = p.viscosity_iso_vg ? `ISO VG ${p.viscosity_iso_vg}` : `${have} cSt à 40 °C`;
+      if (have) {
+        // ISO 3448: a grade spans ±10 % around its value; the nearest grade, then the next one
+        // up or down (grades are ~50 % apart), still count, less
+        const d = vgStep(have) !== null && vgStep(want) !== null ? Math.abs(vgStep(have) - vgStep(want)) : 99;
+        if (Math.abs(have - want) <= want * 0.1) {
           score += 15;
-          reasons.push({ s: "y", t: `Même viscosité ISO VG ${vg(c.iso_vg)}` });
+          reasons.push({ s: "y", t: p.viscosity_iso_vg ? `Même viscosité ISO VG ${want}` : `${what} : dans la classe ISO VG ${want}` });
+        } else if (d === 0) {
+          score += 10;
+          reasons.push({ s: "y", t: `${what}, proche de l'ISO VG ${want} actuel` });
         } else {
           if (d === 1) score += 6;
-          reasons.push({ s: "n", t: `ISO VG ${p.viscosity_iso_vg} (actuel : ${c.iso_vg})${d === 1 ? ", grade voisin" : ""}` });
-        }
-      } else if (cst !== null && want) {
-        // measured viscosity outside the ISO grades: ISO 3448 classes span ±10 % around the grade
-        if (Math.abs(cst - want) <= want * 0.1) {
-          score += 15;
-          reasons.push({ s: "y", t: `${cst} cSt à 40 °C : dans la classe ISO VG ${want}` });
-        } else {
-          const d = near(cst, want);
-          if (d === 1) score += 6;
-          reasons.push({ s: "n", t: `${cst} cSt à 40 °C (actuel : ISO VG ${want})${d === 1 ? ", grade voisin" : ""}` });
+          reasons.push({ s: "n", t: `${what} (actuel : ISO VG ${want})${d === 1 ? ", grade voisin" : ""}` });
         }
       } else if (p.family === "huile") reasons.push({ s: "u", t: "Viscosité ISO VG non renseignée" });
     }
     if (c.nlgi) {
       const a = nlgiIndex(p.nlgi);
       const b = nlgiIndex(c.nlgi);
-      if (!p.nlgi) {
+      if (b === null) {
+        if (p.family === "graisse") reasons.push({ s: "u", t: `Grade NLGI « ${c.nlgi} » non reconnu (ex. 2, 1/2, 000)` });
+      } else if (!p.nlgi) {
         if (p.family === "graisse") reasons.push({ s: "u", t: "Grade NLGI non renseigné" });
       } else if (a !== null && a === b) {
         score += 10;
         reasons.push({ s: "y", t: `Même grade NLGI ${c.nlgi}` });
-      } else if (a !== null && b !== null && Math.abs(a - b) <= 0.5) {
+      } else if (a !== null && Math.abs(a - b) <= 0.5) {
         // "1/2" sits between NLGI 1 and 2
         score += 6;
         reasons.push({ s: "y", t: `NLGI ${p.nlgi}, proche du grade actuel ${c.nlgi}` });
@@ -451,7 +456,7 @@
     }
 
     blockers.forEach((b) => reasons.unshift({ s: "n", t: b }));
-    return { eligible: blockers.length === 0, unchecked, verified: blockers.length === 0 && unchecked.length === 0, group, primary, score, reasons, blockers };
+    return { eligible: blockers.length === 0, unchecked, verified: blockers.length === 0 && unchecked.length === 0, group, primary, score, pref, reasons, blockers };
   }
 
   function matchesQuery(p, q) {
@@ -467,22 +472,29 @@
   const GROUP_ORDER = { main: 0, related: 1, additive: 2 };
   const CONFIDENCE = { high: 2, medium: 1, low: 0 };
   // fully checked matches first, then matches missing a datum, then the excluded; inside
-  // each: the requested organ before a neighbouring one and additives, then the score
+  // each: the requested organ before a neighbouring one and additives, then what the rep
+  // stated (score), then the usual choices among equals (pref)
   const order = (a, b) =>
-    (b.eligible - a.eligible) || (b.verified - a.verified) || (GROUP_ORDER[a.group] - GROUP_ORDER[b.group]) || (b.score - a.score);
-  // equal products are listed specialist first (fewer uses on its sheet), then the
-  // better-documented sheet, then by name: an order of display, not a ranking
-  const display = (a, b) =>
-    (((a.product.applications || []).length || 99) - ((b.product.applications || []).length || 99)) ||
-    ((CONFIDENCE[b.product.confidence] || 0) - (CONFIDENCE[a.product.confidence] || 0)) ||
-    String(a.product.name).localeCompare(String(b.product.name));
+    (b.eligible - a.eligible) || (b.verified - a.verified) || (GROUP_ORDER[a.group] - GROUP_ORDER[b.group]) || (b.score - a.score) || ((b.pref || 0) - (a.pref || 0));
+  // equal products are listed by an order of display, not a ranking: the sheet that names
+  // the requested organ first, then the specialist (fewer uses), the better-documented
+  // sheet, the name
+  const display = (application) => {
+    const pos = (r) => { const i = (r.product.applications || []).indexOf(application); return i < 0 ? 99 : i; };
+    return (a, b) =>
+      (application ? pos(a) - pos(b) : 0) ||
+      (((a.product.applications || []).length || 99) - ((b.product.applications || []).length || 99)) ||
+      ((CONFIDENCE[b.product.confidence] || 0) - (CONFIDENCE[a.product.confidence] || 0)) ||
+      String(a.product.name).localeCompare(String(b.product.name));
+  };
 
   function rank(products, criteria) {
+    const shown = display(criteria && criteria.application);
     const out = (products || [])
       .filter((p) => matchesQuery(p, criteria && criteria.query))
       .map((p) => Object.assign({ product: p }, evaluate(p, criteria)))
-      .sort((a, b) => order(a, b) || display(a, b));
-    // same score on every criterion: shown "ex æquo", never as a ranking
+      .sort((a, b) => order(a, b) || shown(a, b));
+    // same score and preference: shown "ex æquo", never as a ranking
     out.forEach((r, i) => { r.tie = (i > 0 && !order(out[i - 1], r)) || (i < out.length - 1 && !order(r, out[i + 1])); });
     return out;
   }
